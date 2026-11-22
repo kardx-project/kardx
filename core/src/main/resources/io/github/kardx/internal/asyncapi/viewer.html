@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="__LANG__">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>__TITLE__ - AsyncAPI</title>
+  <link rel="stylesheet" href="https://unpkg.com/@asyncapi/react-component@3.2.3/styles/default.min.css"
+        integrity="sha384-oo9RoQcacP++XdMX6CjTucTvASEORHX3chFik0/V2kHcsHiVboGyWZztGeq/0bum" crossorigin="anonymous">
+  <style>
+__VIEWER_CSS__
+  </style>
+</head>
+<body>
+  <div class="tabs">
+    <button id="tab-doc" class="active" data-text="TAB_DOC"></button>
+    <button id="tab-try">Try it out</button>
+  </div>
+  <div id="doc"></div>
+  <div id="tryit">
+    <div class="try-main">
+      <section class="panel settings">
+        <div class="settings-head">
+          <h3 data-text="CONNECTION_SETTINGS"></h3>
+          <div class="conn-summary" id="conn-summary"></div>
+        </div>
+        <div class="settings-grid">
+          <div class="field">
+            <label for="server-url" data-text="SERVER_URL"></label>
+            <input id="server-url" spellcheck="false">
+            <div class="help ws-only" data-text="WS_HELP"></div>
+          </div>
+          <div class="field stomp-only">
+            <label for="connect-headers" data-text="CONNECT_HEADERS"></label>
+            <textarea id="connect-headers" spellcheck="false">{}</textarea>
+            <div class="hint" id="connect-hint"></div>
+          </div>
+        </div>
+        <div class="auth" id="auth"></div>
+      </section>
+      <div id="operations"></div>
+    </div>
+    <aside class="panel log">
+      <div class="log-head"><h3 data-text="MESSAGE_LOG"></h3><button class="link" id="clear-log" data-text="CLEAR_LOG"></button></div>
+      <div class="log-entries" id="log"></div>
+    </aside>
+  </div>
+
+  <script src="https://unpkg.com/@asyncapi/react-component@3.2.3/browser/standalone/index.js"
+          integrity="sha384-DRSJdxZ7hKDSD0f5DRaiICDWjYJLiJSJpzH6APOFdP+jvvTwBulDx9ww7O7Zy7X6" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@stomp/stompjs@7.5.0/bundles/stomp.umd.min.js"
+          integrity="sha384-kQjQD4X78U0SNVeFmVuyOn7JuHmYlQ/CaFvAm/Omtfa8/ev8Iu1Ur9grrK53Vp/z" crossorigin="anonymous"></script>
+  <script>
+__VIEWER_JS__
+  </script>
+</body>
+</html>

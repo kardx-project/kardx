@@ -1,0 +1,148 @@
+{
+  "groups": [
+    {
+      "name": "kardx.startup-log",
+      "type": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "description": "Logs API documentation URLs when the app starts (kardx-boot)."
+    }
+  ],
+  "properties": [
+    {
+      "name": "kardx.language",
+      "type": "java.lang.String",
+      "description": "Language of the default log texts: en or ko. Defaults to the value written by the Gradle plugin, else en.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": "en"
+    },
+    {
+      "name": "kardx.docs-path",
+      "type": "java.lang.String",
+      "description": "Docs path inside the static resources (static/ etc.). Matches the Gradle plugin's bootJar.path (static/docs).",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": "docs"
+    },
+    {
+      "name": "kardx.startup-log.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Logs the docs URLs at INFO when the app starts.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.startup-log.title",
+      "type": "java.lang.String",
+      "description": "Line prefix. Defaults to the text for kardx.language (API docs in English).",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger"
+    },
+    {
+      "name": "kardx.startup-log.rest-docs.label",
+      "type": "java.lang.String",
+      "description": "REST Docs HTML: name shown in the log.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": "REST Docs"
+    },
+    {
+      "name": "kardx.startup-log.rest-docs.enabled",
+      "type": "java.lang.Boolean",
+      "description": "REST Docs HTML: whether to include it in the log.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.startup-log.rest-docs.file",
+      "type": "java.lang.String",
+      "description": "REST Docs HTML: file name inside the docs path (docs-path).",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": "index.html"
+    },
+    {
+      "name": "kardx.startup-log.swagger-ui.label",
+      "type": "java.lang.String",
+      "description": "Swagger UI (springdoc); the URL comes from springdoc.swagger-ui.path: name shown in the log.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": "Swagger UI"
+    },
+    {
+      "name": "kardx.startup-log.swagger-ui.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Swagger UI (springdoc); the URL comes from springdoc.swagger-ui.path: whether to include it in the log.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.startup-log.open-api-viewer.label",
+      "type": "java.lang.String",
+      "description": "Static OpenAPI viewer page (Gradle plugin openApiViewer, Redoc or Scalar): name shown in the log. Defaults to the text for kardx.language.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger"
+    },
+    {
+      "name": "kardx.startup-log.open-api-viewer.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Static OpenAPI viewer page (Gradle plugin openApiViewer, Redoc or Scalar): whether to include it in the log.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.startup-log.open-api-viewer.file",
+      "type": "java.lang.String",
+      "description": "Static OpenAPI viewer page (Gradle plugin openApiViewer, Redoc or Scalar): file name inside the docs path (docs-path). Matches the plugin's openApiViewer.fileName.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": "openapi.html"
+    },
+    {
+      "name": "kardx.startup-log.open-api.label",
+      "type": "java.lang.String",
+      "description": "OpenAPI spec file: name shown in the log. Defaults to the text for kardx.language.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger"
+    },
+    {
+      "name": "kardx.startup-log.open-api.enabled",
+      "type": "java.lang.Boolean",
+      "description": "OpenAPI spec file: whether to include it in the log.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.startup-log.open-api.file",
+      "type": "java.lang.String",
+      "description": "OpenAPI spec file: file name inside the docs path (docs-path).",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": "openapi3.yaml"
+    },
+    {
+      "name": "kardx.startup-log.async-api.label",
+      "type": "java.lang.String",
+      "description": "WebSocket, STOMP and SSE message docs (AsyncAPI viewer): name shown in the log. Defaults to the text for kardx.language.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger"
+    },
+    {
+      "name": "kardx.startup-log.async-api.enabled",
+      "type": "java.lang.Boolean",
+      "description": "WebSocket, STOMP and SSE message docs (AsyncAPI viewer): whether to include it in the log.",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.startup-log.async-api.file",
+      "type": "java.lang.String",
+      "description": "WebSocket, STOMP and SSE message docs (AsyncAPI viewer): file name inside the docs path (docs-path).",
+      "sourceType": "io.github.kardx.boot.ApiDocsStartupLogger",
+      "defaultValue": "asyncapi.html"
+    }
+  ],
+  "hints": [
+    {
+      "name": "kardx.language",
+      "values": [
+        {
+          "value": "en",
+          "description": "English (default)"
+        },
+        {
+          "value": "ko",
+          "description": "Korean"
+        }
+      ]
+    }
+  ]
+}

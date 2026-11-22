@@ -1,0 +1,50 @@
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+*.iml
+.idea/
+out/
+*.class
+*.log
+*.jar
+!gradle-wrapper.jar
+.DS_Store
+local.properties
+
+.claude/
+
+# 브라우저 확인용 캡처
+.playwright-mcp/
+
+# Kotlin 2.x 컴파일러 세션·오류 로그
+.kotlin/
+
+# IDE (VS Code, Fleet, Eclipse)
+.vscode/
+.fleet/
+.settings/
+.project
+.classpath
+bin/
+
+# Node (AsyncAPI 공식 파서 검증용 설치)
+node_modules/
+
+# 힙 덤프·JVM 크래시 로그·임시 파일
+*.hprof
+hs_err_pid*
+*.tmp
+
+# 서명 키·배포 자격증명 (실수로 커밋하지 않도록)
+*.gpg
+*.asc
+*.key
+.env
+.env.*
+gradle-local.properties
+
+# 개발 메모 (공개하지 않음)
+notes/
+
+# Python 캐시
+__pycache__/

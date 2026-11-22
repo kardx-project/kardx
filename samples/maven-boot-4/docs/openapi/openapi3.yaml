@@ -1,0 +1,176 @@
+openapi: 3.0.1
+info:
+  title: Books API
+  description: "HTTP API spec extracted from the passing documentation tests. Full docs: [REST Docs](/docs/index.html)."
+  version: "0.1"
+  contact:
+    name: Books team
+    email: books@example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+- url: /
+tags:
+- name: Books
+  description: Look up and add books
+paths:
+  /api/books:
+    get:
+      tags:
+      - Books
+      summary: List books
+      description: Returns every book, oldest first.
+      operationId: list
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/ListBookResponse"
+              examples:
+                book-api-docs-test/list-books:
+                  summary: List books
+                  value:
+                  - id: 1
+                    title: Domain-Driven Design
+                    author: Eric Evans
+                    pages: 560
+    post:
+      tags:
+      - Books
+      summary: Add a book
+      description: Adds a book and returns it with its new ID.
+      operationId: create
+      requestBody:
+        content:
+          application/json;charset=UTF-8:
+            schema:
+              $ref: "#/components/schemas/CreateBookRequest"
+            examples:
+              book-api-docs-test/create-book:
+                summary: Add a book
+                value:
+                  title: Refactoring
+                  author: Martin Fowler
+                  pages: 448
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+              examples:
+                book-api-docs-test/create-book:
+                  summary: Add a book
+                  value:
+                    id: 2
+                    title: Refactoring
+                    author: Martin Fowler
+                    pages: 448
+  /api/books/{id}:
+    get:
+      tags:
+      - Books
+      summary: Get a book
+      description: Returns one book by ID.
+      operationId: get
+      parameters:
+      - name: id
+        in: path
+        description: Book ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json;charset=UTF-8:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+              examples:
+                book-api-docs-test/get-book:
+                  summary: Get a book
+                  value:
+                    id: 1
+                    title: Domain-Driven Design
+                    author: Eric Evans
+                    pages: 560
+components:
+  schemas:
+    ListBookResponse:
+      title: ListBookResponse
+      type: array
+      items:
+        required:
+        - id
+        - pages
+        type: object
+        properties:
+          pages:
+            type: integer
+            description: No description
+            format: int32
+          author:
+            type: string
+            description: No description
+            nullable: true
+          id:
+            type: integer
+            description: No description
+            format: int64
+          title:
+            type: string
+            description: No description
+            nullable: true
+    CreateBookRequest:
+      title: CreateBookRequest
+      required:
+      - author
+      - pages
+      - title
+      type: object
+      properties:
+        pages:
+          type: integer
+          description: No description
+          format: int32
+          minimum: 0
+          exclusiveMinimum: true
+        author:
+          type: string
+          description: No description
+          minLength: 1
+        title:
+          type: string
+          description: No description
+          minLength: 1
+          maxLength: 200
+    BookResponse:
+      title: BookResponse
+      required:
+      - id
+      - pages
+      type: object
+      properties:
+        pages:
+          type: integer
+          description: No description
+          format: int32
+        author:
+          type: string
+          description: No description
+          nullable: true
+        id:
+          type: integer
+          description: No description
+          format: int64
+        title:
+          type: string
+          description: No description
+          nullable: true
+security: []

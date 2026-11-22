@@ -1,0 +1,32 @@
+public abstract interface annotation class io/github/kardx/annotation/AsciiDescription : java/lang/annotation/Annotation {
+	public abstract fun autoBracket ()Z
+	public abstract fun bracket ()Lio/github/kardx/annotation/AsciiDescription$Bracket;
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public final class io/github/kardx/annotation/AsciiDescription$Bracket : java/lang/Enum {
+	public static final field ANGLE Lio/github/kardx/annotation/AsciiDescription$Bracket;
+	public static final field CURLY Lio/github/kardx/annotation/AsciiDescription$Bracket;
+	public static final field DOUBLE_ANGLE Lio/github/kardx/annotation/AsciiDescription$Bracket;
+	public static final field ROUND Lio/github/kardx/annotation/AsciiDescription$Bracket;
+	public static final field SQUARE Lio/github/kardx/annotation/AsciiDescription$Bracket;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun join (Ljava/lang/CharSequence;)Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/kardx/annotation/AsciiDescription$Bracket;
+	public static fun values ()[Lio/github/kardx/annotation/AsciiDescription$Bracket;
+}
+
+public abstract interface annotation class io/github/kardx/annotation/Description : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class io/github/kardx/annotation/EnumCode : java/lang/annotation/Annotation {
+	public abstract fun codeProperty ()Ljava/lang/String;
+	public abstract fun descriptionProperty ()Ljava/lang/String;
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class io/github/kardx/annotation/Masked : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+

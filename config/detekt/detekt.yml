@@ -1,0 +1,39 @@
+# 기본 규칙 위에 덮어쓰는 설정 (buildUponDefaultConfig = true). 조정한 규칙마다 이유를 적는다.
+style:
+  MaxLineLength:
+    maxLineLength: 140 # 코드 줄은 ktlint(120)가 잡는다. 여기서는 KDoc·문자열 리터럴의 긴 줄만 허용 폭을 둔다
+    excludeCommentStatements: true
+  ReturnCount:
+    max: 3 # 기본값(2)보다 하나 더: 맨 앞 가드 절(`?: return`)과 본문의 조건 반환을 함께 허용한다
+  MagicNumber:
+    excludes: ['**/test/**', '**/samples/**']
+  UnusedPrivateMember:
+    active: true
+performance:
+  SpreadOperator:
+    active: false # Java 가변 인자 API(Spring REST Docs, epages)를 호출하려면 피할 수 없다
+complexity:
+  # 길이·복잡도는 기본값보다 조인다 (2026-11 정리 후 실제 최댓값: 함수 40줄, 순환 복잡도 11, 인지 복잡도 10)
+  LongMethod:
+    threshold: 45
+  CyclomaticComplexMethod:
+    threshold: 12
+    ignoreSimpleWhenEntries: true # 타입 → 문서 타입 같은 단순 when 매핑
+  CognitiveComplexMethod:
+    active: true
+    threshold: 11
+  LongParameterList:
+    functionThreshold: 8 # DSL 진입점(andDocument 등)은 이름 붙은 기본값 인자를 받는다
+    constructorThreshold: 7
+    ignoreDefaultParameters: true
+  TooManyFunctions:
+    thresholdInFiles: 15
+    thresholdInClasses: 15
+    thresholdInObjects: 15
+    ignoreOverridden: true # 인터페이스 구현(가짜 WebSocketSession 등)은 메서드 수를 정할 수 없다
+    excludes: ['**/test/**']
+naming:
+  ObjectPropertyNaming:
+    constantPattern: '[A-Z][_A-Z0-9]*'
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][_A-Z0-9]*'

@@ -1,0 +1,2 @@
+// Written by hand. Use it from the index template or with kardx.common-include-files.
+The Books API documents itself from its tests: every request below comes from a passing test.

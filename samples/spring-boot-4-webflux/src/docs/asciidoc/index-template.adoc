@@ -1,0 +1,15 @@
+= kardx WebFlux 예제 API 문서
+:doctype: book
+:icons: font
+:toc: left
+:sectlinks:
+
+이 문서는 통과한 WebTestClient 테스트의 실제 요청·응답으로 만들어졌습니다.
+
+* HTTP API: link:/webjars/swagger-ui/index.html[Swagger UI 에서 보기] (link:./openapi3.yaml[openapi3.yaml])
+* Server-Sent Events: link:./asyncapi.html[SSE 이벤트 문서] (link:./asyncapi.yaml[AsyncAPI yaml])
+* 코드 정의: link:./code/enum-code.html[Enum 코드]
+
+== API 목록
+
+// restdocs:api-index

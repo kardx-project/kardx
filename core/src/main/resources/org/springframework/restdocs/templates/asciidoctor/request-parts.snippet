@@ -1,0 +1,10 @@
+|===
+|Part|Required|Description
+
+{{#requestParts}}
+|{{#tableCellContent}}`+{{name}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{#optional}}false{{/optional}}{{^optional}}true{{/optional}}{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+
+{{/requestParts}}
+|===

@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "types": {
+    "io.github.kardx.internal.sourcedocs.SourceDocsUser": {
+      "description": "사용자",
+      "properties": {
+        "id": "사용자 ID",
+        "nickname": "닉네임",
+        "annotated": "KDoc 설명",
+        "renamedName": "이름을 바꾼 프로퍼티",
+        "status": "상태",
+        "blank": "  "
+      }
+    },
+    "io.github.kardx.internal.sourcedocs.SourceDocsAudited": {
+      "properties": { "createdBy": "만든 사람" }
+    },
+    "io.github.kardx.internal.sourcedocs.SourceDocsStatus": {
+      "enumConstants": { "ACTIVE": "활성 사용자", "LEFT": "탈퇴한 사용자" }
+    },
+    "io.github.kardx.internal.sourcedocs.SourceDocsQuery": {
+      "properties": { "keyword": "검색어" }
+    },
+    "io.github.kardx.internal.sourcedocs.SourceDocsRecord": {
+      "properties": { "title": "제목" }
+    },
+    "io.github.kardx.internal.sourcedocs.SourceDocsOuter$Inner": {
+      "properties": { "value": "안쪽 값" }
+    }
+  },
+  "methods": {
+    "io.github.kardx.internal.sourcedocs.SourceDocsController#getUser": {
+      "summary": "사용자를 조회한다.",
+      "description": "사용자를 조회한다. 탈퇴한 사용자는 404."
+    },
+    "io.github.kardx.internal.sourcedocs.SourceDocsController#search": {
+      "summary": "이름만 맞춘 설명",
+      "description": "이름만 맞춘 설명"
+    },
+    "io.github.kardx.internal.sourcedocs.SourceDocsController#search/1": {
+      "summary": "검색한다.",
+      "description": "검색한다. 인자 하나짜리."
+    },
+    "io.github.kardx.internal.sourcedocs.ParamDocsController#getMemo": {
+      "summary": "메모를 조회한다.",
+      "description": "메모를 조회한다. 삭제된 메모는 404.",
+      "params": {
+        "id": "메모 ID",
+        "includeDeleted": "삭제된 메모도 포함할지",
+        "traceId": "추적 ID",
+        "keyword": "검색어",
+        "blank": "  "
+      }
+    },
+    "io.github.kardx.internal.sourcedocs.ParamDocsController#upload": {
+      "params": { "file": "업로드 파일" }
+    },
+    "io.github.kardx.internal.sourcedocs.ParamDocsController#rename/1": {
+      "params": { "nickname": "새 닉네임" }
+    },
+    "io.github.kardx.internal.sourcedocs.ParamDocsController#rename": {
+      "params": { "nickname": "이름만 맞춘 설명" }
+    }
+  }
+}

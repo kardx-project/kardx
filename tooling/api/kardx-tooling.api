@@ -1,0 +1,8 @@
+public final class io.github.kardx.tooling.cli.ApiDocsCli {
+  public static void main(java.lang.String[]);
+  public static int run(java.io.PrintStream, java.io.PrintStream, java.lang.String...);
+}
+public class io.github.kardx.tooling.ToolingException extends java.lang.RuntimeException {
+  public io.github.kardx.tooling.ToolingException(java.lang.String);
+  public io.github.kardx.tooling.ToolingException(java.lang.String, java.lang.Throwable);
+}

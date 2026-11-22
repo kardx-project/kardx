@@ -1,0 +1,16 @@
+|===
+|Path|Type|Required|Description|Constraints
+
+{{#fields}}
+|{{#tableCellContent}}`+{{path}}+`{{/tableCellContent}}
+|{{#tableCellContent}}`+{{type}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{#optional}}{{#requiredByConstraint}}true{{/requiredByConstraint}}{{^requiredByConstraint}}false{{/requiredByConstraint}}{{/optional}}{{^optional}}true{{/optional}}{{/tableCellContent}}
+|{{#tableCellContent}}{{#deprecated}}*Deprecated*{{#deprecationNote}}: {{.}}{{/deprecationNote}} +
+{{/deprecated}}{{#masked}}*Masked*{{#maskingRule}}: {{.}}{{/maskingRule}} +
+{{/masked}}{{description}}{{#default}} +
+Default: `+{{.}}+`{{/default}}{{#example}} +
+Example: `+{{.}}+`{{/example}}{{/tableCellContent}}
+|{{#tableCellContent}}{{#constraints}}{{.}}{{/constraints}}{{/tableCellContent}}
+
+{{/fields}}
+|===

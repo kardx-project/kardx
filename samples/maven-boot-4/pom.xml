@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Maven 예제: Java 앱 + Kotlin 문서화 테스트 + kardx Maven 플러그인.
+  mvn verify → target/api-docs (REST Docs HTML, openapi3.yaml, openapi.html, coverage/, http-client/), 기준 스펙 검사.
+  라이브러리는 아직 Maven Central 에 없다: 저장소 루트에서 ./gradlew publishToMavenLocal 을 먼저 실행한다.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.2</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.example</groupId>
+    <artifactId>maven-boot-4</artifactId>
+    <version>0.1</version>
+    <name>maven-boot-4</name>
+
+    <properties>
+        <java.version>17</java.version>
+        <kotlin.version>2.3.21</kotlin.version>
+        <kardx.version>0.1</kardx.version>
+        <!-- epages: Boot 4 = 0.20.x, Boot 3 = 0.19.x -->
+        <epages.version>0.20.2</epages.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- 문서화 테스트 (Kotlin) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.restdocs</groupId>
+            <artifactId>spring-restdocs-mockmvc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.kardx-project</groupId>
+            <artifactId>kardx</artifactId>
+            <version>${kardx.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.epages</groupId>
+            <artifactId>restdocs-api-spec-mockmvc</artifactId>
+            <version>${epages.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 테스트만 Kotlin: src/test/kotlin 을 컴파일한다 (앱은 maven-compiler-plugin 이 Java 로) -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jvmTarget>${java.version}</jvmTarget>
+                </configuration>
+            </plugin>
+
+            <!-- 테스트 뒤: 목차·OpenAPI·뷰어·범위 보고서 (prepare-package), 기준 스펙 검사 (verify).
+                 같은 단계의 플러그인은 적은 순서로 돌므로 asciidoctor-maven-plugin 보다 위에 둔다 -->
+            <plugin>
+                <groupId>io.github.kardx-project</groupId>
+                <artifactId>kardx-maven-plugin</artifactId>
+                <version>${kardx.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>api-docs</goal>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <title>Books API</title>
+                    <openApiViewer>true</openApiViewer>
+                    <httpClient>true</httpClient>
+                    <!-- POM 파라미터로 줄 수 없는 설정(openApiInfo, 보안, API 버전 등)은 JSON 파일로 -->
+                    <configFile>${project.basedir}/restdocs-tooling.json</configFile>
+                </configuration>
+            </plugin>
+
+            <!-- REST Docs HTML: api-docs 가 모은 AsciiDoc(손으로 쓴 문서 + 생성 문서 + index.adoc)을 변환한다 -->
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-docs</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.build.directory}/kardx/asciidoc-sources</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/api-docs</outputDirectory>
+                            <preserveDirectories>true</preserveDirectories>
+                            <backend>html5</backend>
+                            <attributes>
+                                <snippets>${project.build.directory}/generated-snippets</snippets>
+                            </attributes>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.springframework.restdocs</groupId>
+                        <artifactId>spring-restdocs-asciidoctor</artifactId>
+                        <version>${spring-restdocs.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- 앱이 /docs/ 에서 문서를 내놓게 jar 에 넣는다 (Gradle 플러그인의 bootJar 연결과 같은 결과) -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-api-docs</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/static/docs</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/api-docs</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

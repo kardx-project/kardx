@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directories: ["/", "/gradle-plugin"]
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 10
+    groups:
+      kotlin: { patterns: ["org.jetbrains.kotlin*", "org.jetbrains.dokka*"] }
+      spring: { patterns: ["org.springframework*", "org.springdoc*"] }
+      test: { patterns: ["io.kotest*", "org.junit*", "com.jayway.jsonpath*"] }
+      lint: { patterns: ["*ktlint*", "io.gitlab.arturbosch.detekt*"] }
+    ignore:
+      # 지원 하한으로 일부러 고정한 버전 (Boot 3.5 / REST Docs 3.0 / Spring 6.2 / Jackson 2 / jakarta.validation 3.0 / JUnit 5)
+      - dependency-name: "org.springframework.restdocs:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.springframework:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.springframework.boot*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "com.fasterxml.jackson*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.junit*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: weekly }

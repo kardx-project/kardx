@@ -1,0 +1,228 @@
+{
+  "operationId" : "memo-api-docs-test/list-memos",
+  "summary" : "메모 목록 조회",
+  "description" : "메모 목록 조회",
+  "privateResource" : false,
+  "deprecated" : false,
+  "request" : {
+    "path" : "/api/v1/memos",
+    "method" : "GET",
+    "contentType" : null,
+    "schema" : null,
+    "headers" : [ ],
+    "pathParameters" : [ ],
+    "queryParameters" : [ {
+      "name" : "color",
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        },
+        "enumValues" : [ "YELLOW", "PINK", "BLUE" ]
+      },
+      "description" : "이 색(MemoColor)의 메모만 돌려준다. 보내지 않으면 모든 색\n\nYELLOW : 노란색. 색을 고르지 않으면 이 색이다.\n\nPINK : 분홍색. 급한 일에 쓴다.\n\nBLUE : 하늘색. 끝난 일을 모아 둘 때 쓴다.",
+      "ignored" : false,
+      "type" : "STRING",
+      "optional" : true,
+      "default" : null
+    }, {
+      "name" : "page",
+      "attributes" : {
+        "schema" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "default" : "0"
+      },
+      "description" : "페이지 번호 (0부터)",
+      "ignored" : false,
+      "type" : "INTEGER",
+      "optional" : true,
+      "default" : 0
+    }, {
+      "name" : "size",
+      "attributes" : {
+        "schema" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "default" : "20"
+      },
+      "description" : "페이지 크기",
+      "ignored" : false,
+      "type" : "INTEGER",
+      "optional" : true,
+      "default" : 20
+    } ],
+    "formParameters" : [ ],
+    "requestFields" : [ ],
+    "example" : null,
+    "securityRequirements" : null
+  },
+  "response" : {
+    "status" : 200,
+    "contentType" : "application/json;charset=UTF-8",
+    "schema" : {
+      "name" : "MemoPage"
+    },
+    "headers" : [ ],
+    "responseFields" : [ {
+      "attributes" : {
+        "schema" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      },
+      "description" : "조건에 맞는 메모의 전체 개수",
+      "ignored" : false,
+      "path" : "total",
+      "type" : "NUMBER",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      },
+      "description" : "페이지 번호 (0부터)",
+      "ignored" : false,
+      "path" : "page",
+      "type" : "NUMBER",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      },
+      "description" : "페이지 크기",
+      "ignored" : false,
+      "path" : "size",
+      "type" : "NUMBER",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "array"
+        }
+      },
+      "description" : "이 페이지의 메모",
+      "ignored" : false,
+      "path" : "content",
+      "type" : "ARRAY",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "integer",
+          "format" : "int64"
+        }
+      },
+      "description" : "메모 ID",
+      "ignored" : false,
+      "path" : "content[].id",
+      "type" : "NUMBER",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "description" : "메모 제목",
+      "ignored" : false,
+      "path" : "content[].title",
+      "type" : "STRING",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "description" : "메모 본문",
+      "ignored" : false,
+      "path" : "content[].content",
+      "type" : "STRING",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        },
+        "enumValues" : [ "YELLOW", "PINK", "BLUE" ]
+      },
+      "description" : "메모 색\n\nYELLOW : 노란색. 색을 고르지 않으면 이 색이다.\n\nPINK : 분홍색. 급한 일에 쓴다.\n\nBLUE : 하늘색. 끝난 일을 모아 둘 때 쓴다.",
+      "ignored" : false,
+      "path" : "content[].color",
+      "type" : "enum",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "itemsType" : "string"
+      },
+      "description" : "메모 태그",
+      "ignored" : false,
+      "path" : "content[].tags",
+      "type" : "ARRAY",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "nullable" : true
+      },
+      "description" : "메모 알림. 알림을 정하지 않은 메모는 `null` 이다",
+      "ignored" : false,
+      "path" : "content[].reminder",
+      "type" : "OBJECT",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "requiredInParent" : true,
+        "nullable" : false
+      },
+      "description" : "알림을 보낼 시각",
+      "ignored" : false,
+      "path" : "content[].reminder.remindAt",
+      "type" : "STRING",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "boolean"
+        },
+        "requiredInParent" : true,
+        "nullable" : false
+      },
+      "description" : "매일 같은 시각에 다시 알릴지 여부",
+      "ignored" : false,
+      "path" : "content[].reminder.daily",
+      "type" : "BOOLEAN",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string",
+          "format" : "date-time"
+        }
+      },
+      "description" : "메모를 작성한 시각",
+      "ignored" : false,
+      "path" : "content[].createdAt",
+      "type" : "STRING",
+      "optional" : false
+    } ],
+    "example" : "{\n  \"total\" : 1,\n  \"page\" : 0,\n  \"size\" : 20,\n  \"content\" : [ {\n    \"id\" : 1,\n    \"title\" : \"장보기\",\n    \"content\" : \"우유, 달걀\",\n    \"color\" : \"YELLOW\",\n    \"tags\" : [ \"집\" ],\n    \"reminder\" : {\n      \"remindAt\" : \"2026-11-20T18:00:00\",\n      \"daily\" : false\n    },\n    \"createdAt\" : \"2026-11-20T09:00:00\"\n  } ]\n}"
+  },
+  "tags" : [ "메모 API" ]
+}

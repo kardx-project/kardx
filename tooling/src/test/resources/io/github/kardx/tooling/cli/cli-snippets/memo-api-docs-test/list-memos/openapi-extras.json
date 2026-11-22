@@ -1,0 +1,1 @@
+{"operationId":{"id":"listMemos","qualified":"memoListMemos"},"sourceSummary":"메모 목록을 페이지로 나눠 조회한다","sourceDescription":"메모 목록을 페이지로 나눠 조회한다. 메모를 ID 순으로 MemoSearchCondition.page·MemoSearchCondition.size 로 나눠 돌려준다. color 를 보내면 그 색의 메모만 돌려준다."}

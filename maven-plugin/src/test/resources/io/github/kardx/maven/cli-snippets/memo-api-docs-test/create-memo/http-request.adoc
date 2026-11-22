@@ -1,0 +1,18 @@
+[source,http,options="nowrap"]
+----
+POST /api/v1/memos HTTP/1.1
+Content-Type: application/json;charset=UTF-8
+Content-Length: 195
+Host: localhost
+
+{
+  "title" : "병원 예약",
+  "content" : "오전 10시 치과",
+  "color" : "PINK",
+  "tags" : [ "건강" ],
+  "reminder" : {
+    "remindAt" : "2026-11-21T09:00:00",
+    "daily" : false
+  }
+}
+----

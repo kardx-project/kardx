@@ -1,0 +1,9 @@
+[NOTE]
+====
+모든 HTTP API 는 다음 형식으로 응답합니다. `data` 의 내용은 API 마다 다릅니다.
+
+[source,json]
+----
+{ "code": 200, "message": "OK", "data": { } }
+----
+====

@@ -1,0 +1,6 @@
+public final class io/github/kardx/boot/ApiDocsStartupLogger : org/springframework/context/ApplicationListener {
+	public fun <init> ()V
+	public fun onApplicationEvent (Lorg/springframework/boot/context/event/ApplicationReadyEvent;)V
+	public synthetic fun onApplicationEvent (Lorg/springframework/context/ApplicationEvent;)V
+}
+

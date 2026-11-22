@@ -1,0 +1,16 @@
+# 문서화 테스트 설정 (RestDocsTestSupport 의 @ActiveProfiles("docs") 로 적용)
+# 코드의 RestDocsConfiguration.configure { } 가 이 값보다 우선한다.
+kardx:
+  common-include-files: _landing.adoc
+  # 마스킹은 기본으로 꺼져 있다. 토큰·세션 값이 문서에 남지 않게 켠다.
+  mask-sensitive-headers: true
+  # @Description 이 없으면 이 어노테이션에서 설명을 읽는다 (별칭 swagger·jackson, FQCN, FQCN#attribute)
+  description-annotations: jackson
+  open-api:
+    # Swagger Authorize 에서 한 번만 입력하는 헤더. OpenAPI 에서 헤더 파라미터 대신 apiKey 보안 스키마가 된다.
+    global-headers: X-Request-Id
+    # 공통 래퍼로 감싼 응답의 자동 스키마 이름에서 래퍼 이름을 뺀다 (RestResponseProductResponse → ProductResponse)
+    schema-names-without-wrapper: true
+  response-wrapper:
+    class: com.example.restdocs.common.RestResponse
+    data-path: data

@@ -1,0 +1,6 @@
+[source,http,options="nowrap"]
+----
+GET /api/v1/memos?color=YELLOW&page=0&size=20 HTTP/1.1
+Host: localhost
+
+----

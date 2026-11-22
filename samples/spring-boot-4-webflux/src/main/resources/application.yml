@@ -1,0 +1,13 @@
+springdoc:
+  swagger-ui:
+    # Swagger UI 가 런타임 스캔 결과(/v3/api-docs) 대신, 테스트로 검증된 REST Docs 스펙을 보여 준다.
+    # WebFlux UI 는 /webjars/swagger-ui/index.html 에서 열린다 (/swagger-ui.html 은 그리로 리다이렉트)
+    url: /docs/openapi3.yaml
+
+# 앱이 뜨면 API 문서 주소를 INFO 로그로 남긴다 (IDE 실행·bootRun). 나머지 키는 기본값이라 바꿀 것만 적는다 (docs/build.md).
+# 문서 경로와 파일 이름은 Gradle 플러그인이 문서와 함께 남긴 실제 값을 쓰므로 적지 않는다.
+# WebFlux 앱이면 주소 앞에 spring.webflux.base-path 를 붙이고, Swagger UI 는 /webjars/swagger-ui/index.html 로 보여 준다.
+kardx:
+  startup-log:
+    async-api:
+      label: SSE # 기본값 WebSocket·SSE. 이 앱은 SSE 만 있다

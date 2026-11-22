@@ -1,0 +1,15 @@
+springdoc:
+  swagger-ui:
+    # Swagger UI 가 런타임 스캔 결과(/v3/api-docs) 대신, 테스트로 검증된 REST Docs 스펙을 보여 준다.
+    # (swagger-ui 설정 엔드포인트가 api-docs 모듈에 있으므로 api-docs 는 끄지 않는다)
+    url: /docs/openapi3.yaml
+
+# JSON 속성 순서: Boot 3(Jackson 2)은 Spring Data `PageImpl` 의 getter 순서가 실행마다 달라 스니펫이 매번 바뀌므로
+# Boot 3 샘플만 config/application.yml 에서 Jackson 3(Boot 4) 기본값과 같은 순서 규칙을 켠다. 자세한 내용: docs/build.md
+
+server:
+  mime-mappings:
+    yaml: application/yaml
+
+# 앱이 뜨면 API 문서 주소를 INFO 로그로 남긴다 (IDE 실행·bootRun). 기본값으로 동작하므로 kardx.startup-log.* 를
+# 적지 않는다. 문서 경로·파일 이름도 Gradle 플러그인이 남긴 실제 값을 읽는다. 바꿀 수 있는 키: docs/build.md 의 앱 시작 로그

@@ -1,0 +1,1 @@
+{"operationId":{"id":"getMemo","qualified":"memoGetMemo"},"sourceSummary":"ID 로 메모 하나를 조회한다","sourceDescription":"ID 로 메모 하나를 조회한다. 알림을 정하지 않은 메모는 `reminder` 가 `null` 이다. 없는 ID 면 404 를 돌려준다."}

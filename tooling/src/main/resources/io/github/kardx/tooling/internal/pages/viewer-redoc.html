@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="__LANG__">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>__TITLE__</title>
+  <style>
+    body { margin: 0; }
+    .offline { font-family: sans-serif; padding: 2rem; }
+  </style>
+</head>
+<body>
+  <div id="redoc"></div>
+  <!-- Redoc (MIT). 버전과 무결성 해시를 고정한다. 오프라인이면 아래 안내가 보인다 -->
+  <script src="https://unpkg.com/redoc@2.5.4/bundles/redoc.standalone.js"
+          integrity="sha384-w447zOpYfw/1Tv/5AK9NfHTlQIqE3RVR6KY62jCyy9zNDgO64cMwGGP1Fj0zJVf5" crossorigin="anonymous"></script>
+  <script>
+    const spec = __SPEC__;
+    const root = document.getElementById('redoc');
+
+    if (typeof Redoc === 'undefined') {
+      root.className = 'offline';
+      root.textContent = '__OFFLINE_NOTE__';
+    } else {
+      Redoc.init(spec, {}, root);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+public final class io/github/kardx/kotest/EnumDocumentationExtension : io/kotest/core/listeners/BeforeSpecListener {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/github/kardx/asciidoc/EnumDocumentFormat;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/github/kardx/asciidoc/EnumDocumentFormat;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun beforeSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getName ()Ljava/lang/String;
+}
+
+public final class io/github/kardx/kotest/RestDocsExtension : io/kotest/core/extensions/TestCaseExtension, io/kotest/core/listeners/AfterSpecListener, io/kotest/core/listeners/BeforeInvocationListener {
+	public static final field Companion Lio/github/kardx/kotest/RestDocsExtension$Companion;
+	public fun <init> ()V
+	public fun <init> (Lio/github/kardx/kotest/SectionTitleProvider;Lio/github/kardx/kotest/SnippetNameProvider;Lio/github/kardx/asciidoc/DocumentGeneratorFactory;)V
+	public synthetic fun <init> (Lio/github/kardx/kotest/SectionTitleProvider;Lio/github/kardx/kotest/SnippetNameProvider;Lio/github/kardx/asciidoc/DocumentGeneratorFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun afterSpec (Lio/kotest/core/spec/Spec;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun beforeInvocation (Lio/kotest/core/test/TestCase;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getName ()Ljava/lang/String;
+	public final fun getProvider ()Lorg/springframework/restdocs/RestDocumentationContextProvider;
+	public fun intercept (Lio/kotest/core/test/TestCase;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/kardx/kotest/RestDocsExtension$Companion {
+	public final fun getCurrentTestProvider ()Lorg/springframework/restdocs/RestDocumentationContextProvider;
+}
+
+public abstract interface class io/github/kardx/kotest/SectionTitleProvider {
+	public static final field Companion Lio/github/kardx/kotest/SectionTitleProvider$Companion;
+	public abstract fun sectionTitle (Lio/github/kardx/kotest/TestPath;)Ljava/lang/String;
+}
+
+public final class io/github/kardx/kotest/SectionTitleProvider$Companion {
+	public final fun getDEFAULT ()Lio/github/kardx/kotest/SectionTitleProvider;
+}
+
+public abstract interface class io/github/kardx/kotest/SnippetNameProvider {
+	public static final field Companion Lio/github/kardx/kotest/SnippetNameProvider$Companion;
+	public abstract fun snippetName (Lio/github/kardx/kotest/TestPath;)Ljava/lang/String;
+}
+
+public final class io/github/kardx/kotest/SnippetNameProvider$Companion {
+	public final fun getDEFAULT ()Lio/github/kardx/kotest/SnippetNameProvider;
+}
+
+public final class io/github/kardx/kotest/TestNames {
+	public static final field INSTANCE Lio/github/kardx/kotest/TestNames;
+	public static final field MAX_SNIPPET_NAME_BYTES I
+	public final fun sectionTitle (Ljava/util/List;)Ljava/lang/String;
+	public final fun slug (Ljava/lang/String;)Ljava/lang/String;
+	public final fun snippetName (Ljava/util/List;)Ljava/lang/String;
+}
+
+public final class io/github/kardx/kotest/TestPath {
+	public final fun getNames ()Ljava/util/List;
+	public final fun getSpecClass ()Ljava/lang/Class;
+	public fun toString ()Ljava/lang/String;
+}
+

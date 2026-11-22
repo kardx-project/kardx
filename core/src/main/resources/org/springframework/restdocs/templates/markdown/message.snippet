@@ -1,0 +1,23 @@
+`{{direction}} {{destination}}` ({{protocol}})
+{{#description}}
+
+{{.}}
+{{/description}}
+{{#hasHeaders}}
+
+**Headers**
+
+Name | Required | Description | Example
+---- | -------- | ----------- | -------
+{{#headers}}
+`{{name}}` | {{#optional}}false{{/optional}}{{^optional}}true{{/optional}} | {{description}} | {{#example}}`{{.}}`{{/example}}
+{{/headers}}
+{{/hasHeaders}}
+{{#payload}}
+
+**Payload**
+
+```json
+{{.}}
+```
+{{/payload}}

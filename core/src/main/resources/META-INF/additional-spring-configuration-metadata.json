@@ -1,0 +1,354 @@
+{
+  "groups": [
+    {
+      "name": "kardx",
+      "type": "io.github.kardx.config.RestDocsSettings",
+      "description": "kardx documentation settings. RestDocsConfiguration.configure { } in code takes precedence over these values."
+    }
+  ],
+  "properties": [
+    {
+      "name": "kardx.snippets.directory",
+      "type": "java.lang.String",
+      "description": "REST Docs snippet directory. Defaults to build/generated-snippets (target/... for Maven). The Gradle plugin's value takes precedence when the plugin is used.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.asciidoc-directory",
+      "type": "java.lang.String",
+      "description": "Directory for the AsciiDoc documents written by tests. Defaults to build/generated-asciidoc.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.snippets.include-prefix",
+      "type": "java.lang.String",
+      "description": "Path prefix of snippet includes in AsciiDoc.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": "{snippets}"
+    },
+    {
+      "name": "kardx.common-include-files",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Files to include at the top of every generated document (relative to the document directory). Comma-separated or a YAML list.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.index-link",
+      "type": "java.lang.String",
+      "description": "Target of the 'Back to index' link at the start and end of generated documents. none disables the link.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": "index.html"
+    },
+    {
+      "name": "kardx.index-link-text",
+      "type": "java.lang.String",
+      "description": "Text of the index link. Defaults to the text for kardx.language (Back to index in English).",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.language",
+      "type": "java.lang.String",
+      "description": "Language of the text the library writes into generated documents, specs and viewers: en or ko. Logs, warnings and error messages are always English.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": "en"
+    },
+    {
+      "name": "kardx.document-snippets",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Snippets to include in generated documents. Snippet file names (api-summary, http-request, response-fields ...) or constant names (request-info).",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.document-section-order",
+      "type": "io.github.kardx.config.DocumentSectionOrder",
+      "description": "Default section order of generated documents (method-name, display-name). JUnit @TestMethodOrder and @TestClassOrder on the test class take precedence.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": "method-name"
+    },
+    {
+      "name": "kardx.masked-headers",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Header names whose values are masked. Nothing is masked by default.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.masked-query-parameters",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Query and form parameter names whose values are masked (case-insensitive): the URI query, application/x-www-form-urlencoded bodies and non-file multipart parts. Nothing is masked by default.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.mask-sensitive-headers",
+      "type": "java.lang.Boolean",
+      "description": "If true, masks Authorization, Proxy-Authorization, Cookie and Set-Cookie values and well-known credential query and form parameters (access_token, token, api_key, password, client_secret ...).",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": false
+    },
+    {
+      "name": "kardx.masked-header-value",
+      "type": "java.lang.String",
+      "description": "Replacement for masked values.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": "****"
+    },
+    {
+      "name": "kardx.removed-response-headers",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Response header names left out of the documentation because their values change on every run. Default: Date. The list replaces the default, so include Date to keep removing it. Headers documented with responseHeaders are kept. While the list is not empty, Expires is also dropped from Set-Cookie values that have Max-Age. none keeps every header as received.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.print-requests",
+      "type": "java.lang.Boolean",
+      "description": "Prints every request and response to the console. Read per request.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": false
+    },
+    {
+      "name": "kardx.apply-spring-security",
+      "type": "java.lang.Boolean",
+      "description": "Applies the context's Spring Security filter chain (springSecurityFilterChain) to restDocsMockMvc. Off by default. Read when the MockMvc is built. A warning is logged once if the filter chain bean exists and this is not set, so set false explicitly if that is intended.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": false
+    },
+    {
+      "name": "kardx.open-api.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Writes OpenAPI fragments (resource.json) when epages is on the classpath.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.open-api.security-schemes",
+      "type": "java.lang.Boolean",
+      "description": "Builds OpenAPI security schemes (Swagger Authorize) from the request's Authorization header. If false, Authorization is removed from OpenAPI.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.open-api.global-headers",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Headers entered once in Swagger Authorize and sent with every request. They become apiKey (in: header) security schemes in OpenAPI.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.open-api.include-streams",
+      "type": "java.lang.Boolean",
+      "description": "Also puts never-ending streams (performStream) into OpenAPI. Swagger UI keeps loading on such responses.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": false
+    },
+    {
+      "name": "kardx.open-api.schema-names",
+      "type": "java.lang.Boolean",
+      "description": "Names OpenAPI schemas automatically after the extracted types.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.open-api.schema-names-without-wrapper",
+      "type": "java.lang.Boolean",
+      "description": "Drops the response wrapper name from automatic schema names of wrapped responses (RestResponse<ProductResponse> -> ProductResponse). The Gradle plugin picks the next candidate when names collide.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": false
+    },
+    {
+      "name": "kardx.open-api.operation-id-rule",
+      "type": "java.lang.String",
+      "description": "Rule for OpenAPI operationIds: handler-method (controller method name), controller-and-method (controller name + method name), path (HTTP method + path), test-name (test class and method name). openApi { operationId } in a test takes precedence.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": "handler-method"
+    },
+    {
+      "name": "kardx.open-api.error-schema",
+      "type": "java.lang.String",
+      "description": "Common OpenAPI schema name of error responses (4xx, 5xx). A class name (FQCN) uses that class's schema name.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.async-api.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Writes AsyncAPI metadata when documenting messages and SSE.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.wire-mock-stubs",
+      "type": "java.lang.Boolean",
+      "description": "andDocument writes a WireMock mapping JSON per request/response to <snippet directory>/wiremock/mappings. Enabled by the Gradle plugin's wireMock { enabled = true }.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": false
+    },
+    {
+      "name": "kardx.array-element-fields-optional",
+      "type": "java.lang.Boolean",
+      "description": "Marks fields under array elements as optional. Enable when documenting empty arrays.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": false
+    },
+    {
+      "name": "kardx.kotlinx-serialization",
+      "type": "java.lang.Boolean",
+      "description": "Extracts kotlinx.serialization @Serializable classes as kotlinx writes them (@SerialName names, defaults optional, sealed 'type' discriminator). Applies only when kotlinx-serialization-json is on the classpath.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.max-extraction-depth",
+      "type": "java.lang.Integer",
+      "description": "Maximum depth of automatic field extraction from types. Deeper objects become subsections.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": 10
+    },
+    {
+      "name": "kardx.enum-description-property",
+      "type": "java.lang.String",
+      "description": "Property name to read enum constant descriptions from (field -> getter -> method of the same name).",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": "description"
+    },
+    {
+      "name": "kardx.description-annotations",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Annotations to read field descriptions from, in this order after @Description; blank values are skipped. Aliases (swagger, jackson), alias#attribute (swagger#title), FQCN (value, else description attribute), FQCN#attribute.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.source-docs.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Use KDoc/Javadoc from the Gradle plugin's source docs index as the last fallback for field, parameter and enum constant descriptions and as the default OpenAPI operation summary/description.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": true
+    },
+    {
+      "name": "kardx.masked-annotations",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Annotations marking a field value as masked (documentation only, the value is not changed). @Masked is always read. FQCN (no rule text), FQCN#attribute (that attribute's value - a String or enum name - becomes the rule text).",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.response-wrapper.class",
+      "type": "java.lang.String",
+      "description": "Common response wrapper class (FQCN), e.g. com.example.ApiResponse",
+      "sourceType": "io.github.kardx.config.RestDocsSettings"
+    },
+    {
+      "name": "kardx.response-wrapper.data-path",
+      "type": "java.lang.String",
+      "description": "Path of the data inside the common response wrapper. Used with response-wrapper.class.",
+      "sourceType": "io.github.kardx.config.RestDocsSettings",
+      "defaultValue": "data"
+    }
+  ],
+  "hints": [
+    {
+      "name": "kardx.language",
+      "values": [
+        {
+          "value": "en",
+          "description": "English (default)"
+        },
+        {
+          "value": "ko",
+          "description": "Korean"
+        }
+      ]
+    },
+    {
+      "name": "kardx.open-api.operation-id-rule",
+      "values": [
+        {
+          "value": "handler-method",
+          "description": "Controller method name (default, searchUsers). Only colliding ids get the controller name"
+        },
+        {
+          "value": "controller-and-method",
+          "description": "Controller name + method name (userSearchUsers)"
+        },
+        {
+          "value": "path",
+          "description": "HTTP method + path (getApiV1UsersById)"
+        },
+        {
+          "value": "test-name",
+          "description": "Test class and method name (previous behavior)"
+        }
+      ]
+    },
+    {
+      "name": "kardx.document-section-order",
+      "values": [
+        {
+          "value": "method-name",
+          "description": "By method name (default)"
+        },
+        {
+          "value": "display-name",
+          "description": "By @DisplayName"
+        }
+      ]
+    },
+    {
+      "name": "kardx.response-wrapper.class",
+      "providers": [
+        {
+          "name": "class-reference"
+        }
+      ]
+    },
+    {
+      "name": "kardx.index-link",
+      "values": [
+        {
+          "value": "index.html"
+        },
+        {
+          "value": "none",
+          "description": "No link"
+        }
+      ]
+    },
+    {
+      "name": "kardx.removed-response-headers",
+      "values": [
+        {
+          "value": "Date"
+        },
+        {
+          "value": "none",
+          "description": "Keep all response headers"
+        }
+      ]
+    },
+    {
+      "name": "kardx.description-annotations",
+      "values": [
+        {
+          "value": "swagger",
+          "description": "io.swagger.v3.oas.annotations.media.Schema#description"
+        },
+        {
+          "value": "jackson",
+          "description": "com.fasterxml.jackson.annotation.JsonPropertyDescription#value"
+        }
+      ]
+    },
+    {
+      "name": "kardx.masked-headers",
+      "values": [
+        {
+          "value": "Authorization"
+        },
+        {
+          "value": "Proxy-Authorization"
+        },
+        {
+          "value": "Cookie"
+        },
+        {
+          "value": "Set-Cookie"
+        }
+      ]
+    }
+  ]
+}

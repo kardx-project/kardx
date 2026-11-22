@@ -1,0 +1,25 @@
+{{statusHeader}} | {{descriptionHeader}}
+--- | ---
+{{#responses}}
+`{{status}}` | {{description}}
+{{/responses}}
+{{#details}}
+{{#hasFields}}
+
+**{{fieldsTitle}}**
+
+{{pathHeader}} | {{typeHeader}} | {{descriptionHeader}}
+--- | --- | ---
+{{#fields}}
+`{{path}}` | {{#type}}`{{.}}`{{/type}} | {{description}}
+{{/fields}}
+{{/hasFields}}
+{{#example}}
+
+**{{exampleTitle}}**
+
+```{{#language}}{{.}}{{/language}}
+{{.}}
+```
+{{/example}}
+{{/details}}

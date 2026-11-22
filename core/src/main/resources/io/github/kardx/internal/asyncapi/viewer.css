@@ -1,0 +1,138 @@
+:root { --line: #e5e7eb; --soft: #f9fafb; --muted: #6b7280; --ink: #111827; --accent: #2563eb; --ok: #059669; --warn: #b45309; --err: #dc2626; --mono: ui-monospace, SFMono-Regular, Menlo, monospace; }
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif; color: var(--ink); background: #fff; }
+.tabs { position: sticky; top: 0; z-index: 40; height: 49px; box-sizing: border-box; align-items: center; display: flex; gap: 4px; padding: 8px 16px; background: #fff; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; background: none; padding: 6px 14px; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 6px; color: var(--muted); }
+.tabs button.active { background: #eff6ff; color: var(--accent); }
+
+/* ---- 문서 탭: 공식 렌더러 다듬기 (렌더러 클래스에 기대는 규칙은 모두 #doc .aui-root 범위) ---- */
+/* 서버 줄의 두 번째 배지는 서버 이름이다. 이름이 프로토콜과 같아 "STOMP STOMP" 처럼 중복돼 보이므로 숨긴다. */
+#doc .aui-root span.font-mono + strong + strong { display: none; }
+/* 오른쪽 전체 높이 어두운 칸 대신, 예시 블록만 어두운 카드로 보인다. */
+#doc .aui-root .panel--right { display: none; }
+#doc .aui-root .panel-item--right .examples { margin: 16px 0 0; padding: 14px 18px; border-radius: 8px; }
+#doc .aui-root .examples h4 { font-size: 14px; font-weight: 600; color: #e5e7eb; }
+/* 설명의 `코드` 앞뒤에 백틱이 그대로 보이지 않게 */
+#doc .aui-root .prose code::before, #doc .aui-root .prose code::after { content: none; }
+#doc .aui-root .prose :not(pre) > code { background: #f3f4f6; padding: 1px 4px; border-radius: 4px; font-weight: 500; }
+/* 사이드바 제목은 한두 줄로 작게 */
+#doc .aui-root .sidebar--content h1 { font-size: 16px; line-height: 1.4; font-weight: 600; word-break: keep-all; overflow-wrap: anywhere; }
+#doc .aui-root .sidebar--content > ul { margin-top: 20px; }
+#doc .aui-root .sidebar--content > ul > li.mt-9 { margin-top: 24px; }
+/* 방향 배지: 클라이언트 기준. 색은 Try it out 과 맞춘다 (보내기 파랑, 받기 초록). */
+#doc .aui-root [data-rd-dir] { text-transform: none; font-family: inherit; font-weight: 700; white-space: nowrap; }
+#doc .aui-root [data-rd-dir="out"] { background-color: var(--accent); }
+#doc .aui-root [data-rd-dir="in"] { background-color: var(--ok); }
+#doc .aui-root h3 > [data-rd-dir] { font-size: 13px; padding: 3px 8px; vertical-align: 2px; }
+#doc .aui-root a > strong[data-rd-dir] { height: auto; min-width: 4.6em; text-align: center; flex-shrink: 0; align-self: flex-start; padding: 2px 4px; }
+/* 사이드바 operation: 채널 주소 + 메시지 이름 */
+/* 렌더러의 break-all 을 풀어 주소가 구분자(/ .) 뒤에서만 줄바꿈되게 한다 (JS 가 폭 없는 공백을 넣는다) */
+#doc .aui-root [data-rd-sub] { font-family: var(--mono); font-size: 12.5px; line-height: 1.35; word-break: normal; overflow-wrap: break-word; }
+#doc .aui-root [data-rd-sub]::after { content: attr(data-rd-sub); display: block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif; font-size: 11.5px; color: var(--muted); margin-top: 1px; word-break: normal; overflow-wrap: anywhere; }
+/* 덜 중요한 정보는 작게, 중복은 숨긴다 */
+#doc .aui-root [data-rd-hide] { display: none !important; }
+#doc .aui-root [data-rd="channel-note"] .prose { font-size: 12px; color: var(--muted); }
+#doc .aui-root [data-rd="channel-note"] .prose p { margin: 0; }
+#doc .aui-root [data-rd="servers"] { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+#doc .aui-root [data-rd="servers"] p { margin: 0; }
+#doc .aui-root [data-rd="servers"] li { margin-top: 0; }
+@media (max-width: 1023px) {
+  /* 모바일 배치에서 사이드바가 열려도 상단 탭 아래에서 시작한다. */
+  #doc .aui-root .sidebar > div { top: 49px; max-height: calc(100vh - 49px); }
+}
+/* 공식 렌더러는 화면이 1536px 이상일 때만 사이드바·예시 2단 배치를 쓴다. 노트북 화면에서도 쓰도록 기준을 낮춘다. */
+@media (min-width: 1024px) {
+  #doc .aui-root .burger-menu { display: none; }
+  #doc .aui-root .sidebar { position: sticky; top: 49px; display: block; height: calc(100vh - 49px); max-height: none; width: 16rem; flex-shrink: 0; overflow-y: auto; scrollbar-width: thin; }
+  #doc .aui-root .sidebar > div { position: static; height: auto; max-height: none; padding-top: 20px; }
+  #doc .aui-root .sidebar--content { width: 14rem; }
+  #doc .aui-root .panel-item { display: flex; }
+  #doc .aui-root .panel--center .panel-item--center { width: 58.3333%; }
+  #doc .aui-root .panel--center .panel-item--right { width: 41.6667%; padding-left: 4px; padding-right: 24px; }
+}
+
+/* ---- Try it out ---- */
+#tryit { display: none; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: 16px; padding: 16px; max-width: 1360px; margin: 0 auto; box-sizing: border-box; }
+#tryit.show { display: grid; }
+@media (max-width: 899px) { #tryit.show { grid-template-columns: minmax(0, 1fr); padding: 12px; } }
+.panel { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; background: #fff; min-width: 0; }
+h3 { margin: 0; font-size: 15px; }
+label, .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 0 0 4px; }
+input, textarea { width: 100%; box-sizing: border-box; font: 12px/1.5 var(--mono); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; background: #fff; }
+input:focus, textarea:focus { outline: 2px solid #bfdbfe; border-color: var(--accent); }
+textarea { resize: vertical; min-height: 60px; }
+.help { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.hint { font-size: 12px; color: var(--warn); margin-top: 4px; }
+.hint:empty { display: none; }
+button { font: inherit; }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.btn.secondary { background: #fff; color: var(--accent); }
+.btn.stop { background: #fff; color: var(--err); border-color: var(--err); }
+.btn.small { padding: 2px 10px; font-size: 12px; }
+.link { border: 0; background: none; color: var(--accent); cursor: pointer; font-size: 12px; padding: 2px 4px; }
+
+/* 연결 설정 */
+.settings-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.conn-summary { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.conn-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.conn-item b { font-weight: 600; }
+.settings-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 16px; }
+@media (max-width: 1099px) { .settings-grid { grid-template-columns: minmax(0, 1fr); } }
+#connect-headers { min-height: 64px; max-height: 240px; }
+
+/* 인증 (components.securitySchemes) */
+.auth { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.auth h4 { margin: 0 0 6px; font-size: 13px; }
+.auth-list { list-style: none; padding: 0; margin: 0 0 10px; font-size: 12px; }
+.auth-list li { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.auth-list li + li { margin-top: 4px; }
+.auth-place { color: var(--muted); }
+.auth-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 8px 16px; }
+.auth-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+@media (max-width: 1099px) { .auth-grid { grid-template-columns: minmax(0, 1fr); } }
+select { width: 100%; box-sizing: border-box; font: 12px/1.5 var(--mono); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px; background: #fff; }
+.check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink); margin: 0; font-weight: 400; }
+.check input { width: auto; margin: 0; }
+
+/* 연결 상태 (점 + 글자) */
+.status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; flex-shrink: 0; }
+.status.on { color: var(--ok); } .status.on::before { background: var(--ok); box-shadow: 0 0 0 3px #d1fae5; }
+.status.busy { color: var(--warn); } .status.busy::before { background: #f59e0b; }
+.status.error { color: var(--err); } .status.error::before { background: var(--err); }
+
+/* 채널 카드 */
+.card-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card-head .status { margin-left: auto; }
+.proto { font-size: 11px; font-weight: 700; color: #374151; background: #f3f4f6; border-radius: 4px; padding: 2px 6px; }
+.addr { font-family: var(--mono); font-size: 14px; font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
+.summary { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+.summary.small { font-size: 12px; margin-top: 2px; }
+code { font: 12px var(--mono); background: #f3f4f6; padding: 1px 4px; border-radius: 4px; color: var(--ink); }
+.controls { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.controls .field-label { margin: 0; flex-shrink: 0; }
+.controls input { flex: 1 1 auto; max-width: 440px; min-width: 0; }
+.section { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.section-title { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; margin: 0 0 6px; }
+.dir { font-weight: 700; }
+.dir.out { color: var(--accent); } .dir.in { color: var(--ok); }
+.msg { padding: 8px 10px; border-radius: 6px; background: var(--soft); border: 1px solid #f0f1f3; }
+.msg + .msg { margin-top: 8px; }
+.msg-name { font: 600 12px var(--mono); }
+.msg-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.msg details { margin-top: 4px; font-size: 12px; }
+.msg summary { cursor: pointer; color: var(--muted); }
+.msg pre, .entry pre { margin: 4px 0 0; white-space: pre-wrap; word-break: break-all; font: 12px/1.5 var(--mono); }
+.form-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px 12px; margin-top: 8px; }
+.form-grid.two { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+@media (max-width: 1199px) { .form-grid.two { grid-template-columns: minmax(0, 1fr); } }
+.form-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+/* 메시지 로그: 넓은 화면은 오른쪽에 붙어 따라오고, 좁은 화면은 아래쪽에 붙는다 */
+.log { align-self: start; position: sticky; top: 65px; max-height: calc(100vh - 81px); display: flex; flex-direction: column; margin-bottom: 0; padding: 12px 14px; }
+@media (max-width: 899px) { .log { top: auto; bottom: 0; align-self: end; max-height: 40vh; box-shadow: 0 -4px 12px rgba(0, 0, 0, .06); } }
+.log-head { display: flex; justify-content: space-between; align-items: center; }
+.log-entries { overflow: auto; font: 12px/1.5 var(--mono); margin-top: 6px; min-height: 0; }
+.log-entries:empty::before { content: attr(data-empty); display: block; padding: 8px 0; color: var(--muted); font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif; }
+.entry { border-top: 1px solid var(--line); padding: 6px 0; }
+.entry .meta { color: var(--muted); overflow-wrap: anywhere; }
+.entry.out .tag { color: var(--accent); } .entry.in .tag { color: var(--ok); } .entry.error .tag { color: var(--err); } .entry.info .tag { color: var(--muted); }

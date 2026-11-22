@@ -1,0 +1,32 @@
+{
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/memos",
+      "handler": "com.example.restdocs.memo.MemoController#listMemos",
+      "deprecated": false,
+      "apiVersion": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/memos",
+      "handler": "com.example.restdocs.memo.MemoController#createMemo",
+      "deprecated": false,
+      "apiVersion": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/memos/{id}",
+      "handler": "com.example.restdocs.memo.MemoController#getMemo",
+      "deprecated": false,
+      "apiVersion": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/internal/ping",
+      "handler": "com.example.restdocs.memo.MemoController#listMemos",
+      "deprecated": false,
+      "apiVersion": null
+    }
+  ]
+}

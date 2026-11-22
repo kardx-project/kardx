@@ -1,0 +1,21 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts}]
+max_line_length = 120
+ktlint_code_style = intellij_idea
+# 한 줄짜리 DSL 체인과 테스트의 한글 백틱 이름을 허용한다
+ktlint_standard_function-naming = disabled
+ktlint_standard_no-wildcard-imports = enabled
+
+[*.{yml,yaml,json,md}]
+indent_size = 2
+
+[*.bat]
+end_of_line = crlf

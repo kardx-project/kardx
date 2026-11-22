@@ -1,0 +1,233 @@
+{
+  "operationId" : "memo-api-docs-test/create-memo",
+  "summary" : "메모 작성",
+  "description" : "메모 작성",
+  "privateResource" : false,
+  "deprecated" : false,
+  "request" : {
+    "path" : "/api/v1/memos",
+    "method" : "POST",
+    "contentType" : "application/json;charset=UTF-8",
+    "schema" : {
+      "name" : "CreateMemoRequest"
+    },
+    "headers" : [ ],
+    "pathParameters" : [ ],
+    "queryParameters" : [ ],
+    "formParameters" : [ ],
+    "requestFields" : [ {
+      "attributes" : {
+        "schema" : {
+          "type" : "string",
+          "minLength" : 1,
+          "maxLength" : 100
+        },
+        "constraints" : "NotBlank - Must not be blank\n\nSize - Size must be between 0 and 100 inclusive"
+      },
+      "description" : "메모 제목",
+      "ignored" : false,
+      "path" : "title",
+      "type" : "STRING",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "description" : "메모 본문. 줄바꿈을 그대로 저장한다",
+      "ignored" : false,
+      "path" : "content",
+      "type" : "STRING",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        },
+        "default" : "YELLOW",
+        "nullable" : false,
+        "enumValues" : [ "YELLOW", "PINK", "BLUE" ]
+      },
+      "description" : "메모 색. 보내지 않으면 MemoColor.YELLOW 다\n\nYELLOW : 노란색. 색을 고르지 않으면 이 색이다.\n\nPINK : 분홍색. 급한 일에 쓴다.\n\nBLUE : 하늘색. 끝난 일을 모아 둘 때 쓴다.",
+      "ignored" : false,
+      "path" : "color",
+      "type" : "enum",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "nullable" : false,
+        "itemsType" : "string"
+      },
+      "description" : "메모를 찾을 때 쓰는 태그",
+      "ignored" : false,
+      "path" : "tags",
+      "type" : "ARRAY",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "nullable" : true
+      },
+      "description" : "알림. 알림이 필요 없으면 보내지 않는다",
+      "ignored" : false,
+      "path" : "reminder",
+      "type" : "OBJECT",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "requiredInParent" : true,
+        "nullable" : false
+      },
+      "description" : "알림을 보낼 시각",
+      "ignored" : false,
+      "path" : "reminder.remindAt",
+      "type" : "STRING",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "boolean"
+        },
+        "nullable" : false,
+        "default" : "false"
+      },
+      "description" : "매일 같은 시각에 다시 알릴지 여부",
+      "ignored" : false,
+      "path" : "reminder.daily",
+      "type" : "BOOLEAN",
+      "optional" : true
+    } ],
+    "example" : "{\n  \"title\" : \"병원 예약\",\n  \"content\" : \"오전 10시 치과\",\n  \"color\" : \"PINK\",\n  \"tags\" : [ \"건강\" ],\n  \"reminder\" : {\n    \"remindAt\" : \"2026-11-21T09:00:00\",\n    \"daily\" : false\n  }\n}",
+    "securityRequirements" : null
+  },
+  "response" : {
+    "status" : 201,
+    "contentType" : "application/json;charset=UTF-8",
+    "schema" : {
+      "name" : "MemoResponse"
+    },
+    "headers" : [ ],
+    "responseFields" : [ {
+      "attributes" : {
+        "schema" : {
+          "type" : "integer",
+          "format" : "int64"
+        }
+      },
+      "description" : "메모 ID",
+      "ignored" : false,
+      "path" : "id",
+      "type" : "NUMBER",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "description" : "메모 제목",
+      "ignored" : false,
+      "path" : "title",
+      "type" : "STRING",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "description" : "메모 본문",
+      "ignored" : false,
+      "path" : "content",
+      "type" : "STRING",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string"
+        },
+        "enumValues" : [ "YELLOW", "PINK", "BLUE" ]
+      },
+      "description" : "메모 색\n\nYELLOW : 노란색. 색을 고르지 않으면 이 색이다.\n\nPINK : 분홍색. 급한 일에 쓴다.\n\nBLUE : 하늘색. 끝난 일을 모아 둘 때 쓴다.",
+      "ignored" : false,
+      "path" : "color",
+      "type" : "enum",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "itemsType" : "string"
+      },
+      "description" : "메모 태그",
+      "ignored" : false,
+      "path" : "tags",
+      "type" : "ARRAY",
+      "optional" : false
+    }, {
+      "attributes" : {
+        "nullable" : true
+      },
+      "description" : "메모 알림. 알림을 정하지 않은 메모는 `null` 이다",
+      "ignored" : false,
+      "path" : "reminder",
+      "type" : "OBJECT",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "requiredInParent" : true,
+        "nullable" : false
+      },
+      "description" : "알림을 보낼 시각",
+      "ignored" : false,
+      "path" : "reminder.remindAt",
+      "type" : "STRING",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "boolean"
+        },
+        "requiredInParent" : true,
+        "nullable" : false
+      },
+      "description" : "매일 같은 시각에 다시 알릴지 여부",
+      "ignored" : false,
+      "path" : "reminder.daily",
+      "type" : "BOOLEAN",
+      "optional" : true
+    }, {
+      "attributes" : {
+        "schema" : {
+          "type" : "string",
+          "format" : "date-time"
+        }
+      },
+      "description" : "메모를 작성한 시각",
+      "ignored" : false,
+      "path" : "createdAt",
+      "type" : "STRING",
+      "optional" : false
+    } ],
+    "example" : "{\n  \"id\" : 3,\n  \"title\" : \"병원 예약\",\n  \"content\" : \"오전 10시 치과\",\n  \"color\" : \"PINK\",\n  \"tags\" : [ \"건강\" ],\n  \"reminder\" : {\n    \"remindAt\" : \"2026-11-21T09:00:00\",\n    \"daily\" : false\n  },\n  \"createdAt\" : \"2026-11-20T09:00:00\"\n}"
+  },
+  "tags" : [ "메모 API" ]
+}

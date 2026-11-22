@@ -1,0 +1,10 @@
+{
+  "openApi": {
+    "description": "HTTP API spec extracted from the passing documentation tests. Full docs: [REST Docs](/docs/index.html).",
+    "info": {
+      "contact": { "name": "Books team", "email": "books@example.com" },
+      "license": { "name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0" },
+      "tags": { "Books": { "description": "Look up and add books" } }
+    }
+  }
+}

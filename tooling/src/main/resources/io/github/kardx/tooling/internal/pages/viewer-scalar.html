@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="__LANG__">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>__TITLE__</title>
+  <style>
+    body { margin: 0; }
+    .offline { font-family: sans-serif; padding: 2rem; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- Scalar API Reference (MIT). 버전과 무결성 해시를 고정한다. 오프라인이면 아래 안내가 보인다 -->
+  <script src="https://unpkg.com/@scalar/api-reference@1.76.4/dist/browser/standalone.js"
+          integrity="sha384-hwB9WroDTpZaI38gr+u9CXA6ksz5gUYgD2GxXazKl/agT1L2GWUiRFWGJYNiFu4Q" crossorigin="anonymous"></script>
+  <script>
+    const spec = __SPEC__;
+    const root = document.getElementById('app');
+
+    if (typeof Scalar === 'undefined') {
+      root.className = 'offline';
+      root.textContent = '__OFFLINE_NOTE__';
+    } else {
+      // 개발자 도구 막대와 AI 질문(스펙을 외부 서비스로 보낸다)은 끈다
+      Scalar.createApiReference(root, { content: spec, showDeveloperTools: 'never', agent: { disabled: true } });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"operationId":{"id":"createMemo","qualified":"memoCreateMemo"},"fieldDefaults":{"requestBody":{"color":"YELLOW","reminder.daily":false}},"sourceSummary":"새 메모를 작성한다","sourceDescription":"새 메모를 작성한다. 저장한 메모를 ID 와 작성 시각을 채워 돌려준다. 색을 보내지 않으면 노란색(YELLOW) 메모가 된다."}

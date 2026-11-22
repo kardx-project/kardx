@@ -1,0 +1,7 @@
+# 문서화 테스트 설정 (RestDocsTestSupport 의 @ActiveProfiles("docs") 로 적용)
+kardx:
+  # 마스킹은 기본으로 꺼져 있다. 토큰·세션 값이 문서에 남지 않게 켠다.
+  mask-sensitive-headers: true
+  open-api:
+    # 오류 응답(4xx·5xx)의 OpenAPI 스키마 이름을 모두 ErrorResponse 로 (코드: openApiErrorSchema<ErrorResponse>())
+    error-schema: com.example.restdocs.webflux.common.ErrorResponse

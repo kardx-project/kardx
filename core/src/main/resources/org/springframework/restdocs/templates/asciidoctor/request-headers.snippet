@@ -1,0 +1,13 @@
+|===
+|Name|Required|Description|Constraints
+
+{{#headers}}
+|{{#tableCellContent}}`+{{name}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{#optional}}false{{/optional}}{{^optional}}true{{/optional}}{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{#default}} +
+Default: `+{{.}}+`{{/default}}{{#example}} +
+Example: `+{{.}}+`{{/example}}{{/tableCellContent}}
+|{{#tableCellContent}}{{#constraints}}{{.}}{{/constraints}}{{/tableCellContent}}
+
+{{/headers}}
+|===
