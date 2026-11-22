@@ -10,7 +10,7 @@ spring-boot-v4 = "4.1.2"
 epages = "0.19.4"
 epages-v4 = "0.20.2"
 junit = "5.13.4"
-jakarta-validation = "3.0.2"
+jakarta-validation = "3.1.1"
 jackson = "2.21.4"
 # tooling 의 epages 생성기 호출(compileOnly). epages 0.20.x 가 쓰는 Jackson 3
 jackson3 = "3.0.2"
