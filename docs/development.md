@@ -4,6 +4,12 @@
 
 [Document list](README.md)
 
+<!-- toc -->
+**Contents**
+
+- [Releasing](#releasing)
+<!-- /toc -->
+
 How to change or verify this repository. Library users don't need this. Issues, commit messages and pull requests are covered in [CONTRIBUTING](../CONTRIBUTING.md) ([한국어](../CONTRIBUTING.ko.md)).
 
 ```
@@ -128,3 +134,28 @@ Errors and warnings carry a code from `RestDocsErrorCode` (`kardx[KDX-011]: ...`
 ```bash
 python3 scripts/update-error-codes.py
 ```
+
+## Releasing
+
+`.github/workflows/release.yml` publishes the libraries, the Maven plugin and `kardx-tooling` (including the `-all` jar) to Maven Central (Sonatype Central Portal), and the Gradle plugin to the Gradle Plugin Portal. It needs these repository secrets:
+
+| Secret | Use |
+|---|---|
+| `SIGNING_KEY` | ASCII-armored PGP private key (passed as `ORG_GRADLE_PROJECT_signingInMemoryKey`) |
+| `SIGNING_PASSWORD` | Passphrase of that key |
+| `CENTRAL_USERNAME` | Central Portal user token name |
+| `CENTRAL_PASSWORD` | Central Portal user token password |
+| `GRADLE_PUBLISH_KEY` | Gradle Plugin Portal API key |
+| `GRADLE_PUBLISH_SECRET` | Gradle Plugin Portal API secret |
+
+1. Set `version` in `gradle.properties` (for example `0.1`) and merge it to `main`.
+2. Tag that commit `v<version>` and push the tag. The workflow fails if the tag and the version differ.
+3. The workflow runs `build`, `publishToStaging` (signed, into `build/staging-deploy`), `scripts/central-upload.sh`, `gradle-plugin` `publishPlugins`, and creates a GitHub release with generated notes.
+4. The Central deployment is `USER_MANAGED`: once it is `VALIDATED`, press Publish in the Central Portal (Deployments). Until then the Gradle plugin on the Plugin Portal can't resolve `kardx-tooling`.
+
+```bash
+git tag v0.1
+git push origin v0.1
+```
+
+Without `signingInMemoryKey`, `build` and `publishToMavenLocal` don't sign. To check the bundle locally, pass a key and run `./gradlew publishToStaging` then `scripts/central-upload.sh --dry-run` (it checks that every `.jar`/`.pom`/`.module` has `.asc`, `.md5` and `.sha1`, and uploads nothing). Delete `build/staging-deploy` first when files from an earlier run are there. The Gradle plugin and its marker are also put on Central, so `pluginManagement { repositories { mavenCentral() } }` works too.

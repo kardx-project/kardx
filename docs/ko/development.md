@@ -4,6 +4,12 @@
 
 [문서 목록](README.md)
 
+<!-- toc -->
+**목차**
+
+- [배포](#배포)
+<!-- /toc -->
+
 이 저장소를 고치거나 검증할 때 쓰는 방법입니다. 라이브러리 사용자에게는 필요 없습니다. 이슈, 커밋 메시지, PR 은 [기여 안내](../../CONTRIBUTING.ko.md)([English](../../CONTRIBUTING.md))에 있습니다.
 
 ```
@@ -128,3 +134,28 @@ python3 scripts/check-docs-pairs.py
 ```bash
 python3 scripts/update-error-codes.py
 ```
+
+## 배포
+
+`.github/workflows/release.yml` 이 라이브러리·Maven 플러그인·`kardx-tooling`(`-all` jar 포함)을 Maven Central(Sonatype Central Portal)에, Gradle 플러그인을 Gradle Plugin Portal 에 배포합니다. 저장소 시크릿이 필요합니다.
+
+| 시크릿 | 용도 |
+|---|---|
+| `SIGNING_KEY` | ASCII armor PGP 개인 키 (`ORG_GRADLE_PROJECT_signingInMemoryKey` 로 넘긴다) |
+| `SIGNING_PASSWORD` | 그 키의 암호 |
+| `CENTRAL_USERNAME` | Central Portal 사용자 토큰 이름 |
+| `CENTRAL_PASSWORD` | Central Portal 사용자 토큰 암호 |
+| `GRADLE_PUBLISH_KEY` | Gradle Plugin Portal API 키 |
+| `GRADLE_PUBLISH_SECRET` | Gradle Plugin Portal API 시크릿 |
+
+1. `gradle.properties` 의 `version` 을 정하고(예: `0.1`) `main` 에 합칩니다.
+2. 그 커밋에 `v<버전>` 태그를 달고 push 합니다. 태그와 버전이 다르면 워크플로가 실패합니다.
+3. 워크플로가 `build`, `publishToStaging`(서명해서 `build/staging-deploy` 로), `scripts/central-upload.sh`, `gradle-plugin` 의 `publishPlugins` 를 돌리고 자동 생성 노트로 GitHub 릴리스를 만듭니다.
+4. Central 배포는 `USER_MANAGED` 입니다: `VALIDATED` 가 되면 Central Portal(Deployments)에서 Publish 를 누릅니다. 그 전에는 Plugin Portal 의 Gradle 플러그인이 `kardx-tooling` 을 받지 못합니다.
+
+```bash
+git tag v0.1
+git push origin v0.1
+```
+
+`signingInMemoryKey` 가 없으면 `build`·`publishToMavenLocal` 은 서명하지 않습니다. 로컬에서 묶음을 확인하려면 키를 주고 `./gradlew publishToStaging` 뒤 `scripts/central-upload.sh --dry-run` 을 돌립니다 (모든 `.jar`/`.pom`/`.module` 에 `.asc`·`.md5`·`.sha1` 이 있는지 보고, 올리지는 않습니다). 예전 실행의 파일이 남아 있으면 먼저 `build/staging-deploy` 를 지웁니다. Gradle 플러그인 본체와 마커도 Central 에 올라가므로 `pluginManagement { repositories { mavenCentral() } }` 로도 쓸 수 있습니다.

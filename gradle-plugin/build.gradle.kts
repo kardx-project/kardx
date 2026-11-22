@@ -3,6 +3,8 @@ import java.util.Properties
 plugins {
     `java-gradle-plugin`
     `maven-publish`
+    // Gradle Plugin Portal 배포(publishPlugins). 키는 GRADLE_PUBLISH_KEY·GRADLE_PUBLISH_SECRET (release.yml)
+    alias(libs.plugins.plugin.publish)
 }
 
 // 버전·그룹·저장소 URL 은 라이브러리와 같다.
@@ -64,6 +66,7 @@ gradlePlugin {
             implementationClass = "io.github.kardx.gradle.KardxPlugin"
             displayName = "kardx"
             description = "Wires Spring REST Docs, AsciiDoc, OpenAPI and AsyncAPI generation for kardx"
+            tags = listOf("kotlin", "spring", "restdocs", "openapi", "asyncapi", "documentation")
         }
     }
 }
@@ -87,7 +90,7 @@ publishing {
         // projectUrl 을 읽는 방식도 달라져, 스무 줄을 공유하는 이득보다 복잡도가 크다.)
         pom {
             url = projectUrl
-            inceptionYear = "2024"
+            inceptionYear = "2026"
             licenses {
                 license {
                     name = "Apache License 2.0"
@@ -107,6 +110,33 @@ publishing {
                 developerConnection = scmConnection
             }
         }
+    }
+}
+
+// Maven Central 업로드 묶음을 만드는 파일 저장소와 서명.
+// 플러그인 사용자는 Gradle Plugin Portal(publishPlugins)에서 받는다. 그래도 플러그인 본체(kardx-gradle-plugin)와 마커
+// (io.github.kardx-project.gradle.plugin, packaging pom)를 Central 에도 같이 올린다: 해가 없고,
+// pluginManagement { repositories { mavenCentral() } } 만 쓰는 사용자도 플러그인을 찾을 수 있다. 라이브러리 모듈(build-logic/src/main/kotlin/restdocs.published.gradle.kts)과
+// 같은 폴더(저장소 루트의 build/staging-deploy)·같은 속성 이름을 쓴다. 한쪽을 바꾸면 다른 쪽도 바꾼다.
+publishing {
+    repositories {
+        maven {
+            name = "staging"
+            url = uri(layout.projectDirectory.dir("../build/staging-deploy"))
+        }
+    }
+}
+
+// 키가 있을 때만 서명한다 (CI 의 ORG_GRADLE_PROJECT_signingInMemoryKey). 없으면 로컬 빌드는 전과 같다.
+// signing 플러그인도 이때만 적용한다: com.gradle.plugin-publish 는 signing 이 적용돼 있으면 모든 배포물에 서명 태스크를
+// 붙이므로, 키 없이 적용하면 publishToMavenLocal·publishPlugins 가 "no configured signatory" 로 실패한다.
+val signingKey = providers.gradleProperty("signingInMemoryKey")
+
+if (signingKey.isPresent) {
+    apply(plugin = "signing")
+    configure<SigningExtension> {
+        useInMemoryPgpKeys(signingKey.get(), providers.gradleProperty("signingInMemoryKeyPassword").orNull)
+        sign(publishing.publications)
     }
 }
 

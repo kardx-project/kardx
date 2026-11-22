@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     `java-library`
     `maven-publish`
+    signing
 }
 
 // 버전·그룹·저장소 URL 은 라이브러리와 같다 (included build 는 루트의 gradle.properties 를 읽지 않는다).
@@ -187,7 +188,7 @@ publishing {
                 // 라이브러리 모듈의 POM(build-logic/src/main/kotlin/restdocs.published.gradle.kts)과 같은 값을 쓴다.
                 // gradle-plugin/build.gradle.kts 와 같은 이유로 build-logic 을 포함하지 않고 값만 맞춘다.
                 url = projectUrl
-                inceptionYear = "2024"
+                inceptionYear = "2026"
                 licenses {
                     license {
                         name = "Apache License 2.0"
@@ -208,6 +209,27 @@ publishing {
                 }
             }
         }
+    }
+}
+
+// Maven Central 업로드 묶음을 만드는 파일 저장소와 서명. 라이브러리 모듈(build-logic/src/main/kotlin/restdocs.published.gradle.kts)과
+// 같은 폴더(저장소 루트의 build/staging-deploy)·같은 속성 이름을 쓴다. 한쪽을 바꾸면 다른 쪽도 바꾼다.
+publishing {
+    repositories {
+        maven {
+            name = "staging"
+            url = uri(layout.projectDirectory.dir("../build/staging-deploy"))
+        }
+    }
+}
+
+// 키가 있을 때만 서명한다 (CI 의 ORG_GRADLE_PROJECT_signingInMemoryKey). 없으면 로컬 빌드는 전과 같다.
+val signingKey = providers.gradleProperty("signingInMemoryKey")
+
+if (signingKey.isPresent) {
+    signing {
+        useInMemoryPgpKeys(signingKey.get(), providers.gradleProperty("signingInMemoryKeyPassword").orNull)
+        sign(publishing.publications)
     }
 }
 

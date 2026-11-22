@@ -198,3 +198,21 @@ tasks.matching { it.name in includedBuildTasks }
         dependsOn(gradle.includedBuild("gradle-plugin").task(":$name"))
         dependsOn(gradle.includedBuild("tooling").task(":$name"))
     }
+
+// Maven Central 업로드 묶음: 모든 배포 모듈(루트의 restdocs.published 모듈, tooling, gradle-plugin)을 build/staging-deploy 에
+// 배포한다. 서명 키(signingInMemoryKey)를 주면 서명까지 한다. 그다음 scripts/central-upload.sh 가 묶어 올린다 (release.yml).
+// 예전 실행의 파일이 남아 있으면 같이 묶이므로 버전을 바꿨다면 먼저 build/staging-deploy 를 지운다.
+val publishToStaging by tasks.registering {
+    group = PublishingPlugin.PUBLISH_TASK_GROUP
+    description = "Publishes all modules, including tooling and the Gradle plugin, to build/staging-deploy."
+    dependsOn(gradle.includedBuild("tooling").task(":publishAllPublicationsToStagingRepository"))
+    dependsOn(gradle.includedBuild("gradle-plugin").task(":publishAllPublicationsToStagingRepository"))
+}
+
+subprojects {
+    pluginManager.withPlugin("restdocs.published") {
+        val publishModule = tasks.named("publishAllPublicationsToStagingRepository")
+
+        publishToStaging.configure { dependsOn(publishModule) }
+    }
+}
