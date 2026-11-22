@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.21"
+kotlin = "2.4.21"
 # 배포 라이브러리가 지원하는 Kotlin 하한. 메타데이터(languageVersion·apiVersion)와 POM 의 kotlin-stdlib 버전이 된다
 kotlin-baseline = "2.2.21"
 spring-restdocs = "3.0.6"
@@ -44,7 +44,7 @@ spring-data-commons = "3.5.13"
 # 테스트 전용: HATEOAS(HAL) 모양 추출 확인 (core 는 컴파일 의존하지 않는다). 2.5.x = Spring 6 / Jackson 2
 spring-hateoas = "2.5.3"
 # compileOnly: @Serializable 클래스의 serial descriptor 를 읽는다. 앱에 kotlinx.serialization 이 있을 때만 로드한다
-kotlinx-serialization = "1.9.0"
+kotlinx-serialization = "1.13.0"
 # 테스트 전용: WebTestClient 의 BodySpec 구현이 로드할 때 필요하다 (Boot 사용자는 spring-boot-starter-test 로 받는다)
 hamcrest = "3.0"
 
