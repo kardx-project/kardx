@@ -126,7 +126,7 @@ val restTestClient: SourceSet by sourceSets.creating
 val restTestClientTest: SourceSet by sourceSets.creating
 restTestClient.useDirectory("src/main/restTestClient")
 restTestClientTest.useDirectory("src/test/restTestClient")
-val springFramework7 = "7.0.10"
+val springFramework7 = "7.1.0"
 val restDocs4 = "org.springframework.restdocs:spring-restdocs-core:${libs.versions.spring.restdocs.v4.get()}"
 
 // 본체 클래스와 그 의존성 위에 Spring 7 판을 얹는다 (같은 좌표는 높은 버전이 이긴다). 어댑터 본체는 공개 SPI
