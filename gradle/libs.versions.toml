@@ -28,7 +28,7 @@ detekt = "1.23.8"
 # detekt 1.23 이 빌드된 Kotlin. detekt 클래스패스의 Kotlin 을 이 버전으로 고정한다
 detekt-kotlin = "2.0.21"
 binary-compatibility-validator = "0.18.2"
-jakarta-servlet = "6.0.0"
+jakarta-servlet = "6.1.0"
 json-path = "2.9.0"
 # compileOnly: MockMvcTester(MvcTestResult) 진입점이 AssertJ 의 AssertProvider 를 상속한다
 assertj = "3.27.6"
