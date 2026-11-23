@@ -10,6 +10,7 @@ mkdocs does not:
 - links to other pages stay relative; links to another language, or to files
   outside docs/ (samples, README, ...), become absolute URLs
 - a blank line is inserted before a list that directly follows a paragraph
+- the hand-written table of contents and the "Document list" link are dropped (the site has both)
 
 Usage: python3 scripts/build-site.py   (then: mkdocs build -f site/mkdocs.yml)
 """
@@ -81,6 +82,11 @@ def convert(text: str, src_dir: Path, lang: str) -> str:
         lines = lines[1:]
         while lines and not lines[0].strip():
             lines = lines[1:]
+    # The site has its own navigation and table of contents: drop the GitHub-only ones
+    text_ = "\n".join(lines)
+    text_ = re.sub(r"<!-- toc -->.*?<!-- /toc -->\n*", "", text_, flags=re.S)
+    text_ = re.sub(r"^\[(Document list|문서 목록)\]\(README\.md\)\n+", "", text_, flags=re.M)
+    lines = text_.split("\n")
     out = []
     in_fence = False
     for line in lines:

@@ -80,6 +80,11 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.details
 
+extra_css:
+  - assets/extra.css
+extra_javascript:
+  - assets/extra.js
+
 extra:
   social:
     - icon: fontawesome/brands/github

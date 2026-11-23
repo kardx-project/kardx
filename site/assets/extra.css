@@ -1,0 +1,60 @@
+/* Korean text: Pretendard (falls back to the system Korean font) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+html[lang="ko"] {
+  --md-text-font: "Pretendard Variable";
+}
+
+/* Wider reading area: tables and code have more room */
+.md-grid {
+  max-width: 1400px;
+}
+
+/* Line breaks: keep Korean words whole, break only between words.
+   Long tokens (URLs, paths) may still break so nothing overflows. */
+.md-typeset {
+  overflow-wrap: break-word;
+}
+html[lang="ko"] .md-typeset {
+  word-break: keep-all;
+  line-height: 1.75;
+}
+
+/* Inline code: never split an identifier in the middle.
+   extra.js marks short code spans .kx-nowrap; long ones may wrap at spaces only. */
+.md-typeset :not(pre) > code {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+.md-typeset code.kx-nowrap {
+  white-space: nowrap;
+}
+
+/* Tables: readable size, top-aligned cells, first column (names) never squeezed */
+.md-typeset table:not([class]) {
+  font-size: 0.72rem;
+}
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td {
+  vertical-align: top;
+  padding: 0.75em 1em;
+}
+.md-typeset table:not([class]) td:first-child {
+  width: 1%;          /* as narrow as its content allows */
+  min-width: 8rem;
+  max-width: 22rem;
+}
+.md-typeset table:not([class]) th {
+  white-space: nowrap;
+}
+.md-typeset__table {
+  width: 100%;
+}
+.md-typeset__table table:not([class]) {
+  display: table;
+  width: 100%;
+}
+.md-typeset__scrollwrap {
+  overflow-x: auto;
+}
