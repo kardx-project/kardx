@@ -82,7 +82,7 @@ jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.
 # Gradle 플러그인·tooling: openapi3.yaml 후처리
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 groovy-json = { module = "org.apache.groovy:groovy-json", version.ref = "groovy" }
-slf4j-nop = { module = "org.slf4j:slf4j-nop", version = "2.0.17" }
+slf4j-nop = { module = "org.slf4j:slf4j-nop", version = "2.0.20" }
 
 # Maven 플러그인 (maven-plugin)
 maven-plugin-api = { module = "org.apache.maven:maven-plugin-api", version.ref = "maven" }
