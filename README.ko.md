@@ -94,7 +94,7 @@ mockMvc
 |---|---|---|
 | JDK | 17 이상 | 17 (라이브러리·플러그인 바이트코드 17) |
 | Kotlin | 2.2 이상 | 2.4.21 로 컴파일, 메타데이터·stdlib 는 2.2.21 |
-| Gradle | 7.6 이상 (미만이면 플러그인이 바로 실패). Kotlin DSL 예시는 플러그인 설정에 `=` 를 쓰는데 이는 Gradle 8.2 부터 됨. 7.6~8.1 에서는 `.set(...)` 이나 Groovy DSL. 쓰는 Spring Boot 버전이 더 요구할 수 있음 (Spring Boot 4: 8.14 이상) | 래퍼 8.14.6. 플러그인 핵심 시나리오와 스펙 내보내기·업로드(`apiDocsExport`, `apiDocsUpload`)를 7.6.4·9.0.0·9.8.2 에서도 돌림 |
+| Gradle | 7.6 이상 (미만이면 플러그인이 바로 실패). Kotlin DSL 예시는 플러그인 설정에 `=` 를 쓰는데 이는 Gradle 8.2 부터 됨. 7.6~8.1 에서는 `.set(...)` 이나 Groovy DSL. 쓰는 Spring Boot 버전이 더 요구할 수 있음 (Spring Boot 4: 8.14 이상) | 래퍼 8.14.8. 플러그인 핵심 시나리오와 스펙 내보내기·업로드(`apiDocsExport`, `apiDocsUpload`)를 7.6.4·9.0.0·9.8.2 에서도 돌림 |
 | Maven | Maven 플러그인 `io.github.kardx-project:kardx-maven-plugin` 으로 ([Maven 과 명령줄](docs/ko/maven.md)) | 3.9.11 (`samples/maven-boot-4` 의 Maven Wrapper) |
 | Asciidoctor Gradle 플러그인 (`org.asciidoctor.jvm.convert`) | 4.0.x | 4.0.5 |
 | epages (`com.epages.restdocs-api-spec`) | Boot 3 → 0.19.x, Boot 4 → 0.20.x (어긋나면 플러그인이 경고) | 0.19.4, 0.20.2 |

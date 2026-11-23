@@ -94,7 +94,7 @@ Features that are off by default or that you use only when needed.
 |---|---|---|
 | JDK | 17 or later | 17 (library and plugin bytecode 17) |
 | Kotlin | 2.2 or later | Compiled with 2.4.21; metadata and stdlib 2.2.21 |
-| Gradle | 7.6 or later (the plugin fails right away below that). The Kotlin DSL examples use `=` on plugin settings, which needs Gradle 8.2; on 7.6 to 8.1 use `.set(...)` or the Groovy DSL. Your Spring Boot version may need more (Spring Boot 4: 8.14 or later) | Wrapper 8.14.6. The plugin's core scenarios and spec export and upload (`apiDocsExport`, `apiDocsUpload`) also run on 7.6.4, 9.0.0 and 9.8.2 |
+| Gradle | 7.6 or later (the plugin fails right away below that). The Kotlin DSL examples use `=` on plugin settings, which needs Gradle 8.2; on 7.6 to 8.1 use `.set(...)` or the Groovy DSL. Your Spring Boot version may need more (Spring Boot 4: 8.14 or later) | Wrapper 8.14.8. The plugin's core scenarios and spec export and upload (`apiDocsExport`, `apiDocsUpload`) also run on 7.6.4, 9.0.0 and 9.8.2 |
 | Maven | With the Maven plugin `io.github.kardx-project:kardx-maven-plugin` ([Maven and the command line](docs/maven.md)) | 3.9.11 (Maven Wrapper of `samples/maven-boot-4`) |
 | Asciidoctor Gradle plugin (`org.asciidoctor.jvm.convert`) | 4.0.x | 4.0.5 |
 | epages (`com.epages.restdocs-api-spec`) | Boot 3 → 0.19.x, Boot 4 → 0.20.x (the plugin warns on a mismatch) | 0.19.4, 0.20.2 |
