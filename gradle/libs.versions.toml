@@ -11,7 +11,7 @@ epages = "0.19.4"
 epages-v4 = "0.20.2"
 junit = "5.14.4"
 jakarta-validation = "3.0.2"
-jackson = "2.21.4"
+jackson = "2.23.0"
 # tooling 의 epages 생성기 호출(compileOnly). epages 0.20.x 가 쓰는 Jackson 3
 jackson3 = "3.0.2"
 kotest = "6.2.7"
