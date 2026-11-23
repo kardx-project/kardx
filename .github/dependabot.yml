@@ -7,7 +7,6 @@ updates:
     open-pull-requests-limit: 10
     groups:
       kotlin: { patterns: ["org.jetbrains.kotlin*", "org.jetbrains.dokka*"] }
-      spring: { patterns: ["org.springframework*", "org.springdoc*"] }
       test: { patterns: ["io.kotest*", "org.junit*", "com.jayway.jsonpath*"] }
       lint: { patterns: ["*ktlint*", "io.gitlab.arturbosch.detekt*"] }
     ignore:
@@ -15,6 +14,10 @@ updates:
       # Dependabot 이 어느 줄인지 구분하지 못한다 (예: spring-framework 6.2 와 7.0, epages 0.19 와 0.20)
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # Spring·springdoc 은 Boot 3 줄(6.2 / 2.8)과 Boot 4 줄(7.x / 3.x)을 같은 artifact 로 같이 쓴다.
+      # Dependabot 이 두 줄을 섞어 6.2 → 7.1, springdoc 3.2 → 2.10 같은 PR 을 만들므로 손으로 올린다
+      - dependency-name: "org.springframework*"
+      - dependency-name: "org.springdoc*"
       # 지원 하한으로 일부러 고정한 버전. 마이너도 올리지 않는다
       - dependency-name: "jakarta.validation:jakarta.validation-api" # Boot 3.5 = 3.0
         update-types: ["version-update:semver-minor"]
