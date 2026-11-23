@@ -6,6 +6,8 @@
 
 ## [Unreleased]
 
+## [0.1] - 2026-11-23
+
 첫 공개 버전(0.1)입니다. Spring Boot 3.5 (REST Docs 3.0) 와 4.0·4.1 (REST Docs 4.0) 을 같은 아티팩트로 지원합니다.
 
 라이브러리가 생성 문서에 넣는 문구의 기본 언어는 영어입니다. 개발 중 버전처럼 한국어 문구(`메인으로 돌아가기`, `API 목록`, `제약:` 등)를 쓰려면 `kardx { language = "ko" }` 를 정합니다. 이에 따라 `document.indexLinkText` 는 `String?` 이고 `null`(기본값)이면 언어의 기본 문구를 씁니다. 로그·경고·예외 메시지, Gradle 콘솔 출력, `apiDocsCheck` 보고서는 언어와 상관없이 영어입니다.
@@ -322,3 +324,6 @@
 - epages `openapi3 { outputDirectory }` 가 `build/resources/main/...` 을 가리키면 `apiDocs`·`bootJar` 가 Gradle 8 의 암묵적 의존성 검사(`':apiDocsIndex' uses this output of task ':openapi3'`)로 실패하던 문제. 이제 그 경우 스펙을 출력으로 선언하지 않고, 앱 리소스 안을 가리키면 `outputDirectory` 를 지우라고 한 번 경고한다 (플러그인이 이미 스펙을 `bootJar.path` 로 복사한다)
 - 플러그인이 비우는 디렉터리 설정이 이미 있는 파일을 가리키면 빈 디렉터리로 보고 그 파일을 지우던 문제(`aggregate { outputDirectory = file("docs/index.html") }` 등). 이제 `<설정> points to <경로>, which is a file; it must be a directory` 로 실패한다
 - `postmanCollection { enabled }` 를 고정값이 아니라 provider(Gradle 속성, 환경 변수)로 정하면 `apiDocs` 가 `postman` 을 실행하지 않던 문제. 이제 실행 그래프를 만들 때 값을 읽는다
+
+[Unreleased]: https://github.com/kardx-project/kardx/compare/v0.1...HEAD
+[0.1]: https://github.com/kardx-project/kardx/releases/tag/v0.1

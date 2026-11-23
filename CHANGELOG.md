@@ -6,6 +6,8 @@ This file records the notable changes to this project. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.1] - 2026-11-23
+
 The first public version (0.1). Spring Boot 3.5 (REST Docs 3.0) and 4.0/4.1 (REST Docs 4.0) are supported by the same artifacts.
 
 The default language of the text the library puts into generated documents is English. To use the Korean text of the development versions (`메인으로 돌아가기`, `API 목록`, `제약:` and so on), set `kardx { language = "ko" }`. Accordingly, `document.indexLinkText` is `String?`, and `null` (the default) uses the language's default text. Log, warning and exception messages, Gradle console output and the `apiDocsCheck` report are in English regardless of the language.
@@ -322,3 +324,6 @@ Behavior that differs from the development versions.
 - When epages `openapi3 { outputDirectory }` pointed at `build/resources/main/...`, `apiDocs` and `bootJar` failed Gradle 8's implicit dependency check (`':apiDocsIndex' uses this output of task ':openapi3'`). In that case the spec is no longer declared as an output, and when it points inside the app resources, a single warning tells you to remove `outputDirectory` (the plugin already copies the spec to `bootJar.path`)
 - When a directory setting that the plugin clears pointed at an existing file, it was treated as an empty directory and the file was deleted (`aggregate { outputDirectory = file("docs/index.html") }` and so on). It now fails with `<setting> points to <path>, which is a file; it must be a directory`
 - When `postmanCollection { enabled }` was set with a provider (Gradle property, environment variable) instead of a fixed value, `apiDocs` didn't run `postman`. The value is now read when the task graph is built
+
+[Unreleased]: https://github.com/kardx-project/kardx/compare/v0.1...HEAD
+[0.1]: https://github.com/kardx-project/kardx/releases/tag/v0.1
