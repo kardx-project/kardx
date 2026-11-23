@@ -13,7 +13,7 @@ junit = "5.14.4"
 jakarta-validation = "3.0.2"
 jackson = "2.21.4"
 # tooling 의 epages 생성기 호출(compileOnly). epages 0.20.x 가 쓰는 Jackson 3
-jackson3 = "3.0.2"
+jackson3 = "3.0.4"
 kotest = "6.2.7"
 # kotest5 모듈(kardx-kotest5)이 컴파일·테스트하는 Kotest 5.x 와 그 Spring 확장 (별도 좌표)
 kotest5 = "5.9.1"
