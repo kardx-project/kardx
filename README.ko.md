@@ -205,6 +205,7 @@ CI, 기준 비교, 스펙 내보내기, `clean` 에 어떤 명령을 쓰는지�
 | 표의 열·소제목·문서 틀 바꾸기, 직접 만든 스니펫 | [스니펫과 문서 모양 바꾸기](docs/ko/customizing-snippets.md) |
 | 기존 `document(...)` 테스트에서 옮기기 | [기존 Spring REST Docs 에서 옮기기](docs/ko/migration.md) |
 | 오류 해결 | [트러블슈팅](docs/ko/troubleshooting.md) |
+| AI 도우미(Claude Code·Copilot·Cursor)에게 테스트 맡기기: `llms.txt` 와 바로 쓰는 스킬 | [AI 도우미](docs/ko/ai.md) |
 | 모듈 구성과 넣을 아티팩트 | [모듈 구성](docs/ko/architecture.md) |
 
 전체 목록은 [docs/ko/README.md](docs/ko/README.md) 에 있습니다.

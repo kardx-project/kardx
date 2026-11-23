@@ -110,7 +110,87 @@ def main():
     assets = ROOT / "site" / "assets"
     if assets.exists():
         shutil.copytree(assets, OUT / "en" / "assets")
+    write_llms_txt(OUT / "en")
     print(f"wrote {OUT.relative_to(ROOT)}")
+
+
+# --- llms.txt (https://llmstxt.org) -------------------------------------------------------------
+
+RAW = "https://raw.githubusercontent.com/kardx-project/kardx/main/"
+LLMS_HEADER = """# kardx
+
+> kardx (Kotlin Auto Rest Docs eXtension) is a Kotlin DSL for Spring REST Docs. Documentation tests
+> (MockMvc, WebTestClient, RestTestClient; JUnit or Kotest) produce REST Docs snippets and HTML, an OpenAPI 3 spec
+> (Swagger UI, Redoc/Scalar viewer), AsyncAPI for WebSocket/STOMP/SSE, Postman and IntelliJ HTTP Client files and
+> WireMock stubs. Fields are extracted from DTO types and verified against real responses.
+
+- Coordinates: group `io.github.kardx-project`, artifacts `kardx`, `kardx-annotations`, `kardx-kotest`,
+  `kardx-kotest5`, `kardx-boot`, `kardx-bom`, `kardx-tooling`, `kardx-maven-plugin`; Gradle plugin id
+  `io.github.kardx-project` (also on Maven Central: add `mavenCentral()` to `pluginManagement`). Packages `io.github.kardx.*`.
+- Supports Spring Boot 3.5 (REST Docs 3, epages 0.19.x) and 4.x (REST Docs 4, epages 0.20.x), JDK 17+, Kotlin 2.2+.
+- The Gradle plugin adds the library dependencies itself; don't declare `kardx`, `spring-restdocs-*` or
+  `restdocs-api-spec-*` by hand. Run `./gradlew apiDocs`; outputs go to `build/api-docs/`.
+- Documentation tests are written in Kotlin; app code and DTOs may be Java.
+"""
+LLMS_EXTRA = """
+## For AI assistants
+
+- [Claude Code skill]({raw}skills/kardx/SKILL.md): condensed, verified guide for writing kardx documentation tests
+- [Full documentation in one file]({site}llms-full.txt): every English page above, concatenated (about 170k tokens)
+- [Contributor guide for agents]({raw}AGENTS.md): working on the kardx repository itself
+
+## Optional
+
+- [Korean documentation]({site}ko/): the same pages in Korean (`docs/ko/*.md`)
+- [Changelog]({raw}CHANGELOG.md)
+- [Samples]({tree}samples): Boot 3, Boot 4, WebFlux and Maven sample projects
+"""
+
+
+def nav_pages():
+    """Pages in the order of the site navigation (mkdocs.yml nav)."""
+    nav = (ROOT / "site" / "mkdocs.yml").read_text(encoding="utf-8").split("\nnav:", 1)[1]
+    return re.findall(r"-\s+([\w-]+\.md)\s*$", nav, re.M)
+
+
+def page_summaries():
+    """'Contents' column of the document table in docs/README.md, keyed by file name."""
+    summaries = {}
+    for line in (DOCS / "README.md").read_text(encoding="utf-8").splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) >= 3:
+            m = re.search(r"\]\(([\w-]+\.md)[^)]*\)", cells[1])
+            if m:
+                summaries.setdefault(m.group(1), cells[2])
+    return summaries
+
+
+def title_of(path: Path) -> str:
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("# "):
+            return line[2:].strip()
+    return path.stem
+
+
+def write_llms_txt(dest: Path):
+    summaries = page_summaries()
+    pages = [p for p in nav_pages() if p != "index.md"]
+    lines = [LLMS_HEADER, "## Docs", ""]
+    for page in pages:
+        src = DOCS / page
+        summary = summaries.get(page, "")
+        lines.append(f"- [{title_of(src)}]({RAW}docs/{page})" + (f": {summary}" if summary else ""))
+    lines.append(LLMS_EXTRA.format(raw=RAW, site=SITE_URL, tree=REPO_TREE))
+    (dest / "llms.txt").write_text("\n".join(lines), encoding="utf-8")
+
+    full = [LLMS_HEADER]
+    for page in ["README.md"] + pages:
+        text = (DOCS / page).read_text(encoding="utf-8")
+        lines_ = text.split("\n")
+        if lines_ and LANG_SWITCH.match(lines_[0]):
+            text = "\n".join(lines_[1:]).lstrip("\n")
+        full.append(f"\n\n<!-- source: {RAW}docs/{page} -->\n\n{text}")
+    (dest / "llms-full.txt").write_text("".join(full), encoding="utf-8")
 
 
 if __name__ == "__main__":

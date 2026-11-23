@@ -200,6 +200,7 @@ The guides below are also published as a website with search and an English/Kore
 | Change table columns, subheadings and the document layout; custom snippets | [Customizing snippets and document layout](docs/customizing-snippets.md) |
 | Migrate existing `document(...)` tests | [Migrating from Spring REST Docs](docs/migration.md) |
 | Fix errors | [Troubleshooting](docs/troubleshooting.md) |
+| Let an AI assistant (Claude Code, Copilot, Cursor) write the tests: `llms.txt` and a ready-made skill | [AI assistants](docs/ai.md) |
 | Module layout and which artifacts to add | [Modules](docs/architecture.md) |
 
 The full list is in [docs/README.md](docs/README.md).

@@ -105,6 +105,7 @@ nav:
       - migration.md
   - Reference:
       - troubleshooting.md
+      - ai.md
       - architecture.md
       - development.md
 

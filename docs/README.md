@@ -43,6 +43,7 @@ You can change `/docs` and the file locations with the [Gradle plugin](build.md#
 | Change how documents look | [Customizing snippets and document layout](customizing-snippets.md) | Choosing which snippets to include, templates and variables, custom snippets, `DocumentGenerator`, use in hand-written AsciiDoc, request and response preprocessing, Enum table format |
 | Migrate existing REST Docs tests | [Migrating from Spring REST Docs](migration.md) | Dependencies, test base class, `document()` mapping table, mixing with existing snippets and index, epages `resource()`, reusing Swagger descriptions |
 | Fix errors | [Troubleshooting](troubleshooting.md) | Common errors and fixes |
+| Let an AI assistant write the tests | [AI assistants](ai.md) | `llms.txt`, `llms-full.txt`, the Claude Code skill, rules files for Copilot, Cursor and Codex |
 | Work on this repository | [Development](development.md) | Repository layout, the order of checks after a change, build, verification scripts |
 | See the module layout | [Modules](architecture.md) | Role and contents of each module, which artifacts to add, how documents are produced |
 

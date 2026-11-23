@@ -43,6 +43,7 @@ kardx 사용 설명서입니다. 처음이라면 [시작하기](getting-started.
 | 문서 모양 바꾸기 | [스니펫과 문서 모양 바꾸기](customizing-snippets.md) | 넣을 스니펫 고르기, 템플릿과 변수, 직접 만든 스니펫, `DocumentGenerator`, 직접 쓴 AsciiDoc 에서 쓰기, 요청·응답 가공, Enum 표 형식 |
 | 기존 REST Docs 테스트 옮기기 | [기존 Spring REST Docs 에서 옮기기](migration.md) | 의존성, 테스트 기본 클래스, `document()` 대응표, 기존 스니펫·index 와 섞어 쓰기, epages `resource()`, Swagger 설명 재사용 |
 | 오류 해결 | [트러블슈팅](troubleshooting.md) | 자주 나는 오류와 해결 |
+| AI 도우미에게 테스트 맡기기 | [AI 도우미](ai.md) | `llms.txt`, `llms-full.txt`, Claude Code 스킬, Copilot·Cursor·Codex 규칙 파일 |
 | 이 저장소 고치기 | [개발](development.md) | 저장소 구조, 고친 뒤 확인 순서, 빌드, 검증 스크립트 |
 | 모듈 구성 보기 | [모듈 구성](architecture.md) | 모듈별 역할과 내용, 넣을 아티팩트, 문서가 만들어지는 흐름 |
 
