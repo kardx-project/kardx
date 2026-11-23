@@ -70,7 +70,9 @@ If the changes are intended, run ./gradlew apiDocsBaseline to update the baselin
 
 다음 세 가지는 깨는 변경이 아니라 경고로 알립니다: 응답 `oneOf` 에 변형 추가(클라이언트가 모르는 모양을 받을 수 있다), `default` 값 변경, 경로 변수 이름 변경(`Path variables renamed: /users/{id} → /users/{userId}`. 클라이언트가 부르는 URL 은 같으므로 엔드포인트 삭제·추가로 보지 않고 operation 을 그대로 비교한다). 요청 `oneOf` 에 변형 추가는 둘 다 아닙니다. `failOn = "breaking"` 이면 출력만 하고 실패하지 않으며, `any` 면 어차피 모든 차이가 실패입니다.
 
-스키마 이름만 바뀐 것, 필드·엔드포인트 추가, 응답 enum 값 삭제, 제약 완화, 설명 변경은 깨는 변경이 아닙니다. 자기 자신을 참조하는 스키마(`Category.parent`)는 한 번만 따라갑니다. `anyOf`·`allOf`·`additionalProperties`, 보안 요구사항의 scope 변경, 응답 쪽 제약, 응답 헤더 추가, `components.securitySchemes` 의 내용(flow URL, scope 목록)은 판정하지 않습니다(구조 차이에는 나옵니다). 더 넓은 규칙이 필요하면 [oasdiff](https://github.com/oasdiff/oasdiff) 같은 전용 도구를 CI 에서 함께 돌리세요(`oasdiff breaking docs/openapi/openapi3.yaml build/api-docs/openapi3.yaml`). 이 플러그인의 비교는 외부 실행 파일 없이 동작하는 것을 우선했습니다.
+스키마 이름만 바뀐 것, 필드·엔드포인트 추가, 응답 enum 값 삭제, 제약 완화, 설명 변경은 깨는 변경이 아닙니다. 자기 자신을 참조하는 스키마(`Category.parent`)는 한 번만 따라갑니다. `anyOf`·`allOf`·`additionalProperties`, 보안 요구사항의 scope 변경, 응답 쪽 제약, 응답 헤더 추가, `components.securitySchemes` 의 내용(flow URL, scope 목록)은 판정하지 않습니다(구조 차이에는 나옵니다).
+
+더 넓은 규칙이 필요하면 [oasdiff](https://github.com/oasdiff/oasdiff) 같은 전용 도구를 CI 에서 함께 돌리세요(`oasdiff breaking docs/openapi/openapi3.yaml build/api-docs/openapi3.yaml`). 이 플러그인의 비교는 외부 실행 파일 없이 동작하는 것을 우선했습니다.
 
 - 기준 파일 형식(YAML·JSON)은 확장자로 읽습니다. `openapi3 { format = "json" }` 이면 기준 파일도 `.json` 으로 둡니다.
 - 기준 파일이 없으면 `failOn = "none"` 이 아닌 한 실패하고, `./gradlew apiDocsBaseline` 으로 기준을 만들라고 알려 줍니다. 기준이 없으면 어떤 변경도 판정할 수 없어, 그대로 두면 `breaking` 검사가 기준을 만들 때까지 계속 통과하기 때문입니다. 예전처럼 `failOn = "any"` 일 때만 실패하고 `breaking` 은 경고만 하려면 `openApiCheck { requireBaseline = false }` 로 둡니다.

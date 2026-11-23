@@ -230,9 +230,21 @@ The BOM contains only `annotations`, `core`, `boot`, `kotest`, and `kotest5`. Th
 | `compileOnly` | `spring-restdocs-mockmvc` and `jakarta.servlet-api` (MockMvc entry points), `spring-restdocs-webtestclient` and `spring-webflux` (WebTestClient entry points), `spring-web`, `spring-websocket`, `spring-context`, `spring-core`, `junit-jupiter-api`, `jakarta.validation-api`, epages `restdocs-api-spec`, `assertj-core` (`MockMvcTester` entry point) |
 | Looked up by class name only | Jackson 2 (`com.fasterxml.jackson.databind.ObjectMapper`) and Jackson 3 (`tools.jackson.databind.json.JsonMapper`), description annotations set in yml (Swagger `@Schema` and so on). No compile dependency |
 
-Among the `compileOnly` dependencies, epages and Jakarta Validation are optional features, used only when their classes are present (`loadClassOrNull` in `internal/reflect/ClassLoading.kt`). epages classes are referenced only from a separate object in `internal/openapi/OpenApiSupport.kt`, so they aren't loaded without epages. Whether epages is present is decided by its core class (`ResourceDocumentation`), so either `restdocs-api-spec-mockmvc` or `-webtestclient` works. The WebTestClient, MockMvc, and `MockMvcTester` entry points also load their classes only when you call functions in those files, so everything else works in projects without those dependencies. Message documentation (`MessageDocumentation`) builds the configuration map directly with spring-restdocs-core's configurer (`RestDocumentationConfigurer`) and works without MockMvc (`internal/websocket/DocumentationConfigurationMap.kt`). This promise is enforced by the source set `noServletTest` (`core/src/test/noServlet`, task `:core:noServletTest`, part of `check`): on a classpath with only the published dependencies (`project(":core")`) and the WebFlux and STOMP side (no `spring-restdocs-mockmvc`, `spring-webmvc`, or servlet API), it loads and initializes every public class outside `mockmvc`, `sse`, and `internal`, and actually runs the JUnit extension plus WebTestClient and message documentation.
+Among the `compileOnly` dependencies, epages and Jakarta Validation are optional features, used only when their classes are present (`loadClassOrNull` in `internal/reflect/ClassLoading.kt`).
 
-**RestTestClient source set.** `RestTestClient` exists only in Spring Framework 7, while the main source set compiles against Spring 6 and REST Docs 3. So the RestTestClient entry points (package `io.github.kardx.resttestclient`, 6 files in `core/src/main/restTestClient`, one of them Java) are a separate source set `restTestClient`, compiled against Spring Framework 7 and REST Docs 4 (`compileOnly`), and packed into the same jar and sources jar. The classes are loaded only when a user calls them, so Boot 3 projects never touch them. They convert the `ExchangeResult` themselves with `RestDocumentationGenerator` from `spring-restdocs-core`, so the `spring-restdocs-resttestclient` module (REST Docs 4.1) isn't needed. The source set is deliberately not a friend of the main source set: it uses only the public client adapter SPI (`io.github.kardx.client.ClientDocumentation`, see [Client adapter SPI](#client-adapter-spi)), so its compilation checks that the SPI is enough for a real adapter. Only its tests (`restTestClientTest`) see core's `internal` declarations. Tests live in `core/src/test/restTestClient` and run with `:core:restTestClientTest` (part of `check`); `apiValidation` dumps the source set's public API into `core/api/core.api` too.
+- epages classes are referenced only from a separate object in `internal/openapi/OpenApiSupport.kt`, so they aren't loaded without epages. Whether epages is present is decided by its core class (`ResourceDocumentation`), so either `restdocs-api-spec-mockmvc` or `-webtestclient` works.
+- The WebTestClient, MockMvc, and `MockMvcTester` entry points also load their classes only when you call functions in those files, so everything else works in projects without those dependencies.
+- Message documentation (`MessageDocumentation`) builds the configuration map directly with spring-restdocs-core's configurer (`RestDocumentationConfigurer`) and works without MockMvc (`internal/websocket/DocumentationConfigurationMap.kt`).
+
+This promise is enforced by the source set `noServletTest` (`core/src/test/noServlet`, task `:core:noServletTest`, part of `check`). On a classpath with only the published dependencies (`project(":core")`) and the WebFlux and STOMP side (no `spring-restdocs-mockmvc`, `spring-webmvc`, or servlet API), it loads and initializes every public class outside `mockmvc`, `sse`, and `internal`, and actually runs the JUnit extension plus WebTestClient and message documentation.
+
+**RestTestClient source set.** `RestTestClient` exists only in Spring Framework 7, while the main source set compiles against Spring 6 and REST Docs 3. So the RestTestClient entry points (package `io.github.kardx.resttestclient`, 6 files in `core/src/main/restTestClient`, one of them Java) are a separate source set `restTestClient`, compiled against Spring Framework 7 and REST Docs 4 (`compileOnly`), and packed into the same jar and sources jar.
+
+The classes are loaded only when a user calls them, so Boot 3 projects never touch them. They convert the `ExchangeResult` themselves with `RestDocumentationGenerator` from `spring-restdocs-core`, so the `spring-restdocs-resttestclient` module (REST Docs 4.1) isn't needed.
+
+The source set is deliberately not a friend of the main source set: it uses only the public client adapter SPI (`io.github.kardx.client.ClientDocumentation`, see [Client adapter SPI](#client-adapter-spi)), so its compilation checks that the SPI is enough for a real adapter. Only its tests (`restTestClientTest`) see core's `internal` declarations.
+
+Tests live in `core/src/test/restTestClient` and run with `:core:restTestClientTest` (part of `check`); `apiValidation` dumps the source set's public API into `core/api/core.api` too.
 
 **Package principles.** Top-level packages (`io.github.kardx.<name>`) hold only what users import; implementations go in `io.github.kardx.internal.*`. Declarations under `internal` are Kotlin `internal`, and only the `@PublishedApi` declarations called by public inline functions (`serializeJson`, `deserializeJson`, `TypeCapture` in `internal.jackson`) appear public. They are ABI that ends up in user binaries, so they aren't excluded from the API dump (`ignoredPackages` is not used). There are no cycles in the dependencies between packages. `python3 scripts/check-package-cycles.py` checks this, and the root task `checkPackageCycles` (part of `check`) runs it, so `./gradlew build` fails on a cycle.
 
@@ -272,17 +284,38 @@ Callbacks in the settings and extensions are `fun interface`s (`DescriptionResol
 | `introspection` | Type analysis and field extraction (properties, fields of an `errorResponse` example object (`ExampleFields`), Jackson naming rules, sealed, Spring Data, ProblemDetail, Bean Validation constraints, type and constraint schema fragments). Type handling is split by job: unwrapping `Optional`, value classes and `@JsonValue` (`Unwrapped.kt`), generic type parameter bindings (`TypeBindings.kt`), Java `Type` → `KType` (`JavaTypes.kt`) |
 | `schema` | Building JSON Schema from field lists (AsyncAPI payloads, multipart parts) |
 | `diagnostics` | Wrapping validation failures (missing or extra, field type mismatch) into messages with path lists, DSL suggestions, and cause hints |
-| `openapi` | epages resource snippets, relaxed parameter sections (`RelaxedParameters`), security schemes (including `bearerAuth()` and `basicAuth()` declared without headers), global headers, schema name sources, `openapi-extras.json`, operationId candidates (recording the handler that handled the request, names per rule), reading handler parameter types (`HandlerParameters`) and `@Deprecated` (`HandlerDeprecation`), the warning for undocumented path variables (`UndocumentedPathVariables`) |
+| `openapi` | epages resource snippets and everything that feeds them: security schemes, global headers, schema names, operationIds, handler information (details below the table) |
 | `asyncapi` | Writing and reading AsyncAPI records (`*.asyncapi.json`), message schemas, YAML writing, viewer (comments are stripped from the inlined CSS and JS: `WebComments`, `CommentScanner`) |
 | `websocket` | Turning messages into REST Docs requests, message snippets, recording WebSocket sessions, payload text and the raw-text STOMP converter used by `StompTestClient` (`PayloadText`, `RawTextMessageConverter`, `StompSubscriptionCancel`), building the REST Docs configuration map without MockMvc (`DocumentationConfigurationMap`) |
 | `sse` | SSE body parsing, the event table and event `data` field snippets, and AsyncAPI records |
-| `documentation` | Running `andDocument`: block → spec → snippet list, declared error responses (`ErrorResponsesSnippet`, example check `ErrorExampleCheck`, `ErrorResponseExamples`, dropping the received status `ReceivedErrorResponse`), file body tables (`FileBodySnippet`) and plain `[source]` blocks for binary bodies (`BinaryBodyBlocks`), filling parameter types and deprecation not set in the block from the handler (`HandlerDefaults`), preprocessing, api-summary and WireMock snippets, stream freezing (`StreamSnapshot`), list preview tables |
+| `documentation` | Running `andDocument`: block → spec → snippet list, plus the snippets and checks around it (details below the table) |
 | `asciidoc` | Choosing snippet files (`SnippetFileListExtractor`), writing the Enum code document. Writing per-class documents (`AsciiDocumentWriter`) is in `lifecycle` |
-| `i18n` | Per-language catalogue of the texts put into generated documents and specs, plus the language mismatch warning. `DocsText` (index heading and links, schema description prefixes, automatic descriptions for Spring Data, `ProblemDetail` and sealed types, AsyncAPI channel notes, file body table labels), `LocalizedText` (picks the language when a long-cached description is written), `ViewerText` (AsyncAPI viewer UI texts; only the chosen language goes into the page as JSON), `PluginLanguageWarning` (one WARN per JVM on the `io.github.kardx.config` logger when the documentation language differs from the language the Gradle plugin passes to the test JVM; no warning without the plugin). The Korean texts equal the output from before the language setting. Log and exception messages are not kept here; they are written in English |
+| `i18n` | Per-language catalogue of the texts put into generated documents and specs, plus the language mismatch warning (details below the table) |
 | `sourcedocs` | Reading the KDoc/Javadoc index that the Gradle plugin's `apiDocsSourceDocs` writes (`SourceDocs`, `SourceDocsIndex`), the last source of descriptions |
 | `coverage` | The endpoint inventory for documentation coverage: the endpoints the application context maps (`EndpointInventory`, `MappedEndpoint`, `MappedEndpoints`), written under `.kardx/endpoints/` for `apiDocsCoverage` |
 | `provenance` | Where an extracted field came from (`FieldOrigin`, `FieldSource`), carried by the field so that the default schema name survives list edits. Depends on no other package of this repository, so `dsl` and `internal.introspection` don't depend on each other |
 | `spring` | Reading settings and the ObjectMapper from the Spring application context and `Environment`, warning about unknown `kardx.*` keys (`UnknownPropertyWarnings`, key matching in `PropertyKeys`) |
+
+Details of the larger internal packages:
+
+**`openapi`**: epages resource snippets, relaxed parameter sections (`RelaxedParameters`), security schemes (including `bearerAuth()` and `basicAuth()` declared without headers), global headers, schema name sources, `openapi-extras.json`, operationId candidates (recording the handler that handled the request, names per rule), reading handler parameter types (`HandlerParameters`) and `@Deprecated` (`HandlerDeprecation`), the warning for undocumented path variables (`UndocumentedPathVariables`).
+
+**`documentation`**:
+
+- running `andDocument`: block → spec → snippet list
+- declared error responses (`ErrorResponsesSnippet`, example check `ErrorExampleCheck`, `ErrorResponseExamples`, dropping the received status `ReceivedErrorResponse`)
+- file body tables (`FileBodySnippet`) and plain `[source]` blocks for binary bodies (`BinaryBodyBlocks`)
+- filling parameter types and deprecation not set in the block from the handler (`HandlerDefaults`)
+- preprocessing, api-summary and WireMock snippets, stream freezing (`StreamSnapshot`), list preview tables
+
+**`i18n`**:
+
+- `DocsText`: index heading and links, schema description prefixes, automatic descriptions for Spring Data, `ProblemDetail` and sealed types, AsyncAPI channel notes, file body table labels.
+- `LocalizedText`: picks the language when a long-cached description is written.
+- `ViewerText`: AsyncAPI viewer UI texts; only the chosen language goes into the page as JSON.
+- `PluginLanguageWarning`: one WARN per JVM on the `io.github.kardx.config` logger when the documentation language differs from the language the Gradle plugin passes to the test JVM; no warning without the plugin.
+
+The Korean texts equal the output from before the language setting. Log and exception messages are not kept here; they are written in English.
 
 The only implementations left as Kotlin `internal` in public packages are those that call and are called by public types; splitting them out would create package cycles: `ExternalSettings` (yml → `RestDocsSettings`) and `DescriptionResolvers` (the built-in description steps) in `config`, `AsyncApiDocumentBuilder` (reads `AsyncApiInfo`), `AsyncApiSecuritySchemes` and the CLI in `asyncapi`, the index CLI in `asciidoc`, and in `dsl`, the `ParameterSection` and `DocsFieldType` conversion functions and the descriptor attribute keys (`DescriptorAttributes.kt`, `internal` constants next to the public constant `CONSTRAINTS_ATTRIBUTE`; a string contract with the Gradle plugin).
 
@@ -524,7 +557,19 @@ Following the convention of Gradle plugins, public types are split into the plug
 | `gradle.dsl` | The `kardx { }` extension and nested setting types | `KardxExtension` (`Index`, `AsyncApi`, `BootJar`, `OpenApiCheck`, `OpenApiViewer`, `PostmanCollection`, `Aggregate`, `WireMock`, `Export`, `Upload`, `Coverage`, `OpenApiSecurity`, `OAuth2`, `HttpClient`, `SourceDocs`, `ApiVersioning`) |
 | `gradle.tasks` | Tasks users can reference by type | `OpenApiCheckTask` (`apiDocsCheck`), `ApiDocsAggregateTask` (`apiDocsAggregate`), `ApiSpecExportTask` (`apiDocsExport`, `apiDocsPublicationSpecs`), `ApiSpecUploadTask` (`apiDocsUpload`), `ApiDocsCoverageTask` (`apiDocsCoverage`), `HttpClientExportTask` (`apiDocsHttpClient`), `SourceDocsTask` (`apiDocsSourceDocs`) |
 | `gradle.internal` | Plugin id, extension name, task group and names, path constants; the tooling log on the Gradle logger | `PluginConstants`, `GradleToolLog` |
-| `gradle.internal.wiring` | Task registration and hooking into other plugins | `ExtensionDefaults`, `GradleVersionCheck` (minimum Gradle 7.6), `TestTaskSetup`, `LibraryDependencies`, `DependencyMatch`, `WebStack`, `KotestVersionLine`, `EpagesVersion` (automatic dependencies and deciding MVC/WebFlux, Kotest line, and epages version), `WebFluxTestClasspath` (removing `spring-boot-starter-web` for WebFlux apps), `IndexTasks`, `OpenApiDefaults` (epages `openapi3 { }` defaults), `AppDocsProperties` (document locations for the startup log), `ProductionExposure` (production exposure warning), `AsciidoctorIntegration`, `OpenApiIntegration`, `EpagesOutputs`, `OpenApiCheckTasks`, `OpenApiViewerTasks`, `AsyncApiTasks`, `ApiDocsTasks`, `DocsLocations`, `SpringBootIntegration`, `GenerateOnRun`, `ApiDocsAggregation`, `WireMockStubs`, `ExportTasks` (`apiDocsExport`, `apiDocsUpload`), `MavenSpecPublication` (attaching specs to Maven publications), `CommonResponsesIndex` (the common error responses table at the end of the index), `DocsLanguageSetup` (`language` as a system property of the test and CLI tasks), `CoverageTasks`, `HttpClientTasks`, `SourceDocsTasks`, `SourceDocsArgument` (the source-docs file as a test input), `SpecSettingsInputs` (`openApiSecurity` and `apiVersioning` as `openapi3` inputs), `Reflection`, `PluginServices` |
+| `gradle.internal.wiring` | Task registration and hooking into other plugins | See the list below the table |
+
+Classes in `gradle.internal.wiring`:
+
+- `ExtensionDefaults`, `GradleVersionCheck` (minimum Gradle 7.6), `TestTaskSetup`
+- `LibraryDependencies`, `DependencyMatch`, `WebStack`, `KotestVersionLine`, `EpagesVersion`: automatic dependencies and deciding MVC/WebFlux, Kotest line, and epages version
+- `WebFluxTestClasspath`: removing `spring-boot-starter-web` for WebFlux apps
+- `IndexTasks`, `OpenApiDefaults` (epages `openapi3 { }` defaults), `AppDocsProperties` (document locations for the startup log), `ProductionExposure` (production exposure warning)
+- `AsciidoctorIntegration`, `OpenApiIntegration`, `EpagesOutputs`, `OpenApiCheckTasks`, `OpenApiViewerTasks`, `AsyncApiTasks`, `ApiDocsTasks`, `DocsLocations`, `SpringBootIntegration`, `GenerateOnRun`, `ApiDocsAggregation`, `WireMockStubs`
+- `ExportTasks` (`apiDocsExport`, `apiDocsUpload`), `MavenSpecPublication` (attaching specs to Maven publications)
+- `CommonResponsesIndex` (the common error responses table at the end of the index), `DocsLanguageSetup` (`language` as a system property of the test and CLI tasks)
+- `CoverageTasks`, `HttpClientTasks`, `SourceDocsTasks`, `SourceDocsArgument` (the source-docs file as a test input), `SpecSettingsInputs` (`openApiSecurity` and `apiVersioning` as `openapi3` inputs)
+- `Reflection`, `PluginServices`
 
 Layers (lower ones first, zero cycles):
 
@@ -537,7 +582,11 @@ L0  dsl   internal
 
 **Resources.** `io/github/kardx/gradle/internal/wiring/kardx-plugin.properties` gets the plugin version at build time. `SpringBootIntegration` reads it relative to its own package and adds `boot`, `annotations`, `core`, and the Kotest extension of the same version. The OpenAPI viewer templates are in `tooling`.
 
-**Tests.** JUnit 5 tests in `src/test/java`, in the same packages as their targets. `KardxPluginTest` and `AsyncApiTasksTest` create projects with `ProjectBuilder` and use fake epages and Spring Boot plugins from test resources (`META-INF/gradle-plugins/*.properties`). `ApiDocsFunctionalTest`, `AppDocsFunctionalTest`, `WebFluxTestClasspathFunctionalTest`, and `SpecExportFunctionalTest` run real builds with Gradle TestKit (multi-project aggregation and configuration cache reuse, baseline spec comparison, the document locations file, the classpath of WebFlux apps, spec export, Maven publications, and uploading to a local HTTP server). The test classes are added to `pluginUnderTestMetadata` so that TestKit fixtures can use the fake plugins too. `GradleCompatibilityFunctionalTest` runs the core scenarios and spec export and upload on other Gradle versions only when `-PgradleVersions=...` is given ([Development](development.md)). Run them with `./gradlew -p gradle-plugin test`. Behavior as a real user build is verified by the `build` of the two samples.
+**Tests.** JUnit 5 tests in `src/test/java`, in the same packages as their targets. `KardxPluginTest` and `AsyncApiTasksTest` create projects with `ProjectBuilder` and use fake epages and Spring Boot plugins from test resources (`META-INF/gradle-plugins/*.properties`).
+
+`ApiDocsFunctionalTest`, `AppDocsFunctionalTest`, `WebFluxTestClasspathFunctionalTest`, and `SpecExportFunctionalTest` run real builds with Gradle TestKit (multi-project aggregation and configuration cache reuse, baseline spec comparison, the document locations file, the classpath of WebFlux apps, spec export, Maven publications, and uploading to a local HTTP server). The test classes are added to `pluginUnderTestMetadata` so that TestKit fixtures can use the fake plugins too.
+
+`GradleCompatibilityFunctionalTest` runs the core scenarios and spec export and upload on other Gradle versions only when `-PgradleVersions=...` is given ([Development](development.md)). Run them with `./gradlew -p gradle-plugin test`. Behavior as a real user build is verified by the `build` of the two samples.
 
 **Things to watch when changing it**
 
@@ -564,7 +613,7 @@ L0  dsl   internal
 | `tooling.internal.pipeline` | The JSON configuration and the whole run in order (CLI and Maven) | `ApiDocsConfig`, `ConfigMaps` (reading the file and applying overrides), `ConfigValues`, `ApiDocsPipeline` (snippet copy → epages generators → post-processing → viewer → `.http` → Postman → coverage; `Hints` for build-tool-specific messages) |
 | `tooling.internal.steps` | The steps shared by the Gradle tasks, the CLI and Maven | `OpenApiSnippets`, `OpenApiPostProcessing`, `CoverageReportStep`, `OpenApiCheckStep`, `HttpClientStep`, `OpenApiViewerStep`, `SourceDocsStep` |
 | `tooling.internal.epages` | Calling the epages OpenAPI and Postman generators as a library (they are `compileOnly`; a clear message when missing) | `EpagesGenerators` |
-| `tooling.internal.openapi` | Post-processing epages results | `OpenApiResources`, `PrimaryResources` (fragments and representative fragments), `SecurityRequirementsAligner`, `OpenApiSchemaNames`, `SchemaUsage`, `SchemaRenaming`, `SchemaMerging` (schemas with the same name and different structures), `OpenApiGlobalHeaders`, `OpenApiBodySchemas`, `OpenApiRefinements`, `OpenApiSchemaHints`, `DescriptorHints`, `ParameterHints`, `BodyFieldHints` (merging descriptor attributes), `OpenApiRequestExtras`, `OpenApiFileBodies` (file body descriptions, `charset` dropped from binary media types), `OpenApiOperationTidy`, `OpenApiOperationIds`, `OpenApiExamples`, `OpenApiDocumentTidy`, `HttpStatusPhrases` (tidying operations and the document), `SensitiveHeaderExamples`, `SharedSchemaMarks`, `PostmanCollectionTidy`, `OpenApiErrorResponses` (adds declared, then common responses), `OpenApiDeclaredResponses`, `DeclaredResponseSchemas` (responses declared with `errorResponse` and their schema names), `OpenApiCommonResponses` (common error responses), `OpenApiOperationTexts` (summaries and descriptions), `OpenApiFieldDefaults` (Kotlin default values), `OpenApiPolymorphism`, `VariantSchemas`, `SchemaSlot` (sealed and `@JsonSubTypes` as `oneOf`), `OpenApiSecuritySettings`, `OpenApiOAuthSecurity` (OAuth2 and OpenID Connect), `ApiVersioningSettings`, `ApiVersions`, `OpenApiApiVersions`, `OpenApiVersionSplit` (API versioning) |
+| `tooling.internal.openapi` | Post-processing epages results | See the list below the table |
 | `tooling.internal.spec` | Reading and writing spec files and tree traversal. Shared by post-processing, comparison, and aggregation | `OpenApiSpecFiles`, `SwaggerYaml`, `SpecMaps` (map/list tree tools, OpenAPI key names, deep copy and traversal) |
 | `tooling.internal.check` | Comparison with the baseline spec | `OpenApiBreakingChanges`, `SchemaChanges`, `SpecNodes` (breaking change rules), `RequestConstraints`, `OneOfVariants`, `SecurityChanges` (breaking change rules), `OpenApiStructureDiff` (structural differences by position), `OpenApiChangeReport` (summary) |
 | `tooling.internal.aggregate` | Merging specs of multiple projects | `OpenApiMerger`, `SpecRewrites` (renaming references and security names), `ComponentNames`, `ProjectDirectories` (directory names per project) |
@@ -575,6 +624,26 @@ L0  dsl   internal
 | `tooling.internal.coverage` | Documentation coverage: reading the endpoint inventory and the documented operations, matching path templates, the report | `CoverageInputs`, `Endpoint`, `PathPatterns`, `CoverageReport` |
 | `tooling.internal.httpclient` | The IntelliJ HTTP Client file: one representative request per operation, read from the snippets | `RecordedRequest`, `HttpClientRequests`, `HttpClientFile`, `MaskedValues` |
 | `tooling.internal.sourcedocs` | A lightweight KDoc and Javadoc scanner without a compiler, and the JSON index the tests read | `SourceDocsScanner`, `SourceLexer`, `KotlinDeclarations`, `JavaDeclarations`, `DocCommentParser`, `SourceDocsIndex` and helpers |
+
+Classes in `tooling.internal.openapi`:
+
+- `OpenApiResources`, `PrimaryResources`: fragments and representative fragments
+- `SecurityRequirementsAligner`
+- `OpenApiSchemaNames`, `SchemaUsage`, `SchemaRenaming`, `SchemaMerging`: schemas with the same name and different structures
+- `OpenApiGlobalHeaders`, `OpenApiBodySchemas`, `OpenApiRefinements`
+- `OpenApiSchemaHints`, `DescriptorHints`, `ParameterHints`, `BodyFieldHints`: merging descriptor attributes
+- `OpenApiRequestExtras`
+- `OpenApiFileBodies`: file body descriptions, `charset` dropped from binary media types
+- `OpenApiOperationTidy`, `OpenApiOperationIds`, `OpenApiExamples`, `OpenApiDocumentTidy`, `HttpStatusPhrases`: tidying operations and the document
+- `SensitiveHeaderExamples`, `SharedSchemaMarks`, `PostmanCollectionTidy`
+- `OpenApiErrorResponses`: adds declared, then common responses
+- `OpenApiDeclaredResponses`, `DeclaredResponseSchemas`: responses declared with `errorResponse` and their schema names
+- `OpenApiCommonResponses`: common error responses
+- `OpenApiOperationTexts`: summaries and descriptions
+- `OpenApiFieldDefaults`: Kotlin default values
+- `OpenApiPolymorphism`, `VariantSchemas`, `SchemaSlot`: sealed and `@JsonSubTypes` as `oneOf`
+- `OpenApiSecuritySettings`, `OpenApiOAuthSecurity`: OAuth2 and OpenID Connect
+- `ApiVersioningSettings`, `ApiVersions`, `OpenApiApiVersions`, `OpenApiVersionSplit`: API versioning
 
 Layers (lower ones first, zero cycles):
 
@@ -634,9 +703,17 @@ Versions are defined in one place, `gradle/libs.versions.toml`. `build-logic` an
 
 ### samples
 
-**Role.** `samples/spring-boot-3` (Boot 3.5, REST Docs 3, epages 0.19, springdoc 2.8) and `samples/spring-boot-4` (Boot 4.1, REST Docs 4, epages 0.20, springdoc 3.2) are the same sample app. They're usage examples and also integration verification showing that the library behaves the same on both Boot versions. They use HTTP, cookies, multipart, HAL, SSE, STOMP, WebSocket handlers, response wrappers, and yml settings. Among the JUnit tests, one Kotest spec (`kotest/UserSearchDocsSpec`, using the Kotest Spring extension) runs in the same `test` task, and its document goes into the index, HTML, and OpenAPI together. The memo API (`memo` package, `MemoApiDocsTest`) is the KDoc-only example: no description annotations and no descriptions in the test. The Kotest extension is also registered in the project config (`io.kotest.provided.ProjectConfig`), and `kotest/ProjectExtensionSettingsSpec` checks that this global extension reads yml from the Spring context (it produces no document). Only the Boot 4 sample has specs that move 9 JUnit documentation tests to Kotest `FunSpec`s (`kotest/<same subpackage>/…Spec`). `kotest/support/MirrorDocsConfig` writes their documents to `build/generated-asciidoc-kotest` and turns off OpenAPI, AsyncAPI, and WireMock fragments, so the index, HTML, OpenAPI, AsyncAPI, and baseline spec contain only the JUnit documents.
+**Role.** `samples/spring-boot-3` (Boot 3.5, REST Docs 3, epages 0.19, springdoc 2.8) and `samples/spring-boot-4` (Boot 4.1, REST Docs 4, epages 0.20, springdoc 3.2) are the same sample app. They're usage examples and also integration verification showing that the library behaves the same on both Boot versions. They use HTTP, cookies, multipart, HAL, SSE, STOMP, WebSocket handlers, response wrappers, and yml settings.
 
-**Dependencies.** The same as the minimal setup the documentation describes. The library (annotations, core, kotest, boot) and the REST Docs and epages clients aren't declared; the Gradle plugin (`id("io.github.kardx-project")`, composite build) adds them. The samples declare only the Kotest 6.2.7 runner and Spring extension. The published coordinates the plugin adds (`io.github.kardx-project:<artifact>:<version>`) are substituted by the sample convention plugin (`restdocs.kotlin-sample` in `build-logic`) with projects in the same build (`:core`, `:annotations`, `:boot`, `:kotest`, `:kotest5`), so stale jars from mavenLocal aren't used. In `./gradlew :samples:spring-boot-4:dependencies --configuration testRuntimeClasspath` this shows up as `-> project :kotest`.
+Among the JUnit tests, one Kotest spec (`kotest/UserSearchDocsSpec`, using the Kotest Spring extension) runs in the same `test` task, and its document goes into the index, HTML, and OpenAPI together. The memo API (`memo` package, `MemoApiDocsTest`) is the KDoc-only example: no description annotations and no descriptions in the test.
+
+The Kotest extension is also registered in the project config (`io.kotest.provided.ProjectConfig`), and `kotest/ProjectExtensionSettingsSpec` checks that this global extension reads yml from the Spring context (it produces no document).
+
+Only the Boot 4 sample has specs that move 9 JUnit documentation tests to Kotest `FunSpec`s (`kotest/<same subpackage>/…Spec`). `kotest/support/MirrorDocsConfig` writes their documents to `build/generated-asciidoc-kotest` and turns off OpenAPI, AsyncAPI, and WireMock fragments, so the index, HTML, OpenAPI, AsyncAPI, and baseline spec contain only the JUnit documents.
+
+**Dependencies.** The same as the minimal setup the documentation describes. The library (annotations, core, kotest, boot) and the REST Docs and epages clients aren't declared; the Gradle plugin (`id("io.github.kardx-project")`, composite build) adds them. The samples declare only the Kotest 6.2.7 runner and Spring extension.
+
+The published coordinates the plugin adds (`io.github.kardx-project:<artifact>:<version>`) are substituted by the sample convention plugin (`restdocs.kotlin-sample` in `build-logic`) with projects in the same build (`:core`, `:annotations`, `:boot`, `:kotest`, `:kotest5`), so stale jars from mavenLocal aren't used. In `./gradlew :samples:spring-boot-4:dependencies --configuration testRuntimeClasspath` this shows up as `-> project :kotest`.
 
 **Contents.** Controllers and DTOs in `src/main` (package `com.example.restdocs`), documentation tests and the base class `support/RestDocsTestSupport` in `src/test`, `index-template.adoc` and `_landing.adoc` in `src/docs/asciidoc`, and `src/test/resources/application-docs.yml`.
 

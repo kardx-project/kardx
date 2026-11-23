@@ -142,7 +142,15 @@ kardx {
 
 `packageName`·`baseClass` 중 하나만 정했거나, 정하지 않았는데 문서를 쓴 테스트가 없으면 `apiDocsIndex` 는 이유를 한 줄 남기고 건너뜁니다. `baseClass` 를 정하면 그 하위 클래스에 더해 같은 패키지의 Kotest 스펙도 찾습니다(문서를 만든 스펙만 항목이 됨, [Kotest](kotest.md#index-와-openapi)).
 
-플러그인 없이 쓰려면 `DocumentationIndexCli` 를 `--output` 인자로 실행합니다. `--documents <디렉터리>` 는 생성된 테스트 문서(`*.adoc`)와 기록이 있는 디렉터리(주지 않으면 `--output` 파일의 디렉터리), `--template` 은 템플릿(없으면 내장 템플릿, 제목은 `--title`), `--package`·`--base-class` 는 패키지를 훑을 때 함께 줍니다 (플러그인은 index 를 `build/kardx/index/` 에 만들고 `--documents` 로 `asciidocDirectory` 를 넘깁니다). 코드에서는 `DocumentationIndex.write(template, output, testClasses)` 를 부르고, 문서 디렉터리가 다르면 `DocumentationIndex.write(template, output, testClasses, documents)` 를 씁니다. 링크는 `./<문서>.html` 이므로 렌더링할 때는 index 와 테스트 문서를 같은 디렉터리에 모읍니다. 항목은 `@DisplayName`(없으면 클래스 이름) 순서이고, 마커가 없으면 끝에 붙입니다. 순서를 정하려면 테스트 클래스에 JUnit `@Order(n)` 을 붙입니다. `@Order` 가 있는 클래스가 값 순서로 앞에 오고, 나머지는 `@DisplayName` 순서로 뒤에 옵니다.
+플러그인 없이 쓰려면 `DocumentationIndexCli` 를 `--output` 인자로 실행합니다. 나머지 인자는 다음과 같습니다.
+
+- `--documents <디렉터리>`: 생성된 테스트 문서(`*.adoc`)와 기록이 있는 디렉터리(주지 않으면 `--output` 파일의 디렉터리). 플러그인은 index 를 `build/kardx/index/` 에 만들고 `--documents` 로 `asciidocDirectory` 를 넘깁니다.
+- `--template`: 템플릿(없으면 내장 템플릿, 제목은 `--title`).
+- `--package`·`--base-class`: 패키지를 훑을 때 함께 줍니다.
+
+코드에서는 `DocumentationIndex.write(template, output, testClasses)` 를 부르고, 문서 디렉터리가 다르면 `DocumentationIndex.write(template, output, testClasses, documents)` 를 씁니다. 링크는 `./<문서>.html` 이므로 렌더링할 때는 index 와 테스트 문서를 같은 디렉터리에 모읍니다.
+
+항목은 `@DisplayName`(없으면 클래스 이름) 순서이고, 마커가 없으면 끝에 붙입니다. 순서를 정하려면 테스트 클래스에 JUnit `@Order(n)` 을 붙입니다. `@Order` 가 있는 클래스가 값 순서로 앞에 오고, 나머지는 `@DisplayName` 순서로 뒤에 옵니다.
 
 ```kotlin
 @Order(1)

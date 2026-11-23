@@ -280,5 +280,11 @@ class UserRestTestClientDocsTest {
 
 - **Boot 4 / Spring Framework 7 전용입니다.** 클래스는 같은 jar 에 들어 있지만 Spring 7 로 따로 컴파일되고, 부를 때만 로드됩니다. Boot 3 에는 `RestTestClient` 가 없습니다.
 - **multipart 파트를 나누지 않습니다.** multipart 요청은 본문 그대로 문서화되어 `requestParts(...)`·`requestPartFields(...)` 가 파트를 찾지 못하고, OpenAPI 에 multipart 스키마도 없습니다. multipart API 는 MockMvc 로 문서화합니다.
-- **핸들러 기반 기본값이 없습니다.** 요청을 처리한 컨트롤러 메서드를 알 수 없어 operationId 는 테스트 이름 `<클래스-대시>.<메서드-대시>`(`coupon-list-docs-test.list-coupons`)로 대체됩니다. 블록에서 `openApi { operationId = "..." }` 로 정합니다(또는 `path` 규칙, [operationId](http-api.md#operationid)). 같은 이유로 `deprecated` 를 컨트롤러의 `@Deprecated` 에서 추론하지 않고(블록에서 `deprecated(...)` 를 씁니다), 파라미터 타입도 핸들러에서 가져오지 않습니다(`ofType` 없는 파라미터는 `string`). Spring Framework 7 API 버전도 없고(`x-api-version` 없음, [API 버전](openapi.md#api-버전)), 이 테스트들은 [문서화 커버리지](checks.md#문서화-커버리지)의 엔드포인트 목록에 아무것도 더하지 않습니다. Boot 4 샘플 `samples/spring-boot-4/src/test/kotlin/com/example/restdocs/resttestclient/CouponListDocsTest.kt` 가 실행 중인 서버에 붙인 클라이언트(`bindToServer`)에서 operationId 를 정하는 예입니다.
+- **핸들러 기반 기본값이 없습니다.** 요청을 처리한 컨트롤러 메서드를 알 수 없어 operationId 는 테스트 이름 `<클래스-대시>.<메서드-대시>`(`coupon-list-docs-test.list-coupons`)로 대체됩니다.
+  - 블록에서 `openApi { operationId = "..." }` 로 정합니다(또는 `path` 규칙, [operationId](http-api.md#operationid)).
+  - 같은 이유로 `deprecated` 를 컨트롤러의 `@Deprecated` 에서 추론하지 않습니다(블록에서 `deprecated(...)` 를 씁니다).
+  - 파라미터 타입도 핸들러에서 가져오지 않습니다(`ofType` 없는 파라미터는 `string`).
+  - Spring Framework 7 API 버전도 없습니다(`x-api-version` 없음, [API 버전](openapi.md#api-버전)).
+  - 이 테스트들은 [문서화 커버리지](checks.md#문서화-커버리지)의 엔드포인트 목록에 아무것도 더하지 않습니다.
+  - Boot 4 샘플 `samples/spring-boot-4/src/test/kotlin/com/example/restdocs/resttestclient/CouponListDocsTest.kt` 가 실행 중인 서버에 붙인 클라이언트(`bindToServer`)에서 operationId 를 정하는 예입니다.
 - **상대 URI**(`baseUrl` 없이 MockMvc 에 묶은 클라이언트)는 MockMvc 문서처럼 `http://localhost` 기준으로 풉니다.

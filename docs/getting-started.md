@@ -80,7 +80,9 @@ The Gradle plugin is Gradle only. What the tests produce works with any build to
 | WireMock mappings | Yes, plus the stub jar | yml `kardx.wire-mock-stubs: true` (mappings only) | Same as without the plugin |
 | Docs served by the app at `/docs/`, startup log | Yes | Copy the output into `static/docs` and add the `boot` module yourself; the startup log then uses the default file names | Same as without the plugin (copy with `maven-resources-plugin`) |
 
-**Gradle version and the Kotlin DSL.** The plugin needs Gradle 7.6 or later, running on JDK 17 or later: the plugin is compiled for Java 17, so Gradle on an older JDK can't load it (`UnsupportedClassVersionError ... class file version 61.0`). In IntelliJ, check Settings → Build Tools → Gradle → Gradle JVM; on the command line, `JAVA_HOME` or `org.gradle.java.home`. The Kotlin DSL examples in these docs assign plugin settings with `=` (`language = "ko"`, `enabled = true`); the Kotlin DSL accepts `=` on these lazy properties from Gradle 8.2. On Gradle 7.6 to 8.1, call `.set(...)` instead, or use the Groovy DSL, where `=` works on every supported version. Your Spring Boot version may need a newer Gradle anyway (Spring Boot 4 needs Gradle 8.14 or later).
+**Gradle version and the Kotlin DSL.** The plugin needs Gradle 7.6 or later, running on JDK 17 or later: the plugin is compiled for Java 17, so Gradle on an older JDK can't load it (`UnsupportedClassVersionError ... class file version 61.0`). In IntelliJ, check Settings → Build Tools → Gradle → Gradle JVM; on the command line, `JAVA_HOME` or `org.gradle.java.home`.
+
+The Kotlin DSL examples in these docs assign plugin settings with `=` (`language = "ko"`, `enabled = true`); the Kotlin DSL accepts `=` on these lazy properties from Gradle 8.2. On Gradle 7.6 to 8.1, call `.set(...)` instead, or use the Groovy DSL, where `=` works on every supported version. Your Spring Boot version may need a newer Gradle anyway (Spring Boot 4 needs Gradle 8.14 or later).
 
 ```kotlin
 // Gradle 7.6 to 8.1, build.gradle.kts

@@ -7,6 +7,15 @@
 <!-- toc -->
 **목차**
 
+- [자세히](#자세히)
+  - [타입 불일치 원인](#타입-불일치-원인)
+  - [주석 설명 점검 순서](#주석-설명-점검-순서)
+  - [핸들러 주석에서 파라미터 설명 찾기](#핸들러-주석에서-파라미터-설명-찾기)
+  - [병렬 테스트의 설정](#병렬-테스트의-설정)
+  - [Spring Security 필터 체인](#spring-security-필터-체인)
+  - [파라미터 타입이 string 으로 나올 때](#파라미터-타입이-string-으로-나올-때)
+  - [문서화했는데 커버리지에서 빠질 때](#문서화했는데-커버리지에서-빠질-때)
+  - [목록에서 빠지는 엔드포인트](#목록에서-빠지는-엔드포인트)
 - [오류 코드](#오류-코드)
 <!-- /toc -->
 
@@ -46,12 +55,12 @@
 | yml 에 `Cannot resolve configuration property 'kardx...'` | 라이브러리 jar 의 설정 메타데이터를 IDE 가 아직 못 읽었습니다. Gradle 을 다시 동기화(Reload All Gradle Projects)하면 사라집니다. IntelliJ 는 RUNTIME 범위 의존성(`developmentOnly`)의 메타데이터를 읽지 않으므로 플러그인이 시작 로그 모듈을 `compileOnly` 에도 넣습니다. 모듈을 직접 선언했다면 `compileOnly(...) { isTransitive = false }` 도 넣으세요 ([앱 시작 로그](build.md#앱-시작-로그)) |
 | 운영 코드에서 `Unresolved reference 'Description'` | Gradle 플러그인이 annotations 를 `compileOnly` 에 넣습니다. `addDependencies = false` 거나 플러그인 없이 쓰면 직접 `compileOnly` 로 추가하세요 |
 | `DocumentationMismatchException: Documented response fields do not match ...` | 문서화한 필드·파라미터가 실제와 다릅니다. 메시지의 목록·붙여 넣을 DSL 줄·힌트를 보세요. 원래 REST Docs 메시지는 `Caused by` 에 있습니다 ([검증 실패 메시지](http-api.md#검증-실패-메시지)) |
-| `DocumentationMismatchException: ... Type mismatch: - price: documented Number, actual String` | 문서화한 필드 타입과 실제 JSON 타입이 다릅니다 (REST Docs 의 `FieldTypesDoNotMatchException` 은 `Caused by` 에 있습니다). 메시지의 DSL 줄로 타입을 고치거나 원인을 없앱니다. 숫자가 문자열이면 `@JsonFormat(shape = JsonFormat.Shape.STRING)`·`ToStringSerializer`·`JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS`, 문자열로 문서화한 날짜가 숫자·배열이면 `WRITE_DATES_AS_TIMESTAMPS` 를 끕니다. 실제 값이 `Null` 이면 프로퍼티를 nullable 로 하거나 `isOptional true`(추출 목록은 `optionalAt("...")`), 배열 원소마다 타입이 다르면(`Varies`) `VARIES` 로 문서화합니다 ([검증 실패 메시지](http-api.md#검증-실패-메시지)) |
+| `DocumentationMismatchException: ... Type mismatch: - price: documented Number, actual String` | 문서화한 필드 타입과 실제 JSON 타입이 다릅니다 (REST Docs 의 `FieldTypesDoNotMatchException` 은 `Caused by` 에 있습니다). 메시지의 DSL 줄로 타입을 고치거나 원인을 없앱니다 ([흔한 원인](#타입-불일치-원인)) |
 | 추출 결과가 어떤 표가 될지 테스트 없이 보고 싶다 | `println(responseFieldsOf<T>().describe())` ([추출 결과 미리보기](http-api.md#추출-결과-미리보기)) |
-| KDoc·Javadoc 주석이 설명으로 나오지 않음 | 다음 순서로 확인합니다. (1) 기능이 켜져 있는지: 실험 기능이라 기본으로 꺼져 있으므로 Gradle 플러그인에서 `kardx { sourceDocs { enabled = true } }` 로 켭니다. 그 주석 종류의 항목별 스위치(`fieldDocs`, `enumDocs`, `schemaDescriptions`, `paramDocs` 는 기본값 `true`, `methodDocs` 는 기본값 `false`)가 켜져 있는지, yml `kardx.source-docs.enabled`(기본값 `true`)가 `false` 가 아닌지도 봅니다. (2) 클래스가 테스트 소스가 아니라 이 프로젝트나 `project(...)` 의존 프로젝트(`sourceDocs { includeProjectDependencies = true }`, 기본값)의 `main` 소스셋에 있는지. (3) DTO 가 jar 로 들어오지 않았는지. jar 에는 읽을 소스가 없습니다 (`@Description` 이나 `description-annotations` 를 씁니다). (4) 필드에 `@Description` 이나 목록의 어노테이션이 없는지. 있으면 그것이 주석보다 먼저입니다. (5) 스캐너가 모으지 않는 선언이거나 가벼운 스캐너가 건너뛰는 문법을 쓰지 않았는지 ([알려진 한계](http-api.md#알려진-한계)). 건너뛴 선언은 하나씩 로그에 남지 않으므로(`--debug` 는 읽다가 오류로 멈춘 파일만 보여 줍니다) `build/kardx/source-docs/source-docs.json` 을 열어 클래스(JVM 바이너리 이름, `Outer$Inner`)와 프로퍼티를 찾아 봅니다. 컨트롤러 주석은 `methodDocs = true` 일 때만 쓰고 핸들러를 알아야 하므로 RestTestClient 와 함수형 라우트에는 들어가지 않습니다 ([KDoc/Javadoc 에서 설명 가져오기](http-api.md#kdocjavadoc-에서-설명-가져오기)) |
-| `kardx[KDX-101]: path parameter 'id' declared by name only (or with FromParamTag), but no description was found.` | 테스트가 `pathParameters("id")`(또는 `FromParamTag`)로 적었는데 `@param id` 를 찾지 못했습니다. 핸들러 메서드의 KDoc/Javadoc 에 `@param id` 를 더하고 실험 기능인 source docs 를 켜거나(`kardx { sourceDocs { enabled = true } }`, `paramDocs` 는 `true` 그대로) 테스트에서 설명합니다(`"id" pathMeans "..."`). `@param` 을 찾으려면 Gradle 플러그인(`apiDocsSourceDocs`)과 알려진 핸들러가 필요합니다. RestTestClient, 함수형 라우트, `bindToServer` 는 핸들러를 모릅니다 ([이름만 적은 파라미터 → 메서드 `@param`](http-api.md#이름만-적은-파라미터--메서드-param)) |
+| KDoc·Javadoc 주석이 설명으로 나오지 않음 | 실험 기능이라 기본으로 꺼져 있고, 여러 조건이 맞아야 주석을 씁니다. [점검 순서](#주석-설명-점검-순서)대로 확인합니다 |
+| `kardx[KDX-101]: path parameter 'id' declared by name only (or with FromParamTag), but no description was found.` | 테스트가 `pathParameters("id")`(또는 `FromParamTag`)로 적었는데 `@param id` 를 찾지 못했습니다. 핸들러의 KDoc/Javadoc 에 `@param id` 를 더하거나 테스트에서 설명합니다 ([자세히](#핸들러-주석에서-파라미터-설명-찾기)) |
 | 경고 `kardx[KDX-501]: A and B both write X.adoc and share snippet directory 'x'. Rename one of them.` | 다른 패키지의 두 테스트 클래스가 단순 이름이 같아 문서가 서로 덮어씁니다. 한쪽 클래스 이름을 바꿉니다 ([문서 자동 생성](asciidoc.md#문서-자동-생성)) |
-| 병렬 테스트에서 한 클래스의 문서가 다른 클래스의 설정(yml 이나 `configure` 의 래퍼, 마스킹, `document.commonIncludeFiles` 등)으로 만들어짐 | 설정 값은 JVM 전역 하나입니다. 각 테스트는 자기가 더한 `configure` 만 빼므로 서로 지우지는 않지만, 동시에 도는 동안에는 다른 테스트가 더한 블록과 다른 컨텍스트(프로파일, `@TestPropertySource`)의 yml 값이 함께 적용됩니다. 테스트마다 다른 값은 `withSettings` 로 주거나, 그 클래스들을 차례로 실행하세요(`@Execution(ExecutionMode.SAME_THREAD)`, `@ResourceLock`). 같은 클래스의 메서드를 병렬로 돌리면 문서에 쓰는 마지막 테스트의 설정도 정해지지 않습니다 ([병렬 실행](configuration.md#병렬-실행)) |
+| 병렬 테스트에서 한 클래스의 문서가 다른 클래스의 설정(yml 이나 `configure` 의 래퍼, 마스킹, `document.commonIncludeFiles` 등)으로 만들어짐 | 설정 값은 JVM 전역 하나라서, 동시에 도는 테스트는 서로의 설정을 봅니다. 테스트마다 다른 값은 `withSettings` 로 주거나, 그 클래스들을 차례로 실행하세요 ([자세히](#병렬-테스트의-설정)) |
 | `configure` 한 값이 테스트가 끝나도 남는다 | 테스트 스레드가 아닌 곳(테스트가 만든 스레드·스레드 풀, `@BeforeAll`, 격리 모드 Kotest 스펙 본문·`beforeSpec`)에서 불렀습니다. 테스트 스레드(`@BeforeEach`·본문, Kotest `beforeEach`)에서 부르거나 `@AfterAll` 에서 `reset()` 하세요 ([설정](configuration.md#바꾸는-방법), [Kotest](kotest.md#junit-확장과-같은-동작)) |
 | 생성 문서의 섹션 순서가 원하는 것과 다름 | 기본은 메서드 이름순입니다. `@TestMethodOrder(MethodOrderer.OrderAnnotation::class)` + `@Order` 를 쓰세요 ([섹션 순서](asciidoc.md#섹션-순서)) |
 | `mockMvc.get("/x") { }` 나 `MockMvcTester` 결과에 `andDocument` 가 없다 | `io.github.kardx.mockmvc.andDocument` 를 import 합니다. 이 import 하나가 `ResultActions`·`ResultActionsDsl`·`MvcTestResult` 를 모두 덮습니다. IDE 가 다른 `andDocument`(예: WebTestClient 용)를 가져왔다면 그 import 를 바꿉니다 |
@@ -72,7 +81,7 @@
 | `kardx.description-annotations: class '...' not found` | 클래스 이름 오타이거나 그 어노테이션 의존성이 없습니다. 별칭(`swagger`, `jackson`)도 의존성이 필요합니다 ([오류와 해결](http-api.md#오류와-해결)) |
 | 제약조건이 문서에 없음 | `jakarta.validation-api` 가 클래스패스에 있는지, 직접 만든 템플릿이 Constraints 열을 지우지 않았는지 확인하세요 |
 | Asciidoctor 에서 `AbstractMethodError` (Boot 4) | AsciidoctorJ 3 이 필요합니다. Gradle 플러그인은 자동으로 맞추고, 직접 구성했다면 `asciidoctorj { setVersion("3.0.1") }` 을 넣으세요 |
-| 인증이 필요한 API 가 인증 없이 200 으로 문서화됨, 또는 경고 `kardx[KDX-006]: the application context has a springSecurityFilterChain bean, but restDocsMockMvc does not apply it` | `restDocsMockMvc` 는 기본으로 Spring Security 필터 체인을 걸지 않습니다. Spring Security 로 보호하는 API 라면 `kardx.apply-spring-security: true` 로 켜고, `spring-security-test` 를 넣어 `with(jwt())`·`with(user(...))` 로 인증합니다. 필터 체인 없이 문서화하는 것이 의도라면 `apply-spring-security: false` 로 명시하면 경고가 사라집니다. 이 설정은 MockMvc 를 만들 때 읽으므로 `restDocsMockMvc` 를 부르기 전에 정합니다 ([Spring Security](http-api.md#spring-security)) |
+| 인증이 필요한 API 가 인증 없이 200 으로 문서화됨, 또는 경고 `kardx[KDX-006]: the application context has a springSecurityFilterChain bean, but restDocsMockMvc does not apply it` | `restDocsMockMvc` 는 기본으로 Spring Security 필터 체인을 걸지 않습니다. `kardx.apply-spring-security: true` 로 켜거나, 끄는 것이 의도라면 `false` 로 명시합니다 ([자세히](#spring-security-필터-체인)) |
 | `with(jwt())`·`@WithMockUser` 로 인증한 API 에 Swagger Authorize 가 없다 | 요청에 `Authorization` 헤더가 없어 보안 스키마가 생기지 않았습니다. `openApi { bearerAuth() }`(Basic 은 `basicAuth()`)로 선언하세요 ([헤더 없이 인증한 테스트의 보안 스키마](http-api.md#헤더-없이-인증한-테스트의-보안-스키마)) |
 | 문서의 응답 본문이 `<binary: 1234 bytes>` | 글자가 아닌 본문(PDF, 이미지, `application/octet-stream` …)은 크기만 남깁니다. 의도한 동작이고, 옆의 `Response File` 표가 미디어 타입·파일 이름·크기를 보여 주며 `responseFile("...")` 로 설명을 더합니다. 글자 본문인데 이렇게 나오면 응답 `Content-Type` 을 확인하세요 ([파일 다운로드](http-api.md#파일-다운로드)) |
 | 빌드 로그 `OpenAPI schema names: Item → OrderItem (...)` | 이름이 같은데 구조가 다른 스키마를 Gradle 플러그인이 나눈 것입니다. 원하는 이름이 있으면 `openApi { responseSchema = "..." }` ([스키마 이름](http-api.md#스키마-이름)) |
@@ -94,7 +103,7 @@
 | Kotest 스펙의 문서가 index 에 없다 | 문서화한 테스트가 없거나 모두 실패했습니다. `index.packageName` 을 정했다면 스펙이 그 패키지(하위 포함) 밖에 있을 수도 있습니다. 설정을 지우면 문서를 만든 모든 스펙이 들어갑니다 ([index 와 OpenAPI](kotest.md#index-와-openapi)) |
 | Kotest 스펙에서 yml 의 `kardx.*` 이 적용되지 않는다 | Kotest Spring 확장(6.x `io.kotest:kotest-extensions-spring`, 5.x `io.kotest.extensions:kotest-extensions-spring`)이 스펙에 적용되지 않았습니다. 6.x 는 `@ApplyExtension(SpringExtension::class)` 나 프로젝트 설정, 5.x 는 프로젝트 설정·스펙의 `override fun extensions()` 에 등록하세요 ([Spring 과 함께 쓰기](kotest.md#spring-과-함께-쓰기)) |
 | `@DisplayName` 의 `*`·백틱이 굵게·코드로 보인다 | AsciiDoc 서식으로 해석됩니다. `\*` 로 막거나 `+...+` 로 감싸세요 ([테스트 모양별 스니펫·섹션](asciidoc.md#테스트-모양별-스니펫섹션)) |
-| 경로 변수·파라미터가 OpenAPI 에 `type: string` 으로 나온다, 숫자 기본값이 `"20"` | 직접 쓴 파라미터의 타입은 컨트롤러 인자에서 정하는데, 핸들러를 알 수 없는 요청입니다: `recordHandlers()` 없는 WebTestClient(`bindToController`·`bindToRouterFunction`), 함수형 라우터, `bindToServer`. 핸들러를 기록하는 클라이언트(`restDocsWebTestClient`, `recordHandlers()`)를 쓰거나 `ofType Long::class` 를 붙이세요. 컨트롤러 인자가 `String` 이거나 이름이 다르면(Java 는 `-parameters` 없이 컴파일) 역시 `string` 입니다 ([파라미터 타입은 핸들러에서 정해진다](http-api.md#파라미터-타입은-핸들러에서-정해진다)) |
+| 경로 변수·파라미터가 OpenAPI 에 `type: string` 으로 나온다, 숫자 기본값이 `"20"` | 직접 쓴 파라미터의 타입은 컨트롤러 인자에서 정하는데, 핸들러를 알 수 없는 요청입니다. 핸들러를 기록하는 클라이언트(`restDocsWebTestClient`, `recordHandlers()`)를 쓰거나 `ofType Long::class` 를 붙이세요 ([자세히](#파라미터-타입이-string-으로-나올-때)) |
 | 경고 `kardx[KDX-204]: GET /... in ... does not document path variable(s) id` | URL 템플릿의 경로 변수를 블록에서 문서화하지 않아 OpenAPI 에 설명 없이 나갑니다. 메시지 끝의 `pathParameters(...)` 줄을 `andDocument` 블록에 붙여 넣으세요. 테스트마다 한 번만 경고합니다 ([파라미터 타입은 핸들러에서 정해진다](http-api.md#파라미터-타입은-핸들러에서-정해진다)) |
 | Swagger UI 에서 API 가 `default` 그룹에 몰린다 / `summary` 가 비어 있다 | 이 라이브러리의 `andDocument` 로 문서화한 operation 은 태그(문서 클래스 제목)와 요약(테스트 표시 이름)이 항상 들어갑니다. 비어 있다면 그 operation 은 이 라이브러리 밖(epages `MockMvcRestDocumentationWrapper.document`, `resource(...)` 를 직접 부른 테스트)에서 문서화한 것입니다. `andDocument` 로 옮기세요 ([OpenAPI 태그와 요약](http-api.md#openapi-태그와-요약)) |
 | 여러 테스트로 문서화한 operation 의 summary 가 테스트 하나의 이름이다(`계좌이체 결제`), 또는 빌드가 `OpenAPI summary/description: ... tests declare different summary values` 를 경고한다 | 합친 operation 은 대표 테스트의 이름을 받습니다. `openApi { summary = "..." }` 로 operation 이름을 정하고, 그 operation 의 테스트마다 같은 값을 적으세요. 값이 다르면 스니펫 디렉터리 이름순으로 처음 값을 씁니다 ([OpenAPI 태그와 요약](http-api.md#openapi-태그와-요약)) |
@@ -119,12 +128,123 @@
 | ``Expected 3 stream events within PT5S but received 1. Increase `timeout`, or trigger the events in `whileStreaming`.`` | `performStream` 이 `eventCount` 개를 기다렸는데 덜 왔습니다. `whileStreaming` 안에서 이벤트를 일으키거나, `eventCount` 를 줄이거나, `timeout` 을 늘립니다 ([끝나지 않는 스트림](messaging.md#끝나지-않는-스트림)) |
 | `--security expects name=bearer\|basic\|apiKey:<header\|query\|cookie>:<name>, got ...` 또는 `kardx.asyncApi.apiKeyHeader needs an HTTP header name` | 인증 방식 값의 형식이 틀렸습니다. `bearer`, `basic`, `apiKey:<header\|query\|cookie>:<이름>` 으로 씁니다 ([AsyncAPI 인증](messaging.md#asyncapi-인증)) |
 | AsyncAPI Try it out: 토큰을 넣었는데 순수 WebSocket·SSE 연결이 거절된다 | 브라우저는 WebSocket 핸드셰이크와 `EventSource` 에 헤더를 붙일 수 없어, 헤더 자격 증명은 STOMP 로만 보냅니다. "WebSocket·SSE 는 쿼리 파라미터로 보내기"를 켜고, 서버가 그 파라미터의 토큰을 받게 하세요 ([AsyncAPI 인증](messaging.md#asyncapi-인증)) |
-| 테스트가 문서화한 엔드포인트를 `apiDocsCoverage` 가 문서화하지 않았다고 한다 | 커버리지는 메서드·경로 템플릿이 같은 OpenAPI 조각(`resource.json`)이 있으면 문서화한 것으로 봅니다. OpenAPI 에서 뺀 테스트(`openApi { excluded = true }`, `openApi.enabled = false`)도 실제 요청 경로로 셉니다. 요청을 템플릿으로 만들었는지(`get("/api/users/{id}", 1)`. WebTestClient 의 `uri { }` 빌더는 실제 경로를 남깁니다), 메서드가 같은지, API 버전을 쓰면 문서화한 버전이 엔드포인트의 버전과 같은지 확인하세요 ([문서화 커버리지](checks.md#문서화-커버리지)) |
-| 문서화하지 않은 게 분명한 엔드포인트가 커버리지 보고서에 없거나, `apiDocsCoverage` 가 `no endpoint inventory` 를 출력한다 | 목록에는 테스트 애플리케이션 컨텍스트에 들어 있는 것만 잡힙니다. standalone 설정(`standaloneSetup`, `bindToController`, `bindToRouterFunction`)은 읽을 컨텍스트가 없고, 함수형 라우트(`RouterFunction`, `router { }`)는 읽지 않으며, 슬라이스 테스트(`@WebMvcTest(UserController::class)`)는 고른 컨트롤러만 잡습니다. `@SpringBootTest` 문서화 테스트를 하나 두면 모든 컨트롤러가 목록에 들어갑니다 ([목록에 잡히지 않는 엔드포인트](checks.md#목록에-잡히지-않는-엔드포인트)) |
+| 테스트가 문서화한 엔드포인트를 `apiDocsCoverage` 가 문서화하지 않았다고 한다 | 커버리지는 메서드·경로 템플릿으로 OpenAPI 조각(`resource.json`)과 맞춰 봅니다. 요청 경로, 메서드, API 버전을 확인하세요 ([자세히](#문서화했는데-커버리지에서-빠질-때)) |
+| 문서화하지 않은 게 분명한 엔드포인트가 커버리지 보고서에 없거나, `apiDocsCoverage` 가 `no endpoint inventory` 를 출력한다 | 목록에는 테스트 애플리케이션 컨텍스트에 들어 있는 것만 잡힙니다. `@SpringBootTest` 문서화 테스트를 하나 두면 모든 컨트롤러가 목록에 들어갑니다 ([자세히](#목록에서-빠지는-엔드포인트)) |
 | operation 이 `oauth2`·`openIdConnect` 를 쓰는데 `openApiSecurity` 에 설정이 없다는 빌드 경고, Swagger UI 에 OAuth2 로그인이 없다 | 테스트는 `openApi { oauth2(...) }`·`openIdConnect(...)` 를 선언했지만 빌드에 flow 나 discovery URL 이 없어 보안 요구사항을 쓸 수 없습니다. `kardx { openApiSecurity { oauth2 { ... } } }` 를 더하세요 ([OAuth2 와 OpenID Connect](http-api.md#oauth2-와-openid-connect)) |
 | 스펙에서 빠진 API 버전에 대한 빌드 경고, Swagger UI 에 엔드포인트의 최신 버전만 보인다 | 같은 경로·메서드를 여러 버전으로 문서화했고, 스펙 하나에는 가장 높은 버전만 남습니다. 버전마다 스펙을 나누려면 `apiVersioning { splitSpecs = true }` ([API 버전](openapi.md#api-버전)) |
 | Kotlin 기본값(`val size: Int = 20`)이 `default` 로 나오지 않는다 | 기본값은 요청 추출(`parametersOf<T>()`, `requestFields<T>()`)에서만 읽고 `responseFields<T>()` 에서는 읽지 않습니다. 문자열·숫자·불리언·Enum 만, 그리고 라이브러리가 기본값으로 인스턴스를 만들 수 있을 때만 읽습니다. 아니면 그 항목에 `withDefaultValue "20"` 을 붙이세요 ([기본값·예시·제약 설명](http-api.md#기본값예시제약-설명)) |
 | `MockMvc`·`WebTestClient` 테스트 메서드 파라미터에서 `ParameterResolutionException: Discovered multiple competing ParameterResolvers` | 직접 만든 JUnit 확장도 그 타입을 넣고, 이제 `AutoRestDocumentationExtension` 도 이 파라미터를 채웁니다. 문서화 테스트에서는 그 resolver 를 빼거나, 클라이언트를 파라미터로 받지 말고 `restDocsMockMvc(context)` 로 만든 필드에 둡니다 ([시작하기](getting-started.md#9-준비-코드-나누기-선택)) |
+
+## 자세히
+
+위 표에서 한두 문장으로 끝나지 않는 행입니다.
+
+### 타입 불일치 원인
+
+`Type mismatch: - price: documented Number, actual String` 일 때입니다. 실제 값의 모양에 따라 흔한 원인은 다음과
+같습니다.
+
+- 숫자가 문자열이다: `@JsonFormat(shape = JsonFormat.Shape.STRING)`·`ToStringSerializer`·`JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS` 를 찾아 봅니다.
+- 문자열로 문서화한 날짜가 숫자·배열이다: `WRITE_DATES_AS_TIMESTAMPS` 를 끕니다.
+- 실제 값이 `Null` 이다: 프로퍼티를 nullable 로 하거나 `isOptional true`(추출 목록은 `optionalAt("...")`)를 씁니다.
+- 배열 원소마다 타입이 다르다(`Varies`): `VARIES` 로 문서화합니다.
+
+[검증 실패 메시지](http-api.md#검증-실패-메시지)도 참고하세요.
+
+### 주석 설명 점검 순서
+
+KDoc·Javadoc 주석이 설명으로 나오지 않으면 다음 순서로 확인합니다.
+
+1. 기능이 켜져 있는지. 실험 기능이라 기본으로 꺼져 있으므로 Gradle 플러그인에서
+   `kardx { sourceDocs { enabled = true } }` 로 켭니다. 그 주석 종류의 항목별 스위치(`fieldDocs`, `enumDocs`,
+   `schemaDescriptions`, `paramDocs` 는 기본값 `true`, `methodDocs` 는 기본값 `false`)가 켜져 있는지, yml
+   `kardx.source-docs.enabled`(기본값 `true`)가 `false` 가 아닌지도 봅니다.
+2. 클래스가 테스트 소스가 아니라 이 프로젝트나 `project(...)` 의존 프로젝트(`sourceDocs { includeProjectDependencies = true }`, 기본값)의 `main` 소스셋에 있는지.
+3. DTO 가 jar 로 들어오지 않았는지. jar 에는 읽을 소스가 없습니다 (`@Description` 이나 `description-annotations` 를
+   씁니다).
+4. 필드에 `@Description` 이나 목록의 어노테이션이 없는지. 있으면 그것이 주석보다 먼저입니다.
+5. 스캐너가 모으지 않는 선언이거나 가벼운 스캐너가 건너뛰는 문법을 쓰지 않았는지
+   ([알려진 한계](http-api.md#알려진-한계)).
+
+건너뛴 선언은 하나씩 로그에 남지 않습니다(`--debug` 는 읽다가 오류로 멈춘 파일만 보여 줍니다). 무엇을 읽었는지
+보려면 `build/kardx/source-docs/source-docs.json` 을 열어 클래스(JVM 바이너리 이름, `Outer$Inner`)와 프로퍼티를
+찾아 봅니다.
+
+컨트롤러 주석은 `methodDocs = true` 일 때만 쓰고 핸들러를 알아야 하므로 RestTestClient 와 함수형 라우트에는
+들어가지 않습니다 ([KDoc/Javadoc 에서 설명 가져오기](http-api.md#kdocjavadoc-에서-설명-가져오기)).
+
+### 핸들러 주석에서 파라미터 설명 찾기
+
+`kardx[KDX-101]` 일 때입니다. 테스트가 `pathParameters("id")`(또는 `FromParamTag`)로 적었는데 `@param id` 를 찾지
+못했습니다. 둘 중 하나로 고칩니다.
+
+- 핸들러 메서드의 KDoc/Javadoc 에 `@param id` 를 더하고 실험 기능인 source docs 를 켭니다
+  (`kardx { sourceDocs { enabled = true } }`, `paramDocs` 는 `true` 그대로).
+- 테스트에서 설명합니다: `"id" pathMeans "..."`.
+
+`@param` 을 찾으려면 Gradle 플러그인(`apiDocsSourceDocs`)과 알려진 핸들러가 필요합니다. RestTestClient, 함수형
+라우트, `bindToServer` 는 핸들러를 모릅니다
+([이름만 적은 파라미터 → 메서드 `@param`](http-api.md#이름만-적은-파라미터--메서드-param)).
+
+### 병렬 테스트의 설정
+
+설정 값은 JVM 전역 하나입니다. 각 테스트는 자기가 더한 `configure` 만 빼므로 서로 지우지는 않습니다. 하지만
+동시에 도는 동안에는 다른 테스트가 더한 블록과 다른 컨텍스트(프로파일, `@TestPropertySource`)의 yml 값이 함께
+적용됩니다.
+
+- 테스트마다 다른 값은 `withSettings` 로 줍니다.
+- 또는 그 클래스들을 차례로 실행합니다(`@Execution(ExecutionMode.SAME_THREAD)`, `@ResourceLock`).
+
+같은 클래스의 메서드를 병렬로 돌리면 문서에 쓰는 마지막 테스트의 설정도 정해지지 않습니다
+([병렬 실행](configuration.md#병렬-실행)).
+
+### Spring Security 필터 체인
+
+`restDocsMockMvc` 는 기본으로 Spring Security 필터 체인을 걸지 않습니다(경고 `kardx[KDX-006]`).
+
+- Spring Security 로 보호하는 API 라면 `kardx.apply-spring-security: true` 로 켜고, `spring-security-test` 를 넣어
+  `with(jwt())`·`with(user(...))` 로 인증합니다.
+- 필터 체인 없이 문서화하는 것이 의도라면 `apply-spring-security: false` 로 명시하면 경고가 사라집니다.
+
+이 설정은 MockMvc 를 만들 때 읽으므로 `restDocsMockMvc` 를 부르기 전에 정합니다
+([Spring Security](http-api.md#spring-security)).
+
+### 파라미터 타입이 string 으로 나올 때
+
+직접 쓴 파라미터의 타입은 컨트롤러 인자에서 정합니다. 다음 요청은 핸들러를 알 수 없습니다.
+
+- `recordHandlers()` 없는 WebTestClient(`bindToController`·`bindToRouterFunction`)
+- 함수형 라우터
+- `bindToServer`
+
+핸들러를 기록하는 클라이언트(`restDocsWebTestClient`, `recordHandlers()`)를 쓰거나 `ofType Long::class` 를
+붙이세요.
+
+컨트롤러 인자가 `String` 이거나 이름이 다르면(Java 는 `-parameters` 없이 컴파일) 역시 `string` 입니다
+([파라미터 타입은 핸들러에서 정해진다](http-api.md#파라미터-타입은-핸들러에서-정해진다)).
+
+### 문서화했는데 커버리지에서 빠질 때
+
+커버리지는 메서드·경로 템플릿이 같은 OpenAPI 조각(`resource.json`)이 있으면 문서화한 것으로 봅니다. OpenAPI 에서
+뺀 테스트(`openApi { excluded = true }`, `openApi.enabled = false`)도 실제 요청 경로로 셉니다. 다음을 확인하세요.
+
+- 요청을 템플릿으로 만들었는지 (`get("/api/users/{id}", 1)`. WebTestClient 의 `uri { }` 빌더는 실제 경로를
+  남깁니다)
+- 메서드가 같은지
+- API 버전을 쓰면 문서화한 버전이 엔드포인트의 버전과 같은지
+
+[문서화 커버리지](checks.md#문서화-커버리지)도 참고하세요.
+
+### 목록에서 빠지는 엔드포인트
+
+목록에는 테스트 애플리케이션 컨텍스트에 들어 있는 것만 잡힙니다.
+
+- standalone 설정(`standaloneSetup`, `bindToController`, `bindToRouterFunction`)은 읽을 컨텍스트가 없습니다.
+- 함수형 라우트(`RouterFunction`, `router { }`)는 읽지 않습니다.
+- 슬라이스 테스트(`@WebMvcTest(UserController::class)`)는 고른 컨트롤러만 잡습니다.
+
+`@SpringBootTest` 문서화 테스트를 하나 두면 모든 컨트롤러가 목록에 들어갑니다
+([목록에 잡히지 않는 엔드포인트](checks.md#목록에-잡히지-않는-엔드포인트)).
 
 ## 오류 코드
 

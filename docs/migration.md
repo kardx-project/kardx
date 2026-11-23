@@ -25,7 +25,11 @@ The examples below are based on Boot 4 and were verified by compiling and runnin
 
 ## 1. Dependencies and plugins
 
-You don't have to remove your existing `spring-restdocs-mockmvc` and `asciidoctor` setup. When you add the Gradle plugin, it also adds the library dependencies (annotations, core, epages' MockMvc module when the epages plugin is applied, and the startup log module). `spring-restdocs-mockmvc` and `restdocs-api-spec-mockmvc` that you already declared are left as they are. The plugin configures the Asciidoctor inputs, the snippet path and the `spring-restdocs-asciidoctor` extension, so remove your own `asciidoctor { }` and `asciidoctorExt` configuration after migrating. Also remove an epages `openapi3 { outputDirectory = ... }` that points into the app's resources (`build/resources/main/static/docs`, `src/main/resources/static/...`) and any task that copies the spec into `static/` (`copyOasToSwagger` and the like): the plugin copies the docs and the spec into the app at `kardx.bootJar.path` (default `static/docs`). The plugin warns while such an `outputDirectory` is set.
+You don't have to remove your existing `spring-restdocs-mockmvc` and `asciidoctor` setup. When you add the Gradle plugin, it also adds the library dependencies (annotations, core, epages' MockMvc module when the epages plugin is applied, and the startup log module). `spring-restdocs-mockmvc` and `restdocs-api-spec-mockmvc` that you already declared are left as they are.
+
+The plugin configures the Asciidoctor inputs, the snippet path and the `spring-restdocs-asciidoctor` extension, so remove your own `asciidoctor { }` and `asciidoctorExt` configuration after migrating.
+
+Also remove an epages `openapi3 { outputDirectory = ... }` that points into the app's resources (`build/resources/main/static/docs`, `src/main/resources/static/...`) and any task that copies the spec into `static/` (`copyOasToSwagger` and the like): the plugin copies the docs and the spec into the app at `kardx.bootJar.path` (default `static/docs`). The plugin warns while such an `outputDirectory` is set.
 
 ```kotlin
 plugins {
@@ -45,8 +49,15 @@ The library and the Gradle plugin are on Maven Central, so `pluginManagement` ne
 |---|---|
 | `@ExtendWith(RestDocumentationExtension::class)` | `@ExtendWith(AutoRestDocumentationExtension::class)` (`io.github.kardx.junit`). Creates an AsciiDoc document per test class |
 | `MockMvcBuilders.webAppContextSetup(context).apply(documentationConfiguration(provider)).build()` | `restDocsMockMvc(context, provider)` (`io.github.kardx.mockmvc`). UTF-8, pretty print. The Spring Security filter chain only with `apply-spring-security: true` (unlike `@AutoConfigureMockMvc`, it is not applied by default) |
-| `@AutoConfigureRestDocs` + injected `MockMvc` | Take `MockMvc` as a test method parameter (`fun getUser(mockMvc: MockMvc)`, filled by `AutoRestDocumentationExtension`) or use `restDocsMockMvc(context, provider)` as above, and remove `@AutoConfigureRestDocs`. For the injected `MockMvc`, Spring Boot decides the snippet directory only from the test class and method names (`ManualRestDocumentation`), which differs from this library's directory rules. Plain test methods are the same, but for `@Nested` classes (`success/get-user` ↔ `user-api-test/success-get-user`), `@ParameterizedTest` (the same directory for every invocation ↔ `get-user/1`, `get-user/2`) and test methods with the same name but different parameters, snippets land in a different place, and that section would disappear from the generated document. Documenting with such a client now fails with [KDX-011](troubleshooting.md#kdx-011) when the directory differs (a warning once when it is the same); an injected `MockMvc` without REST Docs setup fails with [KDX-012](troubleshooting.md#kdx-012) |
+| `@AutoConfigureRestDocs` + injected `MockMvc` | Take `MockMvc` as a test method parameter (`fun getUser(mockMvc: MockMvc)`, filled by `AutoRestDocumentationExtension`) or use `restDocsMockMvc(context, provider)` as above, and remove `@AutoConfigureRestDocs`. Why the injected `MockMvc` has to go is explained below the table |
 | `WebTestClient.bindToApplicationContext(context).configureClient().filter(documentationConfiguration(provider)).build()` | `restDocsWebTestClient(context, provider)` (`io.github.kardx.webtestclient`). For other bindings, `.restDocs(provider)` on the builder ([WebTestClient](webtestclient.md)) |
+
+Why not keep the injected `MockMvc` from `@AutoConfigureRestDocs`:
+
+- Spring Boot decides its snippet directory only from the test class and method names (`ManualRestDocumentation`), which differs from this library's directory rules.
+- Plain test methods are the same. For `@Nested` classes (`success/get-user` ↔ `user-api-test/success-get-user`), `@ParameterizedTest` (the same directory for every invocation ↔ `get-user/1`, `get-user/2`) and test methods with the same name but different parameters, snippets land in a different place, and that section would disappear from the generated document.
+- Documenting with such a client now fails with [KDX-011](troubleshooting.md#kdx-011) when the directory differs (a warning once when it is the same).
+- An injected `MockMvc` without REST Docs setup fails with [KDX-012](troubleshooting.md#kdx-012).
 
 ```kotlin
 @ExtendWith(AutoRestDocumentationExtension::class)

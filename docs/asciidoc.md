@@ -142,7 +142,15 @@ kardx {
 
 If only one of `packageName` and `baseClass` is set, or neither is set and no test has written a document, `apiDocsIndex` logs a one-line reason and skips. When `baseClass` is set, Kotest specs in the same package are searched in addition to its subclasses (only specs that produced documents become entries, [Kotest](kotest.md#index-and-openapi)).
 
-To use it without the plugin, run `DocumentationIndexCli` with the `--output` argument. `--documents <directory>` is the directory containing the generated test documents (`*.adoc`) and their records (defaults to the directory of the `--output` file), `--template` is the template (the built-in template if omitted, titled with `--title`), and `--package` and `--base-class` are passed together when scanning a package (the plugin builds the index in `build/kardx/index/` and passes `asciidocDirectory` as `--documents`). In code, call `DocumentationIndex.write(template, output, testClasses)`, or `DocumentationIndex.write(template, output, testClasses, documents)` if the documents directory differs. Links are `./<document>.html`, so put the index and the test documents in the same directory when rendering. Entries are ordered by `@DisplayName` (the class name if absent) and are appended at the end if there is no marker. To set the order, put JUnit `@Order(n)` on test classes. Classes with `@Order` come first in value order, and the rest follow in `@DisplayName` order.
+To use it without the plugin, run `DocumentationIndexCli` with the `--output` argument. The other arguments:
+
+- `--documents <directory>`: the directory containing the generated test documents (`*.adoc`) and their records (defaults to the directory of the `--output` file). The plugin builds the index in `build/kardx/index/` and passes `asciidocDirectory` as `--documents`.
+- `--template`: the template (the built-in template if omitted, titled with `--title`).
+- `--package` and `--base-class`: passed together when scanning a package.
+
+In code, call `DocumentationIndex.write(template, output, testClasses)`, or `DocumentationIndex.write(template, output, testClasses, documents)` if the documents directory differs. Links are `./<document>.html`, so put the index and the test documents in the same directory when rendering.
+
+Entries are ordered by `@DisplayName` (the class name if absent) and are appended at the end if there is no marker. To set the order, put JUnit `@Order(n)` on test classes. Classes with `@Order` come first in value order, and the rest follow in `@DisplayName` order.
 
 ```kotlin
 @Order(1)

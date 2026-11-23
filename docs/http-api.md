@@ -824,7 +824,11 @@ If there is no error but the description is `No description`, check the followin
 
 > **Experimental, off by default.** The comments are read by a lightweight scanner, not by the Kotlin or Java compiler, so some declarations are missed ([Known limitations](#known-limitations)). The settings and the results may still change.
 
-If your DTOs and controllers already have KDoc or Javadoc, those comments can become descriptions too. Turn it on in the Gradle plugin with `kardx { sourceDocs { enabled = true } }` ([Turning it on](#turning-it-on)). The `apiDocsSourceDocs` task then reads the comments from the sources before `test` runs ([Gradle plugin](build.md#gradle-plugin)), and the tests use them wherever no annotation gives a description. Once it's on, comments on types, properties and enum constants are used, and so are the `@param` tags of handler methods: they describe the parameters a test declares by name only, such as `pathParameters("id")` ([Parameters declared by name → method `@param`](#parameters-declared-by-name--method-param)). Controller method comments as OpenAPI summary and description also need `methodDocs = true` ([Controller methods → OpenAPI summary and description](#controller-methods--openapi-summary-and-description)).
+If your DTOs and controllers already have KDoc or Javadoc, those comments can become descriptions too. Turn it on in the Gradle plugin with `kardx { sourceDocs { enabled = true } }` ([Turning it on](#turning-it-on)).
+
+The `apiDocsSourceDocs` task then reads the comments from the sources before `test` runs ([Gradle plugin](build.md#gradle-plugin)), and the tests use them wherever no annotation gives a description.
+
+Once it's on, comments on types, properties and enum constants are used, and so are the `@param` tags of handler methods: they describe the parameters a test declares by name only, such as `pathParameters("id")` ([Parameters declared by name → method `@param`](#parameters-declared-by-name--method-param)). Controller method comments as OpenAPI summary and description also need `methodDocs = true` ([Controller methods → OpenAPI summary and description](#controller-methods--openapi-summary-and-description)).
 
 ```kotlin
 /** A user. */
@@ -1958,7 +1962,9 @@ mockMvc.perform(put("/api/v1/products/{id}/image", 1L).contentType(MediaType.IMA
 
 ### OpenAPI output
 
-The body has no fields, so epages creates an empty object schema. After `openapi3`, the Gradle plugin changes empty schemas of non-JSON bodies to `type: string`. For anything other than `text/*` it adds `format: binary`, removes the examples (`examples`), and drops the `charset` parameter from the media type (`application/pdf;charset=UTF-8` → `application/pdf`, since a binary body has no character set). `text/plain` and `text/csv` become `type: string` and keep their examples and media type. The `responseFile` and `requestFile` descriptions become the `description` of the body schema, and a documented `Content-Disposition` header of a file response gets the actual value as its `example`. Documented response headers become the response `headers`.
+The body has no fields, so epages creates an empty object schema. After `openapi3`, the Gradle plugin changes empty schemas of non-JSON bodies to `type: string`. For anything other than `text/*` it adds `format: binary`, removes the examples (`examples`), and drops the `charset` parameter from the media type (`application/pdf;charset=UTF-8` → `application/pdf`, since a binary body has no character set). `text/plain` and `text/csv` become `type: string` and keep their examples and media type.
+
+The `responseFile` and `requestFile` descriptions become the `description` of the body schema, and a documented `Content-Disposition` header of a file response gets the actual value as its `example`. Documented response headers become the response `headers`.
 
 ```yaml
 /api/v1/products/{id}/manual:
@@ -2168,11 +2174,17 @@ epages doesn't put multipart parts and cookies into the spec. The library writes
 
 | Item | Result |
 |---|---|
-| operationId | Decided from the candidates the library records ([operationId](#operationid)): explicit ids are used as is, and rule-based ids get a controller name or number only when they collide. Test-name ids (the `test-name` rule, or when the handler is unknown) have `/` replaced by `.` and characters other than letters (including Korean and other non-ASCII letters), digits, `.`, `_`, and `-` replaced by `-` (`product-api-docs-test.get-product`, Kotest `user-spec.사용자-조회`), with `-2`, `-3` on collision. An operation merged from several tests uses the candidate of the success response test; for test-name ids, the part of the test names shared up to a `-` boundary (`get-product` + `get-product-not-found` → `get-product`), or the success response test's id if there is none (ids are not concatenated as in epages 0.19) |
+| operationId | Decided from the candidates the library records ([operationId](#operationid)). Details below the table |
 | Top-level `tags` | Collects the operations' tags in order. If the test class has `@AsciiDescription`, it becomes that tag's `description` |
 | JSON examples | JSON values rather than strings, so schema validation tools can check the examples |
 | Security requirements | In documents with security schemes, operations documented without an authentication header get `security: []` (no authentication). Documents without security schemes get a single top-level `security: []` (Redocly `security-defined`) |
 | API version (Spring Framework 7) | `x-api-version` and, depending on the style, a version header or query parameter ([API versioning](openapi.md#api-versioning)) |
+
+How the operationId is decided:
+
+- Explicit ids are used as is, and rule-based ids get a controller name or number only when they collide.
+- Test-name ids (the `test-name` rule, or when the handler is unknown) have `/` replaced by `.` and characters other than letters (including Korean and other non-ASCII letters), digits, `.`, `_`, and `-` replaced by `-` (`product-api-docs-test.get-product`, Kotest `user-spec.사용자-조회`), with `-2`, `-3` on collision.
+- An operation merged from several tests uses the candidate of the success response test. For test-name ids, it uses the part of the test names shared up to a `-` boundary (`get-product` + `get-product-not-found` → `get-product`), or the success response test's id if there is none (ids are not concatenated as in epages 0.19).
 
 ### Without the Gradle plugin
 
@@ -2182,11 +2194,11 @@ With only the epages plugin, none of the enhancements above apply. Only what epa
 
 | Function | Description |
 |---|---|
-| `restDocsMockMvc(context, provider)` | MockMvc with the REST Docs setup and a UTF-8 filter applied. It uses the app's Jackson mapper bean as the default mapper for the current thread. Pretty-printing of request and response bodies and your own preprocessors ([Processing requests and responses](customizing-snippets.md#request-and-response-preprocessing)) are handled by `andDocument`, so they are not registered as MockMvc default preprocessors. If you call REST Docs' `document()` directly with this MockMvc, bodies are not pretty-printed, so also pass `preprocessRequest(prettyPrint())` and `preprocessResponse(prettyPrint())` |
+| `restDocsMockMvc(context, provider)` | MockMvc with the REST Docs setup and a UTF-8 filter applied. It uses the app's Jackson mapper bean as the default mapper for the current thread. Notes on preprocessors below the table |
 | `jsonContent(body)` | Serializes an object to JSON and sets `Content-Type: application/json`. `String` and `CharSequence` (`StringBuilder` and so on) are treated as bodies that are already JSON and sent as is (`jsonContent("""{"name":"Jane Doe"}""")`), and `ByteArray` is sent as a UTF-8 string (the same rule as WebSocket message payloads). Works with both `post(...)` and `multipart(...)` builders |
 | `ResultActions.andPrint()` | Prints the request and response to the console. Same as `andDo(MockMvcResultHandlers.print())`. To print every request, use `print-requests: true` |
 | `ResultActions.andLog()` | Logs the request and response (DEBUG). Same as `andDo(MockMvcResultHandlers.log())` |
-| `ResultActions.andStatus(HttpStatus.NOT_FOUND)`, `andStatus(404)` | Verifies the response status code. Same as `andExpect(status().isNotFound)`, without needing the `MockMvcResultMatchers.status` import. Accepts an `HttpStatusCode` (including `HttpStatus` constants) or a number, and on mismatch fails with the same message as Spring's `status()` (`Response status expected:<404> but was:<200>`). It returns the same `ResultActions`, so you can chain `andDocument { }`. With WebTestClient, keep using `expectStatus()` |
+| `ResultActions.andStatus(HttpStatus.NOT_FOUND)`, `andStatus(404)` | Verifies the response status code. Same as `andExpect(status().isNotFound)`, without needing the `MockMvcResultMatchers.status` import. It returns the same `ResultActions`, so you can chain `andDocument { }`. More below the table |
 | `ResultActions.andExpectJsonPath("$.code", 404)` | Verifies a value in the response JSON. Same as `andExpect(jsonPath("$.code").value(404))` |
 | `ResultActions.andReturnContent()` | Returns the response body as a UTF-8 string. `contentAsString` garbles non-ASCII text such as Korean when there is no charset |
 | `bearerToken(token)` | An `Authorization: Bearer <token>` header. Hidden in the documentation when masking is on |
@@ -2195,5 +2207,10 @@ With only the epages plugin, none of the enhancements above apply. Only what epa
 | `ResultActions.andReturnAsObject<T>()` | Deserializes the response body into the generic type as is (UTF-8 and the app mapper, as with `andReturnContent`). If `T` is `String`, you get the raw text; if `ByteArray`, the response bytes as is. An empty or whitespace-only body throws `IllegalStateException`, so use `andReturnEntity` for such responses |
 | `ResultActions.andReturnEntity<T>()` | Returns the status code, all response headers, and the body as a Spring `ResponseEntity<T>`. Body handling is the same as `andReturnAsObject`; an empty or whitespace-only body (204 and so on) gives a null `body`, `T` of `String` gives the raw text, and `ByteArray` gives the response bytes as is. `response.statusCode`, `response.headers.location`, `response.body` |
 | `ResultActionsDsl.andDocument { }`, `MvcTestResult.andDocument { }` | Documents results from the MockMvc Kotlin DSL and `MockMvcTester` ([andDocument](#anddocument)) |
+
+Notes:
+
+- **`restDocsMockMvc`**: pretty-printing of request and response bodies and your own preprocessors ([Processing requests and responses](customizing-snippets.md#request-and-response-preprocessing)) are handled by `andDocument`, so they are not registered as MockMvc default preprocessors. If you call REST Docs' `document()` directly with this MockMvc, bodies are not pretty-printed, so also pass `preprocessRequest(prettyPrint())` and `preprocessResponse(prettyPrint())`.
+- **`andStatus`**: accepts an `HttpStatusCode` (including `HttpStatus` constants) or a number, and on mismatch fails with the same message as Spring's `status()` (`Response status expected:<404> but was:<200>`). With WebTestClient, keep using `expectStatus()`.
 
 Both Jackson 2 and 3 are supported, and the library handles the binary differences between Spring 6 and 7.

@@ -25,7 +25,11 @@
 
 ## 1. 의존성과 플러그인
 
-기존 `spring-restdocs-mockmvc`, `asciidoctor` 설정은 지우지 않아도 됩니다. Gradle 플러그인을 더하면 라이브러리 의존성(annotations, 본체, epages 플러그인이 있으면 epages 의 MockMvc 모듈, 앱 시작 로그 모듈)도 플러그인이 넣습니다. 이미 선언한 `spring-restdocs-mockmvc`·`restdocs-api-spec-mockmvc` 는 그대로 두고 건드리지 않습니다. 플러그인이 Asciidoctor 입력·스니펫 경로·`spring-restdocs-asciidoctor` 확장을 설정하므로, 직접 쓴 `asciidoctor { }`·`asciidoctorExt` 설정은 옮긴 뒤 지웁니다. 앱 리소스 안(`build/resources/main/static/docs`, `src/main/resources/static/...`)을 가리키는 epages `openapi3 { outputDirectory = ... }` 와 스펙을 `static/` 으로 복사하던 태스크(`copyOasToSwagger` 등)도 지웁니다. 플러그인이 문서와 스펙을 `kardx.bootJar.path`(기본 `static/docs`)로 앱에 복사합니다. 그런 `outputDirectory` 가 남아 있으면 플러그인이 경고합니다.
+기존 `spring-restdocs-mockmvc`, `asciidoctor` 설정은 지우지 않아도 됩니다. Gradle 플러그인을 더하면 라이브러리 의존성(annotations, 본체, epages 플러그인이 있으면 epages 의 MockMvc 모듈, 앱 시작 로그 모듈)도 플러그인이 넣습니다. 이미 선언한 `spring-restdocs-mockmvc`·`restdocs-api-spec-mockmvc` 는 그대로 두고 건드리지 않습니다.
+
+플러그인이 Asciidoctor 입력·스니펫 경로·`spring-restdocs-asciidoctor` 확장을 설정하므로, 직접 쓴 `asciidoctor { }`·`asciidoctorExt` 설정은 옮긴 뒤 지웁니다.
+
+앱 리소스 안(`build/resources/main/static/docs`, `src/main/resources/static/...`)을 가리키는 epages `openapi3 { outputDirectory = ... }` 와 스펙을 `static/` 으로 복사하던 태스크(`copyOasToSwagger` 등)도 지웁니다. 플러그인이 문서와 스펙을 `kardx.bootJar.path`(기본 `static/docs`)로 앱에 복사합니다. 그런 `outputDirectory` 가 남아 있으면 플러그인이 경고합니다.
 
 ```kotlin
 plugins {
@@ -45,8 +49,15 @@ index 는 설정 없이 문서를 만든 모든 테스트 클래스를 넣습니
 |---|---|
 | `@ExtendWith(RestDocumentationExtension::class)` | `@ExtendWith(AutoRestDocumentationExtension::class)` (`io.github.kardx.junit`). 테스트 클래스마다 AsciiDoc 문서를 만든다 |
 | `MockMvcBuilders.webAppContextSetup(context).apply(documentationConfiguration(provider)).build()` | `restDocsMockMvc(context, provider)` (`io.github.kardx.mockmvc`). UTF-8, pretty print. Spring Security 필터 체인은 `apply-spring-security: true` 일 때만 (`@AutoConfigureMockMvc` 와 달리 기본은 걸지 않음) |
-| `@AutoConfigureRestDocs` + 주입한 `MockMvc` | `MockMvc` 를 테스트 메서드 파라미터로 받거나(`fun getUser(mockMvc: MockMvc)`, `AutoRestDocumentationExtension` 이 넣는다) 위처럼 `restDocsMockMvc(context, provider)` 로 바꾸고 `@AutoConfigureRestDocs` 를 지운다. 주입한 `MockMvc` 는 Spring Boot 가 스니펫 디렉터리를 테스트 클래스·메서드 이름으로만 정해(`ManualRestDocumentation`) 이 라이브러리의 디렉터리 규칙과 다르다. 일반 테스트 메서드는 같지만 `@Nested` 클래스(`success/get-user` ↔ `user-api-test/success-get-user`), `@ParameterizedTest`(실행마다 같은 디렉터리 ↔ `get-user/1`, `get-user/2`), 인자가 다른 같은 이름의 테스트 메서드는 스니펫이 다른 곳에 생겨 생성 문서에서 그 섹션이 빠진다. 이제 이런 클라이언트로 문서화하면 디렉터리가 다를 때 [KDX-011](troubleshooting.md#kdx-011) 로 실패한다(같으면 한 번 경고). REST Docs 설정이 없는 주입 `MockMvc` 는 [KDX-012](troubleshooting.md#kdx-012) 로 실패한다 |
+| `@AutoConfigureRestDocs` + 주입한 `MockMvc` | `MockMvc` 를 테스트 메서드 파라미터로 받거나(`fun getUser(mockMvc: MockMvc)`, `AutoRestDocumentationExtension` 이 넣는다) 위처럼 `restDocsMockMvc(context, provider)` 로 바꾸고 `@AutoConfigureRestDocs` 를 지운다. 주입한 `MockMvc` 를 바꿔야 하는 이유는 표 아래에 있다 |
 | `WebTestClient.bindToApplicationContext(context).configureClient().filter(documentationConfiguration(provider)).build()` | `restDocsWebTestClient(context, provider)` (`io.github.kardx.webtestclient`). 다른 바인딩은 빌더에 `.restDocs(provider)` ([WebTestClient](webtestclient.md)) |
+
+`@AutoConfigureRestDocs` 로 주입한 `MockMvc` 를 그대로 두지 않는 이유:
+
+- Spring Boot 가 스니펫 디렉터리를 테스트 클래스·메서드 이름으로만 정해(`ManualRestDocumentation`) 이 라이브러리의 디렉터리 규칙과 다릅니다.
+- 일반 테스트 메서드는 같습니다. `@Nested` 클래스(`success/get-user` ↔ `user-api-test/success-get-user`), `@ParameterizedTest`(실행마다 같은 디렉터리 ↔ `get-user/1`, `get-user/2`), 인자가 다른 같은 이름의 테스트 메서드는 스니펫이 다른 곳에 생겨 생성 문서에서 그 섹션이 빠집니다.
+- 이제 이런 클라이언트로 문서화하면 디렉터리가 다를 때 [KDX-011](troubleshooting.md#kdx-011) 로 실패합니다(같으면 한 번 경고).
+- REST Docs 설정이 없는 주입 `MockMvc` 는 [KDX-012](troubleshooting.md#kdx-012) 로 실패합니다.
 
 ```kotlin
 @ExtendWith(AutoRestDocumentationExtension::class)

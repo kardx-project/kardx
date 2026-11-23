@@ -107,9 +107,9 @@ RestDocsConfiguration.configure {
 | `masking.queryParameters` | 없음 (가리지 않음) | 값을 가릴 쿼리·폼 파라미터 (`?access_token=****`, `application/x-www-form-urlencoded` 본문의 `password=****`). `masking.maskSensitive()` 가 `MaskingSettings.SENSITIVE_QUERY_PARAMETERS` 를 더한다. [민감 정보 마스킹](#민감-정보-마스킹) |
 | `http.requestPreprocessors` | 없음 | 요청에 더 적용할 Spring REST Docs `OperationPreprocessor`. 라이브러리 가공(URI·마스킹·pretty print) 뒤에 적용한다. 코드 전용 ([요청·응답 가공](customizing-snippets.md#요청응답-가공)) |
 | `http.responsePreprocessors` | 없음 | 응답에 더 적용할 전처리기. 라이브러리 가공 뒤에 적용한다. 코드 전용 |
-| `http.removedResponseHeaders` | `HttpSettings.VOLATILE_RESPONSE_HEADERS` (`Date`) | 값이 실행마다 바뀌어 문서에서 빼는 응답 헤더. 스니펫·WireMock 매핑이 실행마다 같게 유지된다. 대소문자 무시. `responseHeaders(...)` 로 문서화한 헤더는 늘 남는다. 비어 있지 않으면 `Max-Age` 가 있는 `Set-Cookie` 의 `Expires` 도 뺀다 (지금 시각에서 계산되고, 어차피 `Max-Age` 가 우선한다). `emptySet()` 이면 받은 그대로 모두 남기고, `http.removedResponseHeaders += "X-Request-Id"` 로 더 뺀다. `http.responsePreprocessors` 앞에 적용한다 ([요청·응답 가공](customizing-snippets.md#요청응답-가공)) |
+| `http.removedResponseHeaders` | `HttpSettings.VOLATILE_RESPONSE_HEADERS` (`Date`) | 값이 실행마다 바뀌어 문서에서 빼는 응답 헤더. 스니펫·WireMock 매핑이 실행마다 같게 유지된다. 자세한 내용은 표 아래 |
 | `http.printRequests` | `false` | 요청·응답을 콘솔에 출력. 요청마다 읽으므로 클라이언트를 만든 뒤 `configure { http.printRequests = true }`·`withSettings` 로 켜도 된다 |
-| `http.applySpringSecurity` | `false` | **(생성 시)** 켜면 `restDocsMockMvc` 가 컨텍스트의 Spring Security 필터 체인을 건다 ([Spring Security](http-api.md#spring-security)). 인터셉터 등 다른 방식으로 인증하는 프로젝트가 있어 기본은 걸지 않는다. 필터 체인 빈이 있는데 정하지 않았으면 JVM 마다 한 번 경고하고, `false` 로 명시하면 경고하지 않는다. WebTestClient 에는 쓰지 않는다 (WebFlux 가 `WebFilter` 빈을 건다) |
+| `http.applySpringSecurity` | `false` | **(생성 시)** 켜면 `restDocsMockMvc` 가 컨텍스트의 Spring Security 필터 체인을 건다 ([Spring Security](http-api.md#spring-security)). 기본은 꺼져 있다. 자세한 내용은 표 아래 |
 | `openApi.enabled` | `true` | epages 가 있을 때 OpenAPI 리소스를 만들지 여부 |
 | `openApi.securitySchemes` | `true` | 요청의 `Authorization` 으로 OpenAPI 보안 스키마(Swagger Authorize)를 만든다. 실제 토큰은 스펙에 넣지 않는다 |
 | `openApi.globalHeaders` | 없음 | Swagger Authorize 에서 한 번만 입력해 모든 요청에 붙일 헤더. 헤더 파라미터 대신 `apiKey` 보안 스키마가 된다 ([헤더와 인증](http-api.md#헤더와-인증)). Gradle 플러그인이 적용한다 |
@@ -131,6 +131,18 @@ RestDocsConfiguration.configure {
 | `language` | `DocsLanguage.EN` | 라이브러리가 생성 문서에 넣는 문구의 언어 (`EN`, `KO`). [문서 언어](#문서-언어) |
 | `document.snippets` | `SnippetFile.defaults()` | 생성 문서에 넣을 스니펫 종류 ([문서에 넣을 스니펫 고르기](customizing-snippets.md#문서에-넣을-스니펫-고르기)) |
 | `document.sectionOrder` | `METHOD_NAME` | JUnit `@TestMethodOrder` 가 없을 때 생성 문서의 섹션 순서. `DISPLAY_NAME` 이면 `@DisplayName` 순 ([섹션 순서](asciidoc.md#섹션-순서)) |
+
+위 표에서 두 행의 자세한 내용입니다.
+
+- **`http.removedResponseHeaders`** ([요청·응답 가공](customizing-snippets.md#요청응답-가공))
+  - 대소문자를 구분하지 않습니다. `responseHeaders(...)` 로 문서화한 헤더는 늘 남습니다.
+  - 비어 있지 않으면 `Max-Age` 가 있는 `Set-Cookie` 의 `Expires` 도 뺍니다 (지금 시각에서 계산되고, 어차피 `Max-Age` 가 우선합니다).
+  - `emptySet()` 이면 받은 그대로 모두 남기고, `http.removedResponseHeaders += "X-Request-Id"` 로 더 뺍니다.
+  - `http.responsePreprocessors` 앞에 적용합니다.
+- **`http.applySpringSecurity`**
+  - 인터셉터 등 다른 방식으로 인증하는 프로젝트가 있어 기본은 걸지 않습니다.
+  - 필터 체인 빈이 있는데 정하지 않았으면 JVM 마다 한 번 경고하고, `false` 로 명시하면 경고하지 않습니다.
+  - WebTestClient 에는 쓰지 않습니다 (WebFlux 가 `WebFilter` 빈을 겁니다).
 
 Maven 판정은 Spring REST Docs 와 같습니다. 작업 디렉터리에 `pom.xml` 이 있으면 `target` 을 씁니다.
 
@@ -215,7 +227,11 @@ RestDocsConfiguration.configure {
 - 목록·집합 설정(`descriptions.annotations`, `masking.headers`, `document.commonIncludeFiles` 등)에 대입한 값은 복사해 둡니다. 넘긴 `MutableList` 를 나중에 바꿔도 반영되지 않습니다.
 - fun interface 로 주는 설정(`descriptions.resolver`, `extraction.objectMapper`, `extraction.propertyNameStrategy`, `masking.masker`, `openApi.schemaNameResolver`, `openApi.operationIdResolver`)은 코드에서만 바꿀 수 있습니다.
 - 앱 실행 설정(시작 로그의 `docs-path`, `startup-log.*`)은 운영 `application.yml` 에 씁니다: [앱 시작 로그](build.md#앱-시작-로그). 문서 경로·파일 이름은 Gradle 플러그인이 남긴 실제 값을 기본으로 읽으므로 보통 적지 않습니다.
-- **모르는 키는 경고합니다.** Spring 테스트가 컨텍스트 설정을 읽을 때 `kardx.` 로 시작하는데 위 표(와 시작 로그의 `docs-path`·`startup-log.*`)에 없는 키를 찾으면, 가장 가까운 키를 붙여 경고 로그를 한 번 남깁니다. 오타 난 키는 아무 효과 없이 무시되기 때문입니다. relaxed binding 형태(`maskSensitiveHeaders`, `mask_sensitive_headers`, 환경 변수 `KARDX_MASK_SENSITIVE_HEADERS`, 목록 색인 `common-include-files[0]`)는 같은 키로 봅니다. 이름을 모두 알 수 있는 속성 소스(yml·properties·시스템 속성·환경 변수)만 봅니다. 시작 로그 키(`startup-log.*`)는 boot 모듈이 읽으므로 하위 키의 오타는 검사하지 않습니다. 키가 기능별로 묶이기 전의 평평한 이름(`open-api-enabled`, `open-api-schema-names`, `async-api-enabled`, `snippets-directory`, `snippets-include-prefix` 등)은 읽지 않고, 경고가 가장 가까운 키 대신 바뀐 키를 정확히 알려 줍니다(`... is ignored. It was renamed to 'kardx.open-api.enabled'.`). 환경 변수 이름은 바뀌지 않았습니다.
+- **모르는 키는 경고합니다.** Spring 테스트가 컨텍스트 설정을 읽을 때 `kardx.` 로 시작하는데 위 표(와 시작 로그의 `docs-path`·`startup-log.*`)에 없는 키를 찾으면, 가장 가까운 키를 붙여 경고 로그를 한 번 남깁니다. 오타 난 키는 아무 효과 없이 무시되기 때문입니다.
+  - relaxed binding 형태(`maskSensitiveHeaders`, `mask_sensitive_headers`, 환경 변수 `KARDX_MASK_SENSITIVE_HEADERS`, 목록 색인 `common-include-files[0]`)는 같은 키로 봅니다.
+  - 이름을 모두 알 수 있는 속성 소스(yml·properties·시스템 속성·환경 변수)만 봅니다.
+  - 시작 로그 키(`startup-log.*`)는 boot 모듈이 읽으므로 하위 키의 오타는 검사하지 않습니다.
+  - 키가 기능별로 묶이기 전의 평평한 이름(`open-api-enabled`, `open-api-schema-names`, `async-api-enabled`, `snippets-directory`, `snippets-include-prefix` 등)은 읽지 않고, 경고가 가장 가까운 키 대신 바뀐 키를 정확히 알려 줍니다(`... is ignored. It was renamed to 'kardx.open-api.enabled'.`). 환경 변수 이름은 바뀌지 않았습니다.
 
 ```
 WARN ... io.github.kardx.config : kardx[KDX-001]: unknown property 'kardx.mask-sensitive-header' in [Config resource 'class path resource [application-docs.yml]' via location 'optional:classpath:/'] is ignored. Did you mean 'kardx.mask-sensitive-headers'? Supported properties are listed in docs/configuration.md.
@@ -295,11 +311,20 @@ yml 로는 `mask-sensitive-headers: true`, `masked-headers: X-Api-Key`, `masked-
 - 인증 헤더(`Authorization`, `Proxy-Authorization`)는 방식은 남기고 값만 가립니다: `Bearer ****`. `masking.masker` 를 정하면 값 전체가 든 `MaskTarget` 을 받습니다. 가리는 쿠키마다(`location = COOKIE`, `cookieName` 있음), 가리는 쿼리·폼 파라미터에도(`location = PARAMETER`, `name` 이 파라미터 이름) 불리고, 파라미터 값에는 방식 앞부분이 없으므로 값의 앞 몇 글자를 남기는 마스커는 파라미터 토큰의 일부를 드러냅니다. 위 예시처럼 `location` 과 `name` 으로 가르세요.
 - `Cookie`, `Set-Cookie` 는 쿠키마다 값만 가리고 이름과 속성은 남깁니다 (`SESSION=****; Path=/; HttpOnly`). curl 스니펫의 `--cookie` 도 같이 가립니다.
 - HTTP 스니펫, WebSocket·STOMP 메시지 스니펫에 같은 규칙이 적용됩니다.
-- **쿼리·폼 파라미터.** 브라우저 `EventSource`·WebSocket 처럼 헤더를 보낼 수 없는 클라이언트는 토큰을 쿼리(`?access_token=...`)로 보내고, OAuth 토큰 요청·로그인 폼은 `password`·`client_secret` 을 `application/x-www-form-urlencoded` 본문으로 보냅니다(MockMvc POST 의 `.param(...)` 은 이 본문이 됩니다). `masking.queryParameters` 의 파라미터 값은 HTTP 문서화(`andDocument`)의 요청 URI, 폼 본문, multipart 의 파일이 아닌 파트에서 가려지므로 curl·httpie·http-request·request-body 스니펫과 OpenAPI 예시에 `access_token=****`, `password=****` 로 나옵니다. 파라미터 이름·순서와 다른 파라미터는 그대로이고 `Content-Length` 는 가린 본문에 맞춥니다. JSON 본문의 필드는 `@Masked` 로 가립니다. WireMock 매핑에서는 가린 파라미터가 아무 값이나 맞추므로(`"matches": ".*"`) 스텁을 그대로 쓸 수 있습니다. 이름은 대소문자를 구분하지 않습니다. `masking.masker` 를 정하면 `location = PARAMETER` 와 파라미터 이름·값으로 부릅니다.
+- **쿼리·폼 파라미터.** 브라우저 `EventSource`·WebSocket 처럼 헤더를 보낼 수 없는 클라이언트는 토큰을 쿼리(`?access_token=...`)로 보내고, OAuth 토큰 요청·로그인 폼은 `password`·`client_secret` 을 `application/x-www-form-urlencoded` 본문으로 보냅니다(MockMvc POST 의 `.param(...)` 은 이 본문이 됩니다).
+  - `masking.queryParameters` 의 파라미터 값은 HTTP 문서화(`andDocument`)의 요청 URI, 폼 본문, multipart 의 파일이 아닌 파트에서 가려지므로 curl·httpie·http-request·request-body 스니펫과 OpenAPI 예시에 `access_token=****`, `password=****` 로 나옵니다.
+  - 파라미터 이름·순서와 다른 파라미터는 그대로이고 `Content-Length` 는 가린 본문에 맞춥니다.
+  - JSON 본문의 필드는 `@Masked` 로 가립니다.
+  - WireMock 매핑에서는 가린 파라미터가 아무 값이나 맞추므로(`"matches": ".*"`) 스텁을 그대로 쓸 수 있습니다.
+  - 이름은 대소문자를 구분하지 않습니다. `masking.masker` 를 정하면 `location = PARAMETER` 와 파라미터 이름·값으로 부릅니다.
 - `masking.maskSensitive()`(yml `mask-sensitive-headers: true`)는 `MaskingSettings.SENSITIVE_QUERY_PARAMETERS` 도 더합니다: `access_token`, `id_token`, `refresh_token`, `token`, `api_key`, `apikey`, `client_secret`, `client_assertion`, `password`, `passwd`, `current_password`, `new_password`, `signature`, `sig`, `X-Amz-Signature`, `X-Amz-Security-Token`, `X-Goog-Signature`. 그래서 이 설정을 켜면 `?access_token=demo-token` 이나 `password=...` 로그인 폼을 보내는 테스트의 문서는 `access_token=****`, `password=****` 가 됩니다. yml 키 `mask-sensitive-headers` 도 이름과 달리 이 파라미터들을 가립니다.
 - AsyncAPI 문서와 뷰어는 배포되는 산출물이라, 이 설정과 상관없이 `Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie` 값을 항상 가립니다.
 - 이 기능은 문서에 찍히는 헤더 값을 가립니다. 앱이 응답 본문의 값을 가려서 내보낸다는 사실(이름 `홍*동` 등)을 문서에 적으려면 [마스킹되는 필드 표시](http-api.md#마스킹되는-필드-표시)(`@Masked`)를 씁니다.
-- **Kotlin 기본값.** Kotlin 클래스에서 추출한 요청 필드·파라미터는 생성자 기본값을 문서에 냅니다(`val size: Int = 20` → `Default: 20`, OpenAPI `default`). `@Masked` 필드(와 `masking.annotations` 가 붙은 필드)의 기본값은 내지 않고, 두 번 계산해 값이 다른 기본값도 뺍니다: 랜덤 ID·현재 시각, 그리고 다른 생성자 파라미터에서 계산한 기본값(`val pageSize: Int = limit`)입니다. 두 번째 계산은 필수 파라미터에 다른 자리 값을 넣기 때문입니다. 이를 위해 클래스마다 객체를 두 번 만들므로 `init` 블록의 부수 효과도 두 번 실행됩니다. 컬렉션 파라미터에서 계산한 기본값(`val count: Int = items.size`)은 두 번 다 빈 컬렉션이라 구별하지 못합니다. 환경 변수·설정에서 읽는 기본값(`val clientId: String = System.getenv("CLIENT_ID") ?: "local"`)은 상수와 구별할 수 없어 테스트를 돌릴 때의 값이 **그대로 나갑니다**. 요청 클래스의 생성자 기본값에 비밀 값을 두지 말거나 그 필드에 `@Masked` 를 붙이세요 ([Kotlin 기본값](http-api.md#기본값예시제약-설명)).
+- **Kotlin 기본값.** Kotlin 클래스에서 추출한 요청 필드·파라미터는 생성자 기본값을 문서에 냅니다(`val size: Int = 20` → `Default: 20`, OpenAPI `default`).
+  - `@Masked` 필드(와 `masking.annotations` 가 붙은 필드)의 기본값은 내지 않습니다.
+  - 두 번 계산해 값이 다른 기본값은 뺍니다: 랜덤 ID·현재 시각, 그리고 다른 생성자 파라미터에서 계산한 기본값(`val pageSize: Int = limit`)입니다. 두 번째 계산은 필수 파라미터에 다른 자리 값을 넣기 때문입니다. 이를 위해 클래스마다 객체를 두 번 만들므로 `init` 블록의 부수 효과도 두 번 실행됩니다.
+  - 컬렉션 파라미터에서 계산한 기본값(`val count: Int = items.size`)은 두 번 다 빈 컬렉션이라 구별하지 못합니다.
+  - 환경 변수·설정에서 읽는 기본값(`val clientId: String = System.getenv("CLIENT_ID") ?: "local"`)은 상수와 구별할 수 없어 테스트를 돌릴 때의 값이 **그대로 나갑니다**. 요청 클래스의 생성자 기본값에 비밀 값을 두지 말거나 그 필드에 `@Masked` 를 붙이세요 ([Kotlin 기본값](http-api.md#기본값예시제약-설명)).
 
 ## 실험 API
 

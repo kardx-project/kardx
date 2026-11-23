@@ -7,6 +7,15 @@
 <!-- toc -->
 **Contents**
 
+- [Details](#details)
+  - [Type mismatch causes](#type-mismatch-causes)
+  - [Comment description checklist](#comment-description-checklist)
+  - [Parameter descriptions from handler comments](#parameter-descriptions-from-handler-comments)
+  - [Settings in parallel tests](#settings-in-parallel-tests)
+  - [Spring Security filter chain](#spring-security-filter-chain)
+  - [Parameter types shown as string](#parameter-types-shown-as-string)
+  - [Documented endpoint counted as undocumented](#documented-endpoint-counted-as-undocumented)
+  - [Endpoints missing from the inventory](#endpoints-missing-from-the-inventory)
 - [Error codes](#error-codes)
 <!-- /toc -->
 
@@ -46,12 +55,12 @@
 | `Cannot resolve configuration property 'kardx...'` in yml | The IDE hasn't read the configuration metadata in the library jar yet. Sync Gradle again (Reload All Gradle Projects) and it goes away. IntelliJ doesn't read metadata from RUNTIME-scoped dependencies (`developmentOnly`), so the plugin also adds the startup log module to `compileOnly`. If you declared the module yourself, also add `compileOnly(...) { isTransitive = false }` ([Startup log](build.md#startup-log)) |
 | `Unresolved reference 'Description'` in production code | The Gradle plugin adds annotations to `compileOnly`. With `addDependencies = false` or without the plugin, add it to `compileOnly` yourself |
 | `DocumentationMismatchException: Documented response fields do not match ...` | The documented fields or parameters differ from the actual ones. Check the list, the DSL lines to paste and the hints in the message. The original REST Docs message is in `Caused by` ([Verification failure messages](http-api.md#verification-failure-messages)) |
-| `DocumentationMismatchException: ... Type mismatch: - price: documented Number, actual String` | The documented field type differs from the actual JSON type (REST Docs' `FieldTypesDoNotMatchException` is in `Caused by`). Fix the type with the DSL line in the message, or remove the cause. If numbers are strings, look for `@JsonFormat(shape = JsonFormat.Shape.STRING)`, `ToStringSerializer` or `JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS`; if a date documented as a string is a number or array, turn off `WRITE_DATES_AS_TIMESTAMPS`. If the actual value is `Null`, make the property nullable or use `isOptional true` (`optionalAt("...")` for extracted lists); if array elements have different types (`Varies`), document them as `VARIES` ([Verification failure messages](http-api.md#verification-failure-messages)) |
+| `DocumentationMismatchException: ... Type mismatch: - price: documented Number, actual String` | The documented field type differs from the actual JSON type (REST Docs' `FieldTypesDoNotMatchException` is in `Caused by`). Fix the type with the DSL line in the message, or remove the cause ([common causes](#type-mismatch-causes)) |
 | You want to see what table an extraction result produces without running a test | `println(responseFieldsOf<T>().describe())` ([Previewing extraction results](http-api.md#previewing-extraction-results)) |
-| A KDoc or Javadoc comment isn't picked up as a description | Check in this order: (1) the feature is on: it is experimental and off by default, so set `kardx { sourceDocs { enabled = true } }` in the Gradle plugin; the per-item switch for that kind of comment is on (`fieldDocs`, `enumDocs`, `schemaDescriptions`, `paramDocs`, all `true` by default, `methodDocs` `false` by default); and yml `kardx.source-docs.enabled` (default `true`) is not `false`; (2) the class is in a `main` source set of this project or of a `project(...)` dependency (with `sourceDocs { includeProjectDependencies = true }`, the default), not in test sources; (3) the DTO doesn't come from a jar, which has no sources to read (use `@Description` or `description-annotations`); (4) the field has no `@Description` or listed annotation, which wins over the comment; (5) the declaration is one the scanner doesn't collect or uses syntax the lightweight scanner skips ([Known limitations](http-api.md#known-limitations)). Skipped declarations are not logged one by one (`--debug` only shows a file whose reading stopped with an error), so open `build/kardx/source-docs/source-docs.json` and look for the class (JVM binary name, `Outer$Inner`) and the property. Controller comments are used only with `methodDocs = true` and need a known handler, so RestTestClient and functional routes get none ([Descriptions from KDoc/Javadoc](http-api.md#descriptions-from-kdocjavadoc)) |
-| `kardx[KDX-101]: path parameter 'id' declared by name only (or with FromParamTag), but no description was found.` | The test declares `pathParameters("id")` (or `FromParamTag`) and no `@param id` was found. Add `@param id` to the KDoc/Javadoc of the handler method and turn on the experimental source docs (`kardx { sourceDocs { enabled = true } }`, with `paramDocs` left at `true`), or describe it in the test (`"id" pathMeans "..."`). The `@param` lookup needs the Gradle plugin (`apiDocsSourceDocs`) and a known handler: RestTestClient, functional routes and `bindToServer` never know it ([Parameters declared by name → method `@param`](http-api.md#parameters-declared-by-name--method-param)) |
+| A KDoc or Javadoc comment isn't picked up as a description | The feature is experimental and off by default, and a comment is used only when several conditions hold. Go through the [checklist](#comment-description-checklist) in order |
+| `kardx[KDX-101]: path parameter 'id' declared by name only (or with FromParamTag), but no description was found.` | The test declares `pathParameters("id")` (or `FromParamTag`) and no `@param id` was found. Add `@param id` to the handler's KDoc/Javadoc, or describe the parameter in the test ([details](#parameter-descriptions-from-handler-comments)) |
 | Warning `kardx[KDX-501]: A and B both write X.adoc and share snippet directory 'x'. Rename one of them.` | Two test classes in different packages have the same simple name, so their documents overwrite each other. Rename one class ([Automatic document generation](asciidoc.md#automatic-document-generation)) |
-| In parallel tests, one class's documents are built with another class's settings (yml or `configure` wrappers, masking, `document.commonIncludeFiles`, and so on) | Settings are a single JVM-wide value. Each test removes only the `configure` it added, so tests don't erase each other's settings, but while they run at the same time, blocks added by other tests and yml values from other contexts (profiles, `@TestPropertySource`) apply together. Give per-test values with `withSettings`, or run those classes one after another (`@Execution(ExecutionMode.SAME_THREAD)`, `@ResourceLock`). If you run methods of the same class in parallel, the settings of the last test that writes the document are also undefined ([Parallel execution](configuration.md#parallel-execution)) |
+| In parallel tests, one class's documents are built with another class's settings (yml or `configure` wrappers, masking, `document.commonIncludeFiles`, and so on) | Settings are a single JVM-wide value, so tests that run at the same time see each other's settings. Give per-test values with `withSettings`, or run those classes one after another ([details](#settings-in-parallel-tests)) |
 | A value set with `configure` remains after the test ends | It was called somewhere other than the test thread (threads or thread pools the test created, `@BeforeAll`, the body or `beforeSpec` of a Kotest spec in isolation mode). Call it on the test thread (`@BeforeEach` or the test body, Kotest `beforeEach`) or `reset()` in `@AfterAll` ([Configuration](configuration.md#how-to-change-settings), [Kotest](kotest.md#same-behavior-as-the-junit-extension)) |
 | The section order in the generated document is not what you want | The default is method name order. Use `@TestMethodOrder(MethodOrderer.OrderAnnotation::class)` + `@Order` ([Section order](asciidoc.md#section-order)) |
 | The result of `mockMvc.get("/x") { }` or of `MockMvcTester` has no `andDocument` | Import `io.github.kardx.mockmvc.andDocument`; that one import covers `ResultActions`, `ResultActionsDsl` and `MvcTestResult`. If the IDE imported another `andDocument` (for example the WebTestClient one), replace that import |
@@ -72,7 +81,7 @@
 | `kardx.description-annotations: class '...' not found` | The class name has a typo, or the annotation's dependency is missing. Aliases (`swagger`, `jackson`) also need the dependency ([Errors and fixes](http-api.md#errors-and-fixes)) |
 | Constraints are missing from the documents | Check that `jakarta.validation-api` is on the classpath and that your custom template didn't remove the Constraints column |
 | `AbstractMethodError` in Asciidoctor (Boot 4) | You need AsciidoctorJ 3. The Gradle plugin sets it automatically; if you configured it yourself, add `asciidoctorj { setVersion("3.0.1") }` |
-| An API that requires authentication is documented as 200 without authentication, or the warning `kardx[KDX-006]: the application context has a springSecurityFilterChain bean, but restDocsMockMvc does not apply it` | `restDocsMockMvc` doesn't apply the Spring Security filter chain by default. If the API is protected by Spring Security, turn it on with `kardx.apply-spring-security: true`, add `spring-security-test`, and authenticate with `with(jwt())` or `with(user(...))`. If documenting without the filter chain is intended, set `apply-spring-security: false` explicitly and the warning goes away. This setting is read when the MockMvc is created, so set it before calling `restDocsMockMvc` ([Spring Security](http-api.md#spring-security)) |
+| An API that requires authentication is documented as 200 without authentication, or the warning `kardx[KDX-006]: the application context has a springSecurityFilterChain bean, but restDocsMockMvc does not apply it` | `restDocsMockMvc` doesn't apply the Spring Security filter chain by default. Turn it on with `kardx.apply-spring-security: true`, or set it to `false` explicitly if leaving it off is intended ([details](#spring-security-filter-chain)) |
 | An API authenticated with `with(jwt())` or `@WithMockUser` has no Swagger Authorize | The request has no `Authorization` header, so no security scheme was created. Declare one with `openApi { bearerAuth() }` (`basicAuth()` for Basic) ([Security schemes for tests that authenticate without a header](http-api.md#security-schemes-for-tests-that-authenticate-without-a-header)) |
 | The response body in the documents is `<binary: 1234 bytes>` | For bodies that aren't text (PDF, images, `application/octet-stream` …), only the size is kept. This is intended; the `Response File` table next to it shows the media type, file name, and size, and `responseFile("...")` adds a description. If a text body shows up like this, check the response `Content-Type` ([File downloads](http-api.md#file-downloads)) |
 | Build log `OpenAPI schema names: Item → OrderItem (...)` | The Gradle plugin split schemas that have the same name but different structures. If you want a specific name, use `openApi { responseSchema = "..." }` ([Schema names](http-api.md#schema-names)) |
@@ -94,7 +103,7 @@
 | A Kotest spec's document is missing from the index | No test in it was documented, or all of them failed. If you set `index.packageName`, the spec may be outside that package (including subpackages). If you remove the setting, every spec that produced a document is included ([Index and OpenAPI](kotest.md#index-and-openapi)) |
 | `kardx.*` in yml isn't applied to Kotest specs | The Kotest Spring extension (6.x `io.kotest:kotest-extensions-spring`, 5.x `io.kotest.extensions:kotest-extensions-spring`) isn't applied to the spec. For 6.x, register it with `@ApplyExtension(SpringExtension::class)` or in the project config; for 5.x, in the project config or the spec's `override fun extensions()` ([Using with Spring](kotest.md#using-with-spring)) |
 | `*` or backticks in `@DisplayName` render as bold or code | They are interpreted as AsciiDoc formatting. Escape them as `\*` or wrap the text in `+...+` ([Snippets and sections by test shape](asciidoc.md#snippets-and-sections-by-test-shape)) |
-| Path variables or parameters appear as `type: string` in OpenAPI, and a numeric default value is `"20"` | The type of a hand-written parameter comes from the controller parameter, but the handler of this request is unknown: a WebTestClient without `recordHandlers()` (`bindToController`, `bindToRouterFunction`), functional routes, or `bindToServer`. Use a client that records handlers (`restDocsWebTestClient`, `recordHandlers()`) or add `ofType Long::class`. It's also `string` when the controller parameter is a `String` or has a different name (Java compiled without `-parameters`) ([Parameter types come from the handler](http-api.md#parameter-types-come-from-the-handler)) |
+| Path variables or parameters appear as `type: string` in OpenAPI, and a numeric default value is `"20"` | The type of a hand-written parameter comes from the controller parameter, but the handler of this request is unknown. Use a client that records handlers (`restDocsWebTestClient`, `recordHandlers()`) or add `ofType Long::class` ([details](#parameter-types-shown-as-string)) |
 | Warning `kardx[KDX-204]: GET /... in ... does not document path variable(s) id` | A path variable of the URL template isn't documented in the block, so it appears in OpenAPI without a description. Paste the `pathParameters(...)` line at the end of the message into the `andDocument` block. The warning appears once per test ([Parameter types come from the handler](http-api.md#parameter-types-come-from-the-handler)) |
 | In Swagger UI, APIs pile up in the `default` group / `summary` is empty | Operations documented with this library's `andDocument` always get a tag (the document class title) and a summary (the test display name). If they are empty, the operation was documented outside this library (a test that calls epages `MockMvcRestDocumentationWrapper.document` or `resource(...)` directly). Move it to `andDocument` ([OpenAPI tags and summaries](http-api.md#openapi-tags-and-summaries)) |
 | The summary of an operation documented by several tests is one test's name (`Pay by bank transfer`), or the build warns `OpenAPI summary/description: ... tests declare different summary values` | The merged operation takes the representative test's name. Set the operation name with `openApi { summary = "..." }`, using the same value in every test of that operation; with different values the first in snippet directory order wins ([OpenAPI tags and summaries](http-api.md#openapi-tags-and-summaries)) |
@@ -119,12 +128,126 @@
 | ``Expected 3 stream events within PT5S but received 1. Increase `timeout`, or trigger the events in `whileStreaming`.`` | `performStream` waited for `eventCount` events and fewer arrived. Trigger the events inside `whileStreaming`, lower `eventCount`, or pass a longer `timeout` ([Streams that never end](messaging.md#streams-that-never-end)) |
 | `--security expects name=bearer\|basic\|apiKey:<header\|query\|cookie>:<name>, got ...`, or `kardx.asyncApi.apiKeyHeader needs an HTTP header name` | The scheme value is malformed. Use `bearer`, `basic` or `apiKey:<header\|query\|cookie>:<name>` ([Authentication in AsyncAPI](messaging.md#authentication-in-asyncapi)) |
 | AsyncAPI Try it out: plain WebSocket or SSE connection is rejected although a token is entered | Browsers can't set headers on the WebSocket handshake or on `EventSource`, so header credentials are sent only over STOMP. Check "Send as a query parameter for WebSocket and SSE", and make the server accept the token from that parameter ([Authentication in AsyncAPI](messaging.md#authentication-in-asyncapi)) |
-| `apiDocsCoverage` reports an endpoint as undocumented although a test documents it | Coverage counts an endpoint as documented when an OpenAPI fragment (`resource.json`) has the same method and path template. Tests left out of OpenAPI (`openApi { excluded = true }`, `openApi.enabled = false`) count too, by their actual request path. Check that the request was built from a template (`get("/api/users/{id}", 1)`, not the WebTestClient `uri { }` builder, which records the actual path), that the method matches, and, with API versions, that the documented version is the endpoint's version ([Documentation coverage](checks.md#documentation-coverage)) |
-| An endpoint you know is undocumented doesn't appear in the coverage report, or `apiDocsCoverage` prints `no endpoint inventory` | The inventory holds only what the test application contexts contain. Standalone setups (`standaloneSetup`, `bindToController`, `bindToRouterFunction`) have no context to read, functional routes (`RouterFunction`, `router { }`) aren't read, and slice tests (`@WebMvcTest(UserController::class)`) list only their controllers. Add one `@SpringBootTest` documentation test so every controller is listed ([Endpoints that aren't in the inventory](checks.md#endpoints-that-arent-in-the-inventory)) |
+| `apiDocsCoverage` reports an endpoint as undocumented although a test documents it | Coverage matches the endpoint against OpenAPI fragments (`resource.json`) by method and path template. Check the request path, the method and the API version ([details](#documented-endpoint-counted-as-undocumented)) |
+| An endpoint you know is undocumented doesn't appear in the coverage report, or `apiDocsCoverage` prints `no endpoint inventory` | The inventory holds only what the test application contexts contain. Add one `@SpringBootTest` documentation test so every controller is listed ([details](#endpoints-missing-from-the-inventory)) |
 | Build warning that an operation uses `oauth2` or `openIdConnect` but `openApiSecurity` doesn't configure it, and Swagger UI shows no OAuth2 login | A test declared `openApi { oauth2(...) }` or `openIdConnect(...)`, but the build has no flows or discovery URL for it, so the security requirement can't be written. Add `kardx { openApiSecurity { oauth2 { ... } } }` ([OAuth2 and OpenID Connect](http-api.md#oauth2-and-openid-connect)) |
 | Build warning about API versions left out of the spec, and Swagger UI shows only the newest version of an endpoint | The same path and method are documented in several versions, and one spec keeps only the highest. Set `apiVersioning { splitSpecs = true }` for one spec per version ([API versioning](openapi.md#api-versioning)) |
 | A Kotlin default value (`val size: Int = 20`) doesn't appear as `default` | Defaults are read only when extracting requests (`parametersOf<T>()`, `requestFields<T>()`), not `responseFields<T>()`. Only strings, numbers, booleans and enums are read, and only when the library can create an instance from the defaults. Otherwise add `withDefaultValue "20"` to the entry ([Defaults, examples, and constraint notes](http-api.md#defaults-examples-and-constraint-notes)) |
 | `ParameterResolutionException: Discovered multiple competing ParameterResolvers` for a `MockMvc` or `WebTestClient` test method parameter | Another JUnit extension of yours also resolves that type, and `AutoRestDocumentationExtension` now fills these parameters too. Remove your resolver from documentation tests, or don't take the client as a parameter: keep it in a field built with `restDocsMockMvc(context)` ([Getting started](getting-started.md#9-sharing-setup-optional)) |
+
+## Details
+
+Rows of the table above that need more than a line or two.
+
+### Type mismatch causes
+
+For `Type mismatch: - price: documented Number, actual String`. Common causes, by what the actual value looks like:
+
+- Numbers are strings: look for `@JsonFormat(shape = JsonFormat.Shape.STRING)`, `ToStringSerializer` or
+  `JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS`.
+- A date documented as a string is a number or array: turn off `WRITE_DATES_AS_TIMESTAMPS`.
+- The actual value is `Null`: make the property nullable or use `isOptional true` (`optionalAt("...")` for
+  extracted lists).
+- Array elements have different types (`Varies`): document them as `VARIES`.
+
+See [Verification failure messages](http-api.md#verification-failure-messages).
+
+### Comment description checklist
+
+When a KDoc or Javadoc comment isn't picked up as a description, check in this order:
+
+1. The feature is on. It is experimental and off by default, so set `kardx { sourceDocs { enabled = true } }` in
+   the Gradle plugin. The per-item switch for that kind of comment must be on too (`fieldDocs`, `enumDocs`,
+   `schemaDescriptions`, `paramDocs`, all `true` by default, `methodDocs` `false` by default), and yml
+   `kardx.source-docs.enabled` (default `true`) must not be `false`.
+2. The class is in a `main` source set of this project or of a `project(...)` dependency (with
+   `sourceDocs { includeProjectDependencies = true }`, the default), not in test sources.
+3. The DTO doesn't come from a jar, which has no sources to read (use `@Description` or `description-annotations`).
+4. The field has no `@Description` or listed annotation, which wins over the comment.
+5. The declaration is one the scanner collects, and it doesn't use syntax the lightweight scanner skips
+   ([Known limitations](http-api.md#known-limitations)).
+
+Skipped declarations are not logged one by one (`--debug` only shows a file whose reading stopped with an error).
+To see what was read, open `build/kardx/source-docs/source-docs.json` and look for the class (JVM binary name,
+`Outer$Inner`) and the property.
+
+Controller comments are used only with `methodDocs = true` and need a known handler, so RestTestClient and
+functional routes get none ([Descriptions from KDoc/Javadoc](http-api.md#descriptions-from-kdocjavadoc)).
+
+### Parameter descriptions from handler comments
+
+For `kardx[KDX-101]`. The test declares `pathParameters("id")` (or `FromParamTag`) and no `@param id` was found.
+Fix it one of two ways:
+
+- Add `@param id` to the KDoc/Javadoc of the handler method and turn on the experimental source docs
+  (`kardx { sourceDocs { enabled = true } }`, with `paramDocs` left at `true`).
+- Describe it in the test: `"id" pathMeans "..."`.
+
+The `@param` lookup needs the Gradle plugin (`apiDocsSourceDocs`) and a known handler: RestTestClient, functional
+routes and `bindToServer` never know it
+([Parameters declared by name → method `@param`](http-api.md#parameters-declared-by-name--method-param)).
+
+### Settings in parallel tests
+
+Settings are a single JVM-wide value. Each test removes only the `configure` it added, so tests don't erase each
+other's settings. But while they run at the same time, blocks added by other tests and yml values from other
+contexts (profiles, `@TestPropertySource`) apply together.
+
+- Give per-test values with `withSettings`.
+- Or run those classes one after another (`@Execution(ExecutionMode.SAME_THREAD)`, `@ResourceLock`).
+
+If you run methods of the same class in parallel, the settings of the last test that writes the document are
+also undefined ([Parallel execution](configuration.md#parallel-execution)).
+
+### Spring Security filter chain
+
+`restDocsMockMvc` doesn't apply the Spring Security filter chain by default (warning `kardx[KDX-006]`).
+
+- If the API is protected by Spring Security, turn it on with `kardx.apply-spring-security: true`, add
+  `spring-security-test`, and authenticate with `with(jwt())` or `with(user(...))`.
+- If documenting without the filter chain is intended, set `apply-spring-security: false` explicitly and the
+  warning goes away.
+
+This setting is read when the MockMvc is created, so set it before calling `restDocsMockMvc`
+([Spring Security](http-api.md#spring-security)).
+
+### Parameter types shown as string
+
+The type of a hand-written parameter comes from the controller parameter. The handler of the request is unknown
+with:
+
+- a WebTestClient without `recordHandlers()` (`bindToController`, `bindToRouterFunction`)
+- functional routes
+- `bindToServer`
+
+Use a client that records handlers (`restDocsWebTestClient`, `recordHandlers()`) or add `ofType Long::class`.
+
+The type is also `string` when the controller parameter is a `String` or has a different name (Java compiled
+without `-parameters`) ([Parameter types come from the handler](http-api.md#parameter-types-come-from-the-handler)).
+
+### Documented endpoint counted as undocumented
+
+Coverage counts an endpoint as documented when an OpenAPI fragment (`resource.json`) has the same method and path
+template. Tests left out of OpenAPI (`openApi { excluded = true }`, `openApi.enabled = false`) count too, by their
+actual request path. Check that:
+
+- the request was built from a template (`get("/api/users/{id}", 1)`, not the WebTestClient `uri { }` builder,
+  which records the actual path),
+- the method matches,
+- with API versions, the documented version is the endpoint's version.
+
+See [Documentation coverage](checks.md#documentation-coverage).
+
+### Endpoints missing from the inventory
+
+The inventory holds only what the test application contexts contain:
+
+- Standalone setups (`standaloneSetup`, `bindToController`, `bindToRouterFunction`) have no context to read.
+- Functional routes (`RouterFunction`, `router { }`) aren't read.
+- Slice tests (`@WebMvcTest(UserController::class)`) list only their controllers.
+
+Add one `@SpringBootTest` documentation test so every controller is listed
+([Endpoints that aren't in the inventory](checks.md#endpoints-that-arent-in-the-inventory)).
 
 ## Error codes
 

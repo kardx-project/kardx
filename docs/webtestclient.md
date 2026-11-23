@@ -280,5 +280,11 @@ Limits:
 
 - **Boot 4 / Spring Framework 7 only.** The classes are in the same jar, compiled separately against Spring 7, and loaded only when you call them. Boot 3 has no `RestTestClient`.
 - **Multipart parts are not split.** A multipart request is documented as its raw body: `requestParts(...)` and `requestPartFields(...)` find no parts, and OpenAPI gets no multipart schema. Document multipart APIs with MockMvc.
-- **No handler-based defaults.** The library doesn't learn which controller method handled the request, so the operationId falls back to the test name, `<class-dash>.<method-dash>` (`coupon-list-docs-test.list-coupons`). Set `openApi { operationId = "..." }` in the block (or use the `path` rule, see [operationId](http-api.md#operationid)). For the same reason, `deprecated` isn't inferred from the controller's `@Deprecated` (set `deprecated(...)` in the block), and parameter types aren't taken from the handler (parameters without `ofType` are `string`). There is no Spring Framework 7 API version either (no `x-api-version`, [API versioning](openapi.md#api-versioning)), and these tests add nothing to the endpoint inventory of [documentation coverage](checks.md#documentation-coverage). The Boot 4 sample `samples/spring-boot-4/src/test/kotlin/com/example/restdocs/resttestclient/CouponListDocsTest.kt` shows a client bound to the running server (`bindToServer`) with its operationId set.
+- **No handler-based defaults.** The library doesn't learn which controller method handled the request, so the operationId falls back to the test name, `<class-dash>.<method-dash>` (`coupon-list-docs-test.list-coupons`).
+  - Set `openApi { operationId = "..." }` in the block (or use the `path` rule, see [operationId](http-api.md#operationid)).
+  - For the same reason, `deprecated` isn't inferred from the controller's `@Deprecated` (set `deprecated(...)` in the block).
+  - Parameter types aren't taken from the handler (parameters without `ofType` are `string`).
+  - There is no Spring Framework 7 API version either (no `x-api-version`, [API versioning](openapi.md#api-versioning)).
+  - These tests add nothing to the endpoint inventory of [documentation coverage](checks.md#documentation-coverage).
+  - The Boot 4 sample `samples/spring-boot-4/src/test/kotlin/com/example/restdocs/resttestclient/CouponListDocsTest.kt` shows a client bound to the running server (`bindToServer`) with its operationId set.
 - **Relative URIs** (a client bound to MockMvc without `baseUrl`) are resolved against `http://localhost`, as MockMvc documents do.

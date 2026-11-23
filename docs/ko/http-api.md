@@ -824,7 +824,11 @@ dependencies {
 
 > **실험 기능이며 기본으로 꺼져 있습니다.** 주석은 Kotlin·Java 컴파일러가 아니라 가벼운 스캐너가 읽으므로 놓치는 선언이 있습니다 ([알려진 한계](#알려진-한계)). 설정과 결과는 아직 바뀔 수 있습니다.
 
-DTO 와 컨트롤러에 KDoc·Javadoc 을 이미 달아 두었다면 그 주석도 설명으로 쓸 수 있습니다. Gradle 플러그인에서 `kardx { sourceDocs { enabled = true } }` 로 켭니다 ([켜기](#켜기)). 그러면 `apiDocsSourceDocs` 태스크가 `test` 전에 소스에서 주석을 읽고([Gradle 플러그인](build.md#gradle-플러그인)), 테스트는 어노테이션으로 설명을 찾지 못한 곳에 그 주석을 씁니다. 켜면 타입·프로퍼티·enum 상수 주석과 핸들러 메서드의 `@param` 태그를 씁니다. `@param` 은 테스트가 `pathParameters("id")` 처럼 이름만 적은 파라미터의 설명이 됩니다 ([이름만 적은 파라미터 → 메서드 `@param`](#이름만-적은-파라미터--메서드-param)). 컨트롤러 메서드 주석을 OpenAPI summary·description 으로 쓰려면 `methodDocs = true` 도 필요합니다 ([컨트롤러 메서드 → OpenAPI summary·description](#컨트롤러-메서드--openapi-summarydescription)).
+DTO 와 컨트롤러에 KDoc·Javadoc 을 이미 달아 두었다면 그 주석도 설명으로 쓸 수 있습니다. Gradle 플러그인에서 `kardx { sourceDocs { enabled = true } }` 로 켭니다 ([켜기](#켜기)).
+
+그러면 `apiDocsSourceDocs` 태스크가 `test` 전에 소스에서 주석을 읽고([Gradle 플러그인](build.md#gradle-플러그인)), 테스트는 어노테이션으로 설명을 찾지 못한 곳에 그 주석을 씁니다.
+
+켜면 타입·프로퍼티·enum 상수 주석과 핸들러 메서드의 `@param` 태그를 씁니다. `@param` 은 테스트가 `pathParameters("id")` 처럼 이름만 적은 파라미터의 설명이 됩니다 ([이름만 적은 파라미터 → 메서드 `@param`](#이름만-적은-파라미터--메서드-param)). 컨트롤러 메서드 주석을 OpenAPI summary·description 으로 쓰려면 `methodDocs = true` 도 필요합니다 ([컨트롤러 메서드 → OpenAPI summary·description](#컨트롤러-메서드--openapi-summarydescription)).
 
 ```kotlin
 /** 사용자. */
@@ -1959,7 +1963,9 @@ mockMvc.perform(put("/api/v1/products/{id}/image", 1L).contentType(MediaType.IMA
 
 ### OpenAPI 결과
 
-본문 필드가 없으므로 epages 는 빈 객체 스키마를 만듭니다. Gradle 플러그인이 `openapi3` 뒤에 JSON 이 아닌 본문의 빈 스키마를 `type: string` 으로 바꿉니다. `text/*` 가 아니면 `format: binary` 를 붙이고, 예시(`examples`)를 지우고, 미디어 타입의 `charset` 파라미터를 뺍니다 (`application/pdf;charset=UTF-8` → `application/pdf`. 바이너리 본문에는 문자 집합이 없습니다). `text/plain`·`text/csv` 는 `type: string` 이고 예시와 미디어 타입이 그대로 남습니다. `responseFile`·`requestFile` 의 설명은 본문 스키마의 `description` 이 되고, 파일 응답에 문서화한 `Content-Disposition` 헤더에는 실제 값이 `example` 로 들어갑니다. 문서화한 응답 헤더는 응답 `headers` 가 됩니다.
+본문 필드가 없으므로 epages 는 빈 객체 스키마를 만듭니다. Gradle 플러그인이 `openapi3` 뒤에 JSON 이 아닌 본문의 빈 스키마를 `type: string` 으로 바꿉니다. `text/*` 가 아니면 `format: binary` 를 붙이고, 예시(`examples`)를 지우고, 미디어 타입의 `charset` 파라미터를 뺍니다 (`application/pdf;charset=UTF-8` → `application/pdf`. 바이너리 본문에는 문자 집합이 없습니다). `text/plain`·`text/csv` 는 `type: string` 이고 예시와 미디어 타입이 그대로 남습니다.
+
+`responseFile`·`requestFile` 의 설명은 본문 스키마의 `description` 이 되고, 파일 응답에 문서화한 `Content-Disposition` 헤더에는 실제 값이 `example` 로 들어갑니다. 문서화한 응답 헤더는 응답 `headers` 가 됩니다.
 
 ```yaml
 /api/v1/products/{id}/manual:
@@ -2169,11 +2175,17 @@ epages 는 multipart 파트와 쿠키를 스펙에 넣지 않습니다. 라이�
 
 | 항목 | 결과 |
 |---|---|
-| operationId | 라이브러리가 남긴 후보로 정한다 ([operationId](#operationid)): 직접 정한 id 는 그대로, 규칙 id 는 겹친 것만 컨트롤러 이름·숫자를 붙인다. 테스트 이름 id(`test-name` 규칙, 핸들러를 모를 때)는 `/` 를 `.` 으로, 글자(한글 등 포함)·숫자·`.`·`_`·`-` 밖의 문자는 `-` 로 (`product-api-docs-test.get-product`, Kotest `user-spec.사용자-조회`), 겹치면 `-2`, `-3`. 여러 테스트가 합쳐진 operation 은 성공 응답 테스트의 후보를 쓰고, 테스트 이름 id 는 테스트 이름의 `-` 경계까지 공통인 부분(`get-product` + `get-product-not-found` → `get-product`), 없으면 성공 응답 테스트의 id (epages 0.19 처럼 id 를 이어 붙이지 않는다) |
+| operationId | 라이브러리가 남긴 후보로 정한다 ([operationId](#operationid)). 자세한 규칙은 표 아래 |
 | 최상위 `tags` | operation 의 태그를 순서대로 모은다. 테스트 클래스에 `@AsciiDescription` 이 있으면 그 태그의 `description` |
 | JSON 예시 | 문자열이 아니라 JSON 값. 스키마 검증 도구가 예시를 검사할 수 있다 |
 | 보안 요구사항 | 보안 스키마가 있는 문서에서 인증 헤더 없이 문서화한 operation 은 `security: []` (인증 없음). 보안 스키마가 없는 문서는 최상위에 `security: []` 한 번 (Redocly `security-defined`) |
 | API 버전 (Spring Framework 7) | `x-api-version`, 그리고 방식에 따라 버전 헤더나 쿼리 파라미터 ([API 버전](openapi.md#api-버전)) |
+
+operationId 를 정하는 규칙:
+
+- 직접 정한 id 는 그대로 쓰고, 규칙 id 는 겹친 것만 컨트롤러 이름·숫자를 붙입니다.
+- 테스트 이름 id(`test-name` 규칙, 핸들러를 모를 때)는 `/` 를 `.` 으로, 글자(한글 등 포함)·숫자·`.`·`_`·`-` 밖의 문자는 `-` 로 바꾸고(`product-api-docs-test.get-product`, Kotest `user-spec.사용자-조회`), 겹치면 `-2`, `-3` 을 붙입니다.
+- 여러 테스트가 합쳐진 operation 은 성공 응답 테스트의 후보를 씁니다. 테스트 이름 id 는 테스트 이름의 `-` 경계까지 공통인 부분(`get-product` + `get-product-not-found` → `get-product`)을, 없으면 성공 응답 테스트의 id 를 씁니다 (epages 0.19 처럼 id 를 이어 붙이지 않습니다).
 
 ### Gradle 플러그인 없이 쓸 때
 
@@ -2183,11 +2195,11 @@ epages 플러그인만 쓰면 위 보강이 없습니다. epages 가 직접 읽�
 
 | 함수 | 설명 |
 |---|---|
-| `restDocsMockMvc(context, provider)` | REST Docs 설정, UTF-8 필터를 적용한 MockMvc. 앱의 Jackson 매퍼 빈을 현재 스레드의 기본 매퍼로 씁니다. 요청·응답 본문 pretty print 와 사용자 전처리기([요청·응답 가공](customizing-snippets.md#요청응답-가공))는 `andDocument` 가 하므로 MockMvc 기본 전처리기로 등록하지 않습니다. 이 MockMvc 로 REST Docs 의 `document()` 를 직접 쓰면 본문이 pretty print 되지 않으니 `preprocessRequest(prettyPrint())`·`preprocessResponse(prettyPrint())` 를 함께 넘기세요 |
+| `restDocsMockMvc(context, provider)` | REST Docs 설정, UTF-8 필터를 적용한 MockMvc. 앱의 Jackson 매퍼 빈을 현재 스레드의 기본 매퍼로 씁니다. 전처리기 관련 주의는 표 아래 |
 | `jsonContent(body)` | 객체를 JSON 으로 직렬화하고 `Content-Type: application/json` 을 설정합니다. `String`·`CharSequence`(`StringBuilder` 등)는 이미 JSON 인 본문으로 보고 그대로(`jsonContent("""{"name":"홍길동"}""")`), `ByteArray` 는 UTF-8 문자열로 보냅니다 (WebSocket 메시지 payload 와 같은 규칙). `post(...)`, `multipart(...)` 빌더 모두에 쓸 수 있습니다 |
 | `ResultActions.andPrint()` | 요청·응답을 콘솔에 출력합니다. `andDo(MockMvcResultHandlers.print())` 와 같습니다. 모든 요청을 출력하려면 `print-requests: true` 를 씁니다 |
 | `ResultActions.andLog()` | 요청·응답을 로그(DEBUG)로 남깁니다. `andDo(MockMvcResultHandlers.log())` 와 같습니다 |
-| `ResultActions.andStatus(HttpStatus.NOT_FOUND)`, `andStatus(404)` | 응답 상태 코드 검증. `andExpect(status().isNotFound)` 와 같고 `MockMvcResultMatchers.status` import 가 필요 없습니다. `HttpStatusCode`(`HttpStatus` 상수 포함)나 숫자를 받고, 다르면 Spring `status()` 와 같은 메시지(`Response status expected:<404> but was:<200>`)로 실패합니다. 같은 `ResultActions` 를 돌려주므로 `andDocument { }` 를 이어 씁니다. WebTestClient 는 `expectStatus()` 를 그대로 씁니다 |
+| `ResultActions.andStatus(HttpStatus.NOT_FOUND)`, `andStatus(404)` | 응답 상태 코드 검증. `andExpect(status().isNotFound)` 와 같고 `MockMvcResultMatchers.status` import 가 필요 없습니다. 같은 `ResultActions` 를 돌려주므로 `andDocument { }` 를 이어 씁니다. 자세한 내용은 표 아래 |
 | `ResultActions.andExpectJsonPath("$.code", 404)` | 응답 JSON 값 검증. `andExpect(jsonPath("$.code").value(404))` 와 같습니다 |
 | `ResultActions.andReturnContent()` | 응답 본문을 UTF-8 문자열로 돌려줍니다. `contentAsString` 은 charset 이 없으면 한글이 깨집니다 |
 | `bearerToken(token)` | `Authorization: Bearer <token>` 헤더. 마스킹을 켜면 문서에서 가려집니다 |
@@ -2196,5 +2208,10 @@ epages 플러그인만 쓰면 위 보강이 없습니다. epages 가 직접 읽�
 | `ResultActions.andReturnAsObject<T>()` | 응답 본문을 제네릭 타입 그대로 역직렬화합니다 (`andReturnContent` 와 같은 UTF-8, 앱 매퍼). `T` 가 `String` 이면 원문, `ByteArray` 면 응답 바이트 그대로입니다. 본문이 비었거나 공백뿐이면 `IllegalStateException` 이므로 그런 응답은 `andReturnEntity` 를 씁니다 |
 | `ResultActions.andReturnEntity<T>()` | 상태 코드·응답 헤더 전부·본문을 Spring `ResponseEntity<T>` 로 돌려줍니다. 본문 처리는 `andReturnAsObject` 와 같고, 본문이 비었거나 공백뿐이면(204 등) `body` 가 null, `T` 가 `String` 이면 원문 그대로, `ByteArray` 면 응답 바이트 그대로입니다. `response.statusCode`, `response.headers.location`, `response.body` |
 | `ResultActionsDsl.andDocument { }`, `MvcTestResult.andDocument { }` | MockMvc Kotlin DSL·`MockMvcTester` 결과를 문서화합니다 ([andDocument](#anddocument)) |
+
+참고:
+
+- **`restDocsMockMvc`**: 요청·응답 본문 pretty print 와 사용자 전처리기([요청·응답 가공](customizing-snippets.md#요청응답-가공))는 `andDocument` 가 하므로 MockMvc 기본 전처리기로 등록하지 않습니다. 이 MockMvc 로 REST Docs 의 `document()` 를 직접 쓰면 본문이 pretty print 되지 않으니 `preprocessRequest(prettyPrint())`·`preprocessResponse(prettyPrint())` 를 함께 넘기세요.
+- **`andStatus`**: `HttpStatusCode`(`HttpStatus` 상수 포함)나 숫자를 받고, 다르면 Spring `status()` 와 같은 메시지(`Response status expected:<404> but was:<200>`)로 실패합니다. WebTestClient 는 `expectStatus()` 를 그대로 씁니다.
 
 Jackson 2 와 3 을 모두 지원하고, Spring 6 과 7 의 바이너리 차이는 라이브러리가 처리합니다.

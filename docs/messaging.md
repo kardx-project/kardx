@@ -139,7 +139,12 @@ fun chat(provider: RestDocumentationContextProvider) {
 | `fields<T>(path = "")` | Shortcut that extracts from a type and registers it. It picks the rules that match the direction: `send` and `connect` use request rules (`requestFieldsOf`: properties with default values are optional, read-only ones are excluded), `subscribe` uses response rules (`responseFieldsOf`). To adjust or combine lists, use `fields(responseFieldsOf<T>() + ...)` |
 | `relaxed = true` | Allows undocumented payload fields |
 
-The protocol is chosen with `MessageProtocol` (`io.github.kardx.dsl`): `STOMP` (default), `WEBSOCKET`, `SSE`. It appears as `STOMP`, `WebSocket` or `SSE` in the documents and in `x-protocol` of the AsyncAPI channel, and the AsyncAPI servers (`stomp`, `ws`, `http` …) that can connect with that protocol are attached to the channel. For a protocol not in the list, pass a string (`MessageDocumentation(provider, "MQTT")`); its channels get every AsyncAPI server attached. Leading and trailing whitespace is trimmed, and if it is the name or alias of a known protocol (case-insensitive: `"websocket"` and `"ws"` → `WebSocket`, `"stomp"` → `STOMP`, `"sse"` and `"http"` → `SSE`), it is treated as that protocol and the display name is normalized too (the document display and the AsyncAPI server matching use the same value). An empty string is rejected.
+The protocol is chosen with `MessageProtocol` (`io.github.kardx.dsl`): `STOMP` (default), `WEBSOCKET`, `SSE`. It appears as `STOMP`, `WebSocket` or `SSE` in the documents and in `x-protocol` of the AsyncAPI channel, and the AsyncAPI servers (`stomp`, `ws`, `http` …) that can connect with that protocol are attached to the channel.
+
+For a protocol not in the list, pass a string (`MessageDocumentation(provider, "MQTT")`); its channels get every AsyncAPI server attached:
+
+- Leading and trailing whitespace is trimmed, and if it is the name or alias of a known protocol (case-insensitive: `"websocket"` and `"ws"` → `WebSocket`, `"stomp"` → `STOMP`, `"sse"` and `"http"` → `SSE`), it is treated as that protocol and the display name is normalized too (the document display and the AsyncAPI server matching use the same value).
+- An empty string is rejected.
 
 `headers`, `headerValues` and `fields` append when called several times, and accept both varargs and a `List` (`Map`). To choose the direction yourself, use `docs.document(MessageDirection.SEND, destination, payload) { ... }`. `MessageDirection` and the block type `MessageDocumentationBuilder` are in `io.github.kardx.dsl`, like the HTTP block type; `MessageDocumentation` and `WebSocketHandlerTester` are in `io.github.kardx.websocket`; the shortcut `fields<T>()` is in `io.github.kardx.extractor`.
 
@@ -224,11 +229,17 @@ class ChatMessageDocsTest : RestDocsTestSupport() {
 | Member | What it does |
 |---|---|
 | `StompTestClient(url, connectHeaders, timeout, webSocketClient)` | Connects right away. `connectHeaders` go into the CONNECT frame (also readable as `stomp.connectHeaders`). `timeout` defaults to 5 seconds; `webSocketClient` defaults to the standard JSR-356 client (provided by Tomcat or Jetty). Fails with `IllegalStateException` if it can't connect in time or the server refuses |
-| `sendAndReceive(destination, payload, subscribeTo)` | Subscribes, sends, and returns the first frame received. A message sent before the broker has registered the subscription can be lost, and Spring's simple broker sends no receipt for SUBSCRIBE, so it resends the same payload until a frame arrives, waiting 200 ms at first and doubling up to 1 second. A handler that takes time (saving to a database, for example) may therefore receive the message more than once, and the returned frame may come from any of the sends; to send exactly once, use `subscribe` → `send` → `StompSubscription.await` yourself. Fails if nothing arrives within the timeout; the whole call, resends included, stays within the timeout, and nothing is resent right at the deadline |
+| `sendAndReceive(destination, payload, subscribeTo)` | Subscribes, sends, and returns the first frame received. It resends until a frame arrives, so the handler may receive the message more than once (details below the table) |
 | `send(destination, payload, headers)` | Sends one frame. Strings and `ByteArray` go as is, objects as JSON with the configured Jackson mapper. `content-type` defaults to `application/json` |
 | `subscribe(destination)` | Returns a `StompSubscription`: `await(timeout)` takes the next frame, `unsubscribe()` ends it |
 | `StompFrame` | `headers` (first value per name) and `body` (the payload as a string). Pass `frame.body` to `docs.subscribe(...)` |
 | `close()` | Disconnects. Use `use { }` |
+
+How `sendAndReceive` delivers:
+
+- A message sent before the broker has registered the subscription can be lost, and Spring's simple broker sends no receipt for SUBSCRIBE. So it resends the same payload until a frame arrives, waiting 200 ms at first and doubling up to 1 second.
+- A handler that takes time (saving to a database, for example) may therefore receive the message more than once, and the returned frame may come from any of the sends. To send exactly once, use `subscribe` → `send` → `StompSubscription.await` yourself.
+- It fails if nothing arrives within the timeout. The whole call, resends included, stays within the timeout, and nothing is resent right at the deadline.
 
 `StompTestClient` works on Spring Framework 6 (Boot 3) and 7 (Boot 4). If the server rejects the CONNECT (for example a channel interceptor that throws for a missing token), the constructor throws `IllegalStateException` instead of returning a client that never connects, so a wrong token fails the test right there.
 
@@ -277,7 +288,15 @@ OpenAPI can't express WebSocket or STOMP messages. So the library produces a doc
 - `MessageDocumentation` and `events(...)` record AsyncAPI metadata along with the snippets. There is nothing else to do.
 - The Gradle plugin's `apiDocsAsyncApi` task creates `asyncapi.yaml` and the viewer `asyncapi.html`. Servers are set with `asyncApi { server(...) }` and the file path with `asyncApi { fileName }`. If no messages or SSE are documented, nothing is created.
 - The viewer's **documentation** tab is the official AsyncAPI viewer. In the **Try it out** tab, you can connect, subscribe and send over STOMP, connect and send over WebSocket, and subscribe to SSE yourself. The server address defaults to the app that served the page, and CDN scripts are checked for integrity (SRI).
-- To use it without the plugin, run the main class `io.github.kardx.asyncapi.AsyncApiCli` on the test runtime classpath (for example a Gradle `JavaExec` task, or `exec-maven-plugin`) with the arguments `--snippets` (default `build/generated-snippets`), `--output` (default `build/api-spec/asyncapi.yaml`), `--viewer` (no viewer if omitted), `--title` (default `API`), `--version` (default `1.0.0`), `--description` (optional, AsyncAPI `info.description`), `--server name=protocol://host[/path]` (repeatable, for example `stomp=stomp://localhost:8080/ws`) and `--security` (repeatable, [below](#authentication-in-asyncapi)). With nothing documented it prints `AsyncAPI: no documented WebSocket, STOMP or SSE messages, nothing generated`; invalid arguments exit with code 2.
+- To use it without the plugin, run the main class `io.github.kardx.asyncapi.AsyncApiCli` on the test runtime classpath (for example a Gradle `JavaExec` task, or `exec-maven-plugin`) with the arguments below. With nothing documented it prints `AsyncAPI: no documented WebSocket, STOMP or SSE messages, nothing generated`; invalid arguments exit with code 2.
+  - `--snippets` (default `build/generated-snippets`)
+  - `--output` (default `build/api-spec/asyncapi.yaml`)
+  - `--viewer` (no viewer if omitted)
+  - `--title` (default `API`)
+  - `--version` (default `1.0.0`)
+  - `--description` (optional, AsyncAPI `info.description`)
+  - `--server name=protocol://host[/path]` (repeatable, for example `stomp=stomp://localhost:8080/ws`)
+  - `--security` (repeatable, [below](#authentication-in-asyncapi))
 
 | Library | AsyncAPI |
 |---|---|

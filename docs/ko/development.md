@@ -36,7 +36,9 @@ kardx/
 └── scripts/          문서 산출물·실행 앱 검증, 문서 목차 갱신 스크립트
 ```
 
-core 의 패키지별 책임과 공개 여부, 계층, 리소스, 계약 테스트는 [아키텍처 문서의 core](architecture.md#core) 에 있습니다. JUnit 확장과 Kotest 확장이 함께 쓰는 문서화 수명주기는 core 의 `io.github.kardx.lifecycle`(opt-in `@RestDocsExtensionApi`)에 있고, 두 확장에서 로직을 복제하지 않습니다([아키텍처 문서의 kotest](architecture.md#kotest)). 사용자가 import 하지 않는 구현은 `io.github.kardx.internal.*`(Gradle 플러그인은 `io.github.kardx.gradle.internal.*`, tooling 은 `io.github.kardx.tooling.internal.*`)에 둡니다. Gradle 플러그인에는 연결 코드만 있고 `tooling` 의 단계(`internal.steps`)를 부릅니다. Maven 플러그인(`io.github.kardx.maven`)과 CLI 는 `internal.pipeline` 을 거쳐 같은 코드를 부릅니다([아키텍처 문서의 tooling](architecture.md#tooling)).
+core 의 패키지별 책임과 공개 여부, 계층, 리소스, 계약 테스트는 [아키텍처 문서의 core](architecture.md#core) 에 있습니다. JUnit 확장과 Kotest 확장이 함께 쓰는 문서화 수명주기는 core 의 `io.github.kardx.lifecycle`(opt-in `@RestDocsExtensionApi`)에 있고, 두 확장에서 로직을 복제하지 않습니다([아키텍처 문서의 kotest](architecture.md#kotest)).
+
+사용자가 import 하지 않는 구현은 `io.github.kardx.internal.*`(Gradle 플러그인은 `io.github.kardx.gradle.internal.*`, tooling 은 `io.github.kardx.tooling.internal.*`)에 둡니다. Gradle 플러그인에는 연결 코드만 있고 `tooling` 의 단계(`internal.steps`)를 부릅니다. Maven 플러그인(`io.github.kardx.maven`)과 CLI 는 `internal.pipeline` 을 거쳐 같은 코드를 부릅니다([아키텍처 문서의 tooling](architecture.md#tooling)).
 
 라이브러리나 플러그인 코드를 고친 뒤에는 아래 순서로 확인합니다. 뒤 단계일수록 느리고, 앞 단계가 잡지 못하는 것을 잡습니다. 검증 스크립트는 항목마다 `PASS`/`FAIL` 을 출력하고, 하나라도 실패하면 종료 코드 1 로 끝납니다(CI 도 종료 코드로 판정).
 
@@ -106,9 +108,15 @@ IntelliJ 는 한 디렉터리를 모듈 하나에만 붙이므로 `kotest-common
 
 공개 API 는 Kotlin `explicitApi()` 로 관리하고 `<모듈>/api/*.api` 로 고정됩니다. API 를 바꾸면 `./gradlew apiDump` 로 갱신해 함께 반영합니다(`check` 가 `apiCheck` 로 검사). `tooling` 은 Java 라서 javap 기반의 `apiDump`/`apiCheck` 가 따로 있습니다(`./gradlew -p tooling apiDump`, 파일 `tooling/api/kardx-tooling.api`. 공개는 `io.github.kardx.tooling` 패키지와 `cli.ApiDocsCli` 뿐). Maven 플러그인의 계약은 목표와 파라미터이고 [Maven 과 명령줄](maven.md)에 적혀 있습니다. 변경 내역은 [CHANGELOG.ko.md](../../CHANGELOG.ko.md) 에 있습니다.
 
-공개 API 에는 data class 를 두지 않습니다. `copy`·`componentN` 이 ABI 에 들어가 프로퍼티를 하나만 추가해도 바이너리 호환이 깨지기 때문입니다. 값 객체(`AsyncApiInfo`, `ResponseWrapper`, `DocumentGenerator.Config` 등)는 일반 class 에 `equals`/`hashCode`/`toString` 을 직접 구현하고(`PublicValueClassesTest` 에 계약 테스트 추가), 이름 있는 인자로 부르는 public 생성자를 둡니다. 이런 클래스에 프로퍼티를 추가할 때는 새 프로퍼티를 기본값과 함께 주 생성자 끝에 붙이고, 바꾸기 전의 생성자 시그니처를 그대로 받는 secondary constructor 를 남겨 새 생성자로 위임합니다(기본값이 있는 생성자는 `$default` 합성 메서드까지 시그니처가 바뀌므로 기존 바이너리가 찾을 수 있게). `apiDump` 결과에서 기존 `<init>` 줄이 지워지지 않고 추가만 되었는지 확인합니다.
+공개 API 에는 data class 를 두지 않습니다. `copy`·`componentN` 이 ABI 에 들어가 프로퍼티를 하나만 추가해도 바이너리 호환이 깨지기 때문입니다. 값 객체(`AsyncApiInfo`, `ResponseWrapper`, `DocumentGenerator.Config` 등)는 일반 class 에 `equals`/`hashCode`/`toString` 을 직접 구현하고(`PublicValueClassesTest` 에 계약 테스트 추가), 이름 있는 인자로 부르는 public 생성자를 둡니다.
 
-모듈 공통 빌드 설정은 `build-logic/` 의 `restdocs.*` 컨벤션 플러그인에 있습니다. 라이브러리 모듈(annotations·core·boot)은 `restdocs.kotlin-library` 가 javadoc jar 를 Dokka 로 채우고, 인터페이스 기본 구현을 `jvmDefault = NO_COMPATIBILITY` 로 내 `DefaultImpls` 를 만들지 않습니다. 모듈 build 파일에는 모듈 이름·설명 같은 모듈별 값만 둡니다. 지원하는 Kotlin 하한(`kotlin-baseline`, 메타데이터 버전과 POM 의 kotlin-stdlib)과 detekt 용 Kotlin(`detekt-kotlin`)은 `gradle/libs.versions.toml` 에서 바꿉니다. 샘플은 문서의 최소 설정처럼 라이브러리 의존성을 적지 않고 Gradle 플러그인에 맡깁니다. 플러그인이 넣는 배포 좌표(`io.github.kardx-project:...`)는 `restdocs.kotlin-sample` 이 같은 빌드의 프로젝트로 바꾸므로 샘플은 늘 지금 소스로 빌드됩니다. 두 샘플(spring-boot-3·4)의 공통 소스는 같아야 하며 `checkSampleSync` 가 검사합니다(WebFlux 샘플은 다른 앱이라 대상이 아닙니다). 의도한 차이는 루트 `build.gradle.kts` 의 허용 목록에 추가합니다(목록과 이유는 [아키텍처 문서](architecture.md#samples). JUnit 문서화 테스트를 Kotest 로 옮긴 스펙은 Boot 4 샘플에만 있습니다).
+이런 클래스에 프로퍼티를 추가할 때는 새 프로퍼티를 기본값과 함께 주 생성자 끝에 붙이고, 바꾸기 전의 생성자 시그니처를 그대로 받는 secondary constructor 를 남겨 새 생성자로 위임합니다(기본값이 있는 생성자는 `$default` 합성 메서드까지 시그니처가 바뀌므로 기존 바이너리가 찾을 수 있게). `apiDump` 결과에서 기존 `<init>` 줄이 지워지지 않고 추가만 되었는지 확인합니다.
+
+모듈 공통 빌드 설정은 `build-logic/` 의 `restdocs.*` 컨벤션 플러그인에 있습니다. 라이브러리 모듈(annotations·core·boot)은 `restdocs.kotlin-library` 가 javadoc jar 를 Dokka 로 채우고, 인터페이스 기본 구현을 `jvmDefault = NO_COMPATIBILITY` 로 내 `DefaultImpls` 를 만들지 않습니다. 모듈 build 파일에는 모듈 이름·설명 같은 모듈별 값만 둡니다. 지원하는 Kotlin 하한(`kotlin-baseline`, 메타데이터 버전과 POM 의 kotlin-stdlib)과 detekt 용 Kotlin(`detekt-kotlin`)은 `gradle/libs.versions.toml` 에서 바꿉니다.
+
+샘플은 문서의 최소 설정처럼 라이브러리 의존성을 적지 않고 Gradle 플러그인에 맡깁니다. 플러그인이 넣는 배포 좌표(`io.github.kardx-project:...`)는 `restdocs.kotlin-sample` 이 같은 빌드의 프로젝트로 바꾸므로 샘플은 늘 지금 소스로 빌드됩니다.
+
+두 샘플(spring-boot-3·4)의 공통 소스는 같아야 하며 `checkSampleSync` 가 검사합니다(WebFlux 샘플은 다른 앱이라 대상이 아닙니다). 의도한 차이는 루트 `build.gradle.kts` 의 허용 목록에 추가합니다(목록과 이유는 [아키텍처 문서](architecture.md#samples). JUnit 문서화 테스트를 Kotest 로 옮긴 스펙은 Boot 4 샘플에만 있습니다).
 
 문서(`docs/*.md`)의 절을 바꾸면 목차를 다시 만듭니다.
 

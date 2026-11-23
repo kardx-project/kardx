@@ -230,9 +230,21 @@ BOM 은 `annotations`, `core`, `boot`, `kotest`, `kotest5` 만 담습니다. Gra
 | `compileOnly` | `spring-restdocs-mockmvc`·`jakarta.servlet-api` (MockMvc 진입점), `spring-restdocs-webtestclient`·`spring-webflux` (WebTestClient 진입점), `spring-web`, `spring-websocket`, `spring-context`, `spring-core`, `junit-jupiter-api`, `jakarta.validation-api`, epages `restdocs-api-spec`, `assertj-core` (`MockMvcTester` 진입점) |
 | 클래스 이름으로만 찾음 | Jackson 2(`com.fasterxml.jackson.databind.ObjectMapper`)·Jackson 3(`tools.jackson.databind.json.JsonMapper`), yml 로 지정한 설명 어노테이션(Swagger `@Schema` 등). 컴파일 의존이 없습니다 |
 
-`compileOnly` 중 epages 와 Jakarta Validation 은 선택 기능이라 클래스가 있을 때만 씁니다(`internal/reflect/ClassLoading.kt` 의 `loadClassOrNull`). epages 클래스는 `internal/openapi/OpenApiSupport.kt` 안의 별도 객체에서만 참조해, epages 가 없으면 로드되지 않습니다. epages 가 있는지는 본체 클래스(`ResourceDocumentation`)로 판단하므로 `restdocs-api-spec-mockmvc`·`-webtestclient` 어느 쪽이든 됩니다. WebTestClient·MockMvc·`MockMvcTester` 진입점도 그 파일의 함수를 부를 때만 클래스가 로드되므로, 해당 의존성이 없는 프로젝트에서도 나머지는 그대로 동작합니다. 메시지 문서화(`MessageDocumentation`)는 spring-restdocs-core 의 설정기(`RestDocumentationConfigurer`)로 설정 맵을 직접 만들어 MockMvc 없이 동작합니다(`internal/websocket/DocumentationConfigurationMap.kt`). 이 약속은 소스셋 `noServletTest`(`core/src/test/noServlet`, 태스크 `:core:noServletTest`, `check` 에 포함)가 지킵니다: 배포 의존성(`project(":core")`)과 WebFlux·STOMP 쪽만 둔 클래스패스(`spring-restdocs-mockmvc`·`spring-webmvc`·서블릿 API 없음)에서 `mockmvc`·`sse`·`internal` 밖의 공개 클래스를 모두 로드·초기화하고, JUnit 확장 + WebTestClient·메시지 문서화를 실제로 돌립니다.
+`compileOnly` 중 epages 와 Jakarta Validation 은 선택 기능이라 클래스가 있을 때만 씁니다(`internal/reflect/ClassLoading.kt` 의 `loadClassOrNull`).
 
-**RestTestClient 소스셋.** `RestTestClient` 는 Spring Framework 7 에만 있는데 본체 소스셋은 Spring 6·REST Docs 3 으로 컴파일합니다. 그래서 RestTestClient 진입점(패키지 `io.github.kardx.resttestclient`, `core/src/main/restTestClient` 의 파일 6개, 하나는 Java)은 따로 소스셋 `restTestClient` 로 두고, Spring Framework 7·REST Docs 4(`compileOnly`)로 컴파일해 같은 jar·sources jar 에 넣습니다. 클래스는 사용자가 부를 때만 로드되므로 Boot 3 프로젝트는 건드리지 않습니다. `spring-restdocs-core` 의 `RestDocumentationGenerator` 로 `ExchangeResult` 를 직접 변환하므로 `spring-restdocs-resttestclient` 모듈(REST Docs 4.1)은 필요 없습니다. 이 소스셋은 일부러 본체의 friend 로 두지 않습니다: 공개된 클라이언트 어댑터 SPI(`io.github.kardx.client.ClientDocumentation`, [클라이언트 어댑터 SPI](#클라이언트-어댑터-spi))만 쓰므로, 컴파일이 곧 SPI 로 실제 어댑터를 만들 수 있는지 검사가 됩니다. 본체 `internal` 은 테스트(`restTestClientTest`)만 봅니다. 테스트는 `core/src/test/restTestClient` 에 있고 `:core:restTestClientTest`(`check` 에 포함)로 돌며, `apiValidation` 이 이 소스셋의 공개 API 도 `core/api/core.api` 에 남깁니다.
+- epages 클래스는 `internal/openapi/OpenApiSupport.kt` 안의 별도 객체에서만 참조해, epages 가 없으면 로드되지 않습니다. epages 가 있는지는 본체 클래스(`ResourceDocumentation`)로 판단하므로 `restdocs-api-spec-mockmvc`·`-webtestclient` 어느 쪽이든 됩니다.
+- WebTestClient·MockMvc·`MockMvcTester` 진입점도 그 파일의 함수를 부를 때만 클래스가 로드되므로, 해당 의존성이 없는 프로젝트에서도 나머지는 그대로 동작합니다.
+- 메시지 문서화(`MessageDocumentation`)는 spring-restdocs-core 의 설정기(`RestDocumentationConfigurer`)로 설정 맵을 직접 만들어 MockMvc 없이 동작합니다(`internal/websocket/DocumentationConfigurationMap.kt`).
+
+이 약속은 소스셋 `noServletTest`(`core/src/test/noServlet`, 태스크 `:core:noServletTest`, `check` 에 포함)가 지킵니다. 배포 의존성(`project(":core")`)과 WebFlux·STOMP 쪽만 둔 클래스패스(`spring-restdocs-mockmvc`·`spring-webmvc`·서블릿 API 없음)에서 `mockmvc`·`sse`·`internal` 밖의 공개 클래스를 모두 로드·초기화하고, JUnit 확장 + WebTestClient·메시지 문서화를 실제로 돌립니다.
+
+**RestTestClient 소스셋.** `RestTestClient` 는 Spring Framework 7 에만 있는데 본체 소스셋은 Spring 6·REST Docs 3 으로 컴파일합니다. 그래서 RestTestClient 진입점(패키지 `io.github.kardx.resttestclient`, `core/src/main/restTestClient` 의 파일 6개, 하나는 Java)은 따로 소스셋 `restTestClient` 로 두고, Spring Framework 7·REST Docs 4(`compileOnly`)로 컴파일해 같은 jar·sources jar 에 넣습니다.
+
+클래스는 사용자가 부를 때만 로드되므로 Boot 3 프로젝트는 건드리지 않습니다. `spring-restdocs-core` 의 `RestDocumentationGenerator` 로 `ExchangeResult` 를 직접 변환하므로 `spring-restdocs-resttestclient` 모듈(REST Docs 4.1)은 필요 없습니다.
+
+이 소스셋은 일부러 본체의 friend 로 두지 않습니다: 공개된 클라이언트 어댑터 SPI(`io.github.kardx.client.ClientDocumentation`, [클라이언트 어댑터 SPI](#클라이언트-어댑터-spi))만 쓰므로, 컴파일이 곧 SPI 로 실제 어댑터를 만들 수 있는지 검사가 됩니다. 본체 `internal` 은 테스트(`restTestClientTest`)만 봅니다.
+
+테스트는 `core/src/test/restTestClient` 에 있고 `:core:restTestClientTest`(`check` 에 포함)로 돌며, `apiValidation` 이 이 소스셋의 공개 API 도 `core/api/core.api` 에 남깁니다.
 
 **패키지 원칙.** 최상위 패키지(`io.github.kardx.<이름>`)에는 사용자가 import 하는 것만 두고, 구현은 `io.github.kardx.internal.*` 에 둡니다. `internal` 아래 선언은 Kotlin `internal` 이고, 공개 inline 함수가 부르는 `@PublishedApi` 선언(`internal.jackson` 의 `serializeJson`·`deserializeJson`·`TypeCapture`)만 public 으로 보입니다. 이것들은 사용자 바이너리에 들어가는 ABI 라서 API 덤프에서 빼지 않습니다(`ignoredPackages` 를 쓰지 않음). 패키지 사이 의존에는 순환이 없습니다. `python3 scripts/check-package-cycles.py` 가 확인하고, 루트 태스크 `checkPackageCycles`(`check` 의 일부)가 이를 돌리므로 순환이 있으면 `./gradlew build` 가 실패합니다.
 
@@ -272,17 +284,38 @@ BOM 은 `annotations`, `core`, `boot`, `kotest`, `kotest5` 만 담습니다. Gra
 | `introspection` | 타입 분석과 필드 추출(프로퍼티, `errorResponse` 예시 객체의 필드(`ExampleFields`), Jackson 이름 규칙, sealed·Spring Data·ProblemDetail, Bean Validation 제약, 타입·제약 스키마 조각). 타입 처리는 일별로 나뉩니다: `Optional`·value class·`@JsonValue` 풀기(`Unwrapped.kt`), 제네릭 타입 파라미터 바인딩(`TypeBindings.kt`), Java `Type` → `KType`(`JavaTypes.kt`) |
 | `schema` | 필드 목록으로 JSON Schema 만들기 (AsyncAPI 페이로드, multipart 파트) |
 | `diagnostics` | 검증 실패(누락·초과, 필드 타입 불일치)를 경로 목록·DSL 제안·원인 힌트가 담긴 메시지로 감싸기 |
-| `openapi` | epages 리소스 스니펫, relaxed 파라미터 항목(`RelaxedParameters`), 보안 스키마(헤더 없이 선언한 `bearerAuth()`·`basicAuth()` 포함), 전역 헤더, 스키마 이름 출처, `openapi-extras.json`, operationId 후보(요청을 처리한 핸들러 기록, 규칙별 이름), 핸들러 인자 타입(`HandlerParameters`)·`@Deprecated`(`HandlerDeprecation`) 읽기, 문서화하지 않은 경로 변수 경고(`UndocumentedPathVariables`) |
+| `openapi` | epages 리소스 스니펫과 거기에 들어가는 것들: 보안 스키마, 전역 헤더, 스키마 이름, operationId, 핸들러 정보 (자세한 내용은 표 아래) |
 | `asyncapi` | AsyncAPI 기록(`*.asyncapi.json`) 쓰기·읽기, 메시지 스키마, YAML 쓰기, 뷰어(인라인하는 CSS·JS 에서 주석 빼기: `WebComments`, `CommentScanner`) |
 | `websocket` | 메시지를 REST Docs 요청으로 바꾸기, 메시지 스니펫, 녹화 WebSocket 세션, `StompTestClient` 가 쓰는 페이로드 글·원문 STOMP 변환기(`PayloadText`, `RawTextMessageConverter`, `StompSubscriptionCancel`), MockMvc 없이 REST Docs 설정 맵 만들기(`DocumentationConfigurationMap`) |
 | `sse` | SSE 본문 파싱, 이벤트 표·이벤트 `data` 필드 스니펫과 AsyncAPI 기록 |
-| `documentation` | `andDocument` 실행: 블록 → 스펙 → 스니펫 목록, 선언한 오류 응답(`ErrorResponsesSnippet`, 예시 검사 `ErrorExampleCheck`·`ErrorResponseExamples`, 받은 상태 빼기 `ReceivedErrorResponse`), 파일 본문 표(`FileBodySnippet`)와 바이너리 본문의 언어 없는 `[source]` 블록(`BinaryBodyBlocks`), 블록에서 정하지 않은 파라미터 타입·deprecated 를 핸들러에서 채우기(`HandlerDefaults`), 전처리, api-summary·WireMock 스니펫, 스트림 고정(`StreamSnapshot`), 목록 미리보기 표 |
+| `documentation` | `andDocument` 실행: 블록 → 스펙 → 스니펫 목록과 그 주변의 스니펫·검사 (자세한 내용은 표 아래) |
 | `asciidoc` | 스니펫 파일 고르기(`SnippetFileListExtractor`), Enum 코드 문서 쓰기. 클래스별 문서 쓰기(`AsciiDocumentWriter`)는 `lifecycle` 에 있다 |
-| `i18n` | 생성 문서·스펙에 넣는 문구의 언어별 목록과 언어 불일치 경고. `DocsText`(index 제목·링크, 스키마 설명 접두사, Spring Data·`ProblemDetail`·sealed 자동 설명, AsyncAPI 채널 설명, 파일 본문 표 머리글), `LocalizedText`(캐시에 오래 남는 설명을 쓰는 시점의 언어로 고른다), `ViewerText`(AsyncAPI 뷰어 화면 문구. 고른 언어의 것만 페이지에 JSON 으로 넣는다), `PluginLanguageWarning`(문서 언어가 Gradle 플러그인이 테스트 JVM 에 넘긴 언어와 다르면 `io.github.kardx.config` 로거에 JVM 마다 한 번 WARN. 플러그인 없이는 경고하지 않는다). 한국어 문구는 언어 설정 전의 출력과 같다. 로그·예외 메시지는 여기에 두지 않고 영어로 쓴다 |
+| `i18n` | 생성 문서·스펙에 넣는 문구의 언어별 목록과 언어 불일치 경고 (자세한 내용은 표 아래) |
 | `sourcedocs` | Gradle 플러그인의 `apiDocsSourceDocs` 가 쓴 KDoc/Javadoc 색인 읽기(`SourceDocs`, `SourceDocsIndex`). 설명의 마지막 출처 |
 | `coverage` | 문서화 커버리지용 엔드포인트 목록: 앱 컨텍스트가 매핑한 엔드포인트(`EndpointInventory`, `MappedEndpoint`, `MappedEndpoints`)를 `apiDocsCoverage` 가 읽도록 `.kardx/endpoints/` 에 씀 |
 | `provenance` | 추출한 필드의 출처(`FieldOrigin`, `FieldSource`). 필드가 들고 다녀 목록을 고쳐도 스키마 이름 기본값이 남음. 저장소의 다른 패키지에 기대지 않으므로 `dsl` 과 `internal.introspection` 이 서로 기대지 않음 |
 | `spring` | Spring 앱 컨텍스트·`Environment` 에서 설정과 ObjectMapper 읽기, 모르는 `kardx.*` 키 경고(`UnknownPropertyWarnings`, 키 대조는 `PropertyKeys`) |
+
+큰 내부 패키지의 자세한 내용:
+
+**`openapi`**: epages 리소스 스니펫, relaxed 파라미터 항목(`RelaxedParameters`), 보안 스키마(헤더 없이 선언한 `bearerAuth()`·`basicAuth()` 포함), 전역 헤더, 스키마 이름 출처, `openapi-extras.json`, operationId 후보(요청을 처리한 핸들러 기록, 규칙별 이름), 핸들러 인자 타입(`HandlerParameters`)·`@Deprecated`(`HandlerDeprecation`) 읽기, 문서화하지 않은 경로 변수 경고(`UndocumentedPathVariables`).
+
+**`documentation`**:
+
+- `andDocument` 실행: 블록 → 스펙 → 스니펫 목록
+- 선언한 오류 응답(`ErrorResponsesSnippet`, 예시 검사 `ErrorExampleCheck`·`ErrorResponseExamples`, 받은 상태 빼기 `ReceivedErrorResponse`)
+- 파일 본문 표(`FileBodySnippet`)와 바이너리 본문의 언어 없는 `[source]` 블록(`BinaryBodyBlocks`)
+- 블록에서 정하지 않은 파라미터 타입·deprecated 를 핸들러에서 채우기(`HandlerDefaults`)
+- 전처리, api-summary·WireMock 스니펫, 스트림 고정(`StreamSnapshot`), 목록 미리보기 표
+
+**`i18n`**:
+
+- `DocsText`: index 제목·링크, 스키마 설명 접두사, Spring Data·`ProblemDetail`·sealed 자동 설명, AsyncAPI 채널 설명, 파일 본문 표 머리글.
+- `LocalizedText`: 캐시에 오래 남는 설명을 쓰는 시점의 언어로 고릅니다.
+- `ViewerText`: AsyncAPI 뷰어 화면 문구. 고른 언어의 것만 페이지에 JSON 으로 넣습니다.
+- `PluginLanguageWarning`: 문서 언어가 Gradle 플러그인이 테스트 JVM 에 넘긴 언어와 다르면 `io.github.kardx.config` 로거에 JVM 마다 한 번 WARN 을 남깁니다. 플러그인 없이는 경고하지 않습니다.
+
+한국어 문구는 언어 설정 전의 출력과 같습니다. 로그·예외 메시지는 여기에 두지 않고 영어로 씁니다.
 
 공개 패키지에 Kotlin `internal` 로 남긴 구현은 공개 타입과 서로 부르는 것뿐입니다. 떼어 내면 패키지 순환이 생깁니다: `config` 의 `ExternalSettings`(yml → `RestDocsSettings`)·`DescriptionResolvers`(기본 설명 단계), `asyncapi` 의 `AsyncApiDocumentBuilder`(`AsyncApiInfo` 를 읽음)·`AsyncApiSecuritySchemes` 와 CLI, `asciidoc` 의 index CLI, `dsl` 의 `ParameterSection`·`DocsFieldType` 변환 함수와 디스크립터 속성 키(`DescriptorAttributes.kt`, 공개 상수 `CONSTRAINTS_ATTRIBUTE` 옆의 `internal` 상수. Gradle 플러그인과의 문자열 약속).
 
@@ -524,7 +557,19 @@ fun HttpResponse.andDocument(block: DocumentationBuilder.() -> Unit) {
 | `gradle.dsl` | `kardx { }` 확장과 중첩 설정 타입 | `KardxExtension` (`Index`, `AsyncApi`, `BootJar`, `OpenApiCheck`, `OpenApiViewer`, `PostmanCollection`, `Aggregate`, `WireMock`, `Export`, `Upload`, `Coverage`, `OpenApiSecurity`, `OAuth2`, `HttpClient`, `SourceDocs`, `ApiVersioning`) |
 | `gradle.tasks` | 사용자가 타입으로 참조할 수 있는 태스크 | `OpenApiCheckTask`(`apiDocsCheck`), `ApiDocsAggregateTask`(`apiDocsAggregate`), `ApiSpecExportTask`(`apiDocsExport`·`apiDocsPublicationSpecs`), `ApiSpecUploadTask`(`apiDocsUpload`), `ApiDocsCoverageTask`(`apiDocsCoverage`), `HttpClientExportTask`(`apiDocsHttpClient`), `SourceDocsTask`(`apiDocsSourceDocs`) |
 | `gradle.internal` | 플러그인 id, 확장 이름, 태스크 그룹·이름, 경로 상수, Gradle 로거로 보내는 tooling 로그 | `PluginConstants`, `GradleToolLog` |
-| `gradle.internal.wiring` | 태스크 등록과 다른 플러그인 연결 | `ExtensionDefaults`, `GradleVersionCheck`(최소 Gradle 7.6), `TestTaskSetup`, `LibraryDependencies`·`DependencyMatch`·`WebStack`·`KotestVersionLine`·`EpagesVersion`(의존성 자동 추가와 MVC/WebFlux·Kotest 판·epages 버전 판정), `WebFluxTestClasspath`(WebFlux 앱의 `spring-boot-starter-web` 제외), `IndexTasks`, `OpenApiDefaults`(epages `openapi3 { }` 기본값), `AppDocsProperties`(시작 로그용 문서 위치), `ProductionExposure`(운영 노출 경고), `AsciidoctorIntegration`, `OpenApiIntegration`, `EpagesOutputs`, `OpenApiCheckTasks`, `OpenApiViewerTasks`, `AsyncApiTasks`, `ApiDocsTasks`, `DocsLocations`, `SpringBootIntegration`, `GenerateOnRun`, `ApiDocsAggregation`, `WireMockStubs`, `ExportTasks`(`apiDocsExport`·`apiDocsUpload`), `MavenSpecPublication`(Maven 배포물에 스펙 붙이기), `CommonResponsesIndex`(index 끝의 공통 오류 응답 표), `DocsLanguageSetup`(`language` 를 테스트·CLI 태스크의 시스템 속성으로), `CoverageTasks`, `HttpClientTasks`, `SourceDocsTasks`, `SourceDocsArgument`(source-docs 파일을 테스트 입력으로), `SpecSettingsInputs`(`openApiSecurity`·`apiVersioning` 을 `openapi3` 입력으로), `Reflection`, `PluginServices` |
+| `gradle.internal.wiring` | 태스크 등록과 다른 플러그인 연결 | 표 아래 목록 참고 |
+
+`gradle.internal.wiring` 의 클래스:
+
+- `ExtensionDefaults`, `GradleVersionCheck`(최소 Gradle 7.6), `TestTaskSetup`
+- `LibraryDependencies`·`DependencyMatch`·`WebStack`·`KotestVersionLine`·`EpagesVersion`: 의존성 자동 추가와 MVC/WebFlux·Kotest 판·epages 버전 판정
+- `WebFluxTestClasspath`: WebFlux 앱의 `spring-boot-starter-web` 제외
+- `IndexTasks`, `OpenApiDefaults`(epages `openapi3 { }` 기본값), `AppDocsProperties`(시작 로그용 문서 위치), `ProductionExposure`(운영 노출 경고)
+- `AsciidoctorIntegration`, `OpenApiIntegration`, `EpagesOutputs`, `OpenApiCheckTasks`, `OpenApiViewerTasks`, `AsyncApiTasks`, `ApiDocsTasks`, `DocsLocations`, `SpringBootIntegration`, `GenerateOnRun`, `ApiDocsAggregation`, `WireMockStubs`
+- `ExportTasks`(`apiDocsExport`·`apiDocsUpload`), `MavenSpecPublication`(Maven 배포물에 스펙 붙이기)
+- `CommonResponsesIndex`(index 끝의 공통 오류 응답 표), `DocsLanguageSetup`(`language` 를 테스트·CLI 태스크의 시스템 속성으로)
+- `CoverageTasks`, `HttpClientTasks`, `SourceDocsTasks`, `SourceDocsArgument`(source-docs 파일을 테스트 입력으로), `SpecSettingsInputs`(`openApiSecurity`·`apiVersioning` 을 `openapi3` 입력으로)
+- `Reflection`, `PluginServices`
 
 계층 (아래가 먼저, 순환 0):
 
@@ -537,7 +582,11 @@ L0  dsl   internal
 
 **리소스.** `io/github/kardx/gradle/internal/wiring/kardx-plugin.properties` 에 빌드할 때 플러그인 버전이 들어갑니다. `SpringBootIntegration` 이 자기 패키지 기준으로 읽어 같은 버전의 `boot`·`annotations`·`core`·Kotest 확장을 추가합니다. OpenAPI 뷰어 템플릿은 `tooling` 에 있습니다.
 
-**테스트.** JUnit 5 테스트가 `src/test/java` 에 대상 클래스와 같은 패키지로 있습니다. `KardxPluginTest`, `AsyncApiTasksTest` 는 `ProjectBuilder` 로 프로젝트를 만들고, 테스트 리소스의 가짜 epages·Spring Boot 플러그인(`META-INF/gradle-plugins/*.properties`)을 씁니다. `ApiDocsFunctionalTest`·`AppDocsFunctionalTest`·`WebFluxTestClasspathFunctionalTest`·`SpecExportFunctionalTest` 는 Gradle TestKit 으로 실제 빌드를 돌립니다(멀티 프로젝트 집계와 configuration cache 재사용, 기준 스펙 비교, 문서 위치 파일, WebFlux 앱의 클래스패스, 스펙 내보내기·Maven 배포물·로컬 HTTP 서버로 올리기). TestKit 픽스처가 가짜 플러그인도 쓰도록 `pluginUnderTestMetadata` 에 테스트 클래스를 더합니다. `GradleCompatibilityFunctionalTest` 는 `-PgradleVersions=...` 를 줄 때만 다른 Gradle 버전으로 핵심 시나리오와 스펙 내보내기·업로드를 돌립니다([개발](development.md)). 실행은 `./gradlew -p gradle-plugin test` 입니다. 실제 사용자 빌드로서의 동작은 두 샘플의 `build` 가 확인합니다.
+**테스트.** JUnit 5 테스트가 `src/test/java` 에 대상 클래스와 같은 패키지로 있습니다. `KardxPluginTest`, `AsyncApiTasksTest` 는 `ProjectBuilder` 로 프로젝트를 만들고, 테스트 리소스의 가짜 epages·Spring Boot 플러그인(`META-INF/gradle-plugins/*.properties`)을 씁니다.
+
+`ApiDocsFunctionalTest`·`AppDocsFunctionalTest`·`WebFluxTestClasspathFunctionalTest`·`SpecExportFunctionalTest` 는 Gradle TestKit 으로 실제 빌드를 돌립니다(멀티 프로젝트 집계와 configuration cache 재사용, 기준 스펙 비교, 문서 위치 파일, WebFlux 앱의 클래스패스, 스펙 내보내기·Maven 배포물·로컬 HTTP 서버로 올리기). TestKit 픽스처가 가짜 플러그인도 쓰도록 `pluginUnderTestMetadata` 에 테스트 클래스를 더합니다.
+
+`GradleCompatibilityFunctionalTest` 는 `-PgradleVersions=...` 를 줄 때만 다른 Gradle 버전으로 핵심 시나리오와 스펙 내보내기·업로드를 돌립니다([개발](development.md)). 실행은 `./gradlew -p gradle-plugin test` 입니다. 실제 사용자 빌드로서의 동작은 두 샘플의 `build` 가 확인합니다.
 
 **고칠 때 주의할 점**
 
@@ -564,7 +613,7 @@ L0  dsl   internal
 | `tooling.internal.pipeline` | JSON 설정과 전체 실행 순서 (CLI·Maven) | `ApiDocsConfig`, `ConfigMaps`(파일 읽기와 덮어쓰기), `ConfigValues`, `ApiDocsPipeline`(스니펫 복사 → epages 생성기 → 후처리 → 뷰어 → `.http` → Postman → 커버리지. 빌드 도구별 안내 문구는 `Hints`) |
 | `tooling.internal.steps` | Gradle 태스크·CLI·Maven 이 함께 쓰는 단계 | `OpenApiSnippets`, `OpenApiPostProcessing`, `CoverageReportStep`, `OpenApiCheckStep`, `HttpClientStep`, `OpenApiViewerStep`, `SourceDocsStep` |
 | `tooling.internal.epages` | epages OpenAPI·Postman 생성기를 라이브러리로 부름 (`compileOnly`. 없으면 알기 쉬운 메시지) | `EpagesGenerators` |
-| `tooling.internal.openapi` | epages 결과 후처리 | `OpenApiResources`·`PrimaryResources`(조각과 대표 조각), `SecurityRequirementsAligner`, `OpenApiSchemaNames`·`SchemaUsage`·`SchemaRenaming`·`SchemaMerging`(같은 이름·다른 구조 스키마), `OpenApiGlobalHeaders`, `OpenApiBodySchemas`, `OpenApiRefinements`, `OpenApiSchemaHints`·`DescriptorHints`·`ParameterHints`·`BodyFieldHints`(디스크립터 속성 합치기), `OpenApiRequestExtras`, `OpenApiFileBodies`(파일 본문 설명, 바이너리 미디어 타입의 `charset` 빼기), `OpenApiOperationTidy`·`OpenApiOperationIds`·`OpenApiExamples`·`OpenApiDocumentTidy`·`HttpStatusPhrases`(operation·문서 다듬기), `SensitiveHeaderExamples`, `SharedSchemaMarks`, `PostmanCollectionTidy`, `OpenApiErrorResponses`(선언 응답, 이어서 공통 응답 더하기), `OpenApiDeclaredResponses`·`DeclaredResponseSchemas`(`errorResponse` 로 선언한 응답과 그 스키마 이름), `OpenApiCommonResponses`(공통 오류 응답), `OpenApiOperationTexts`(요약·설명), `OpenApiFieldDefaults`(Kotlin 기본값), `OpenApiPolymorphism`·`VariantSchemas`·`SchemaSlot`(sealed·`@JsonSubTypes` 를 `oneOf` 로), `OpenApiSecuritySettings`·`OpenApiOAuthSecurity`(OAuth2·OpenID Connect), `ApiVersioningSettings`·`ApiVersions`·`OpenApiApiVersions`·`OpenApiVersionSplit`(API 버전) |
+| `tooling.internal.openapi` | epages 결과 후처리 | 표 아래 목록 참고 |
 | `tooling.internal.spec` | 스펙 파일 읽기·쓰기와 트리 탐색. 후처리·비교·집계가 함께 쓴다 | `OpenApiSpecFiles`, `SwaggerYaml`, `SpecMaps`(맵·리스트 트리 도구, OpenAPI 키 이름, 깊은 복사·순회) |
 | `tooling.internal.check` | 기준 스펙과의 비교 | `OpenApiBreakingChanges`·`SchemaChanges`·`SpecNodes`(깨는 변경 규칙), `RequestConstraints`·`OneOfVariants`·`SecurityChanges`(깨는 변경 규칙), `OpenApiStructureDiff`(위치별 구조 차이), `OpenApiChangeReport`(요약) |
 | `tooling.internal.aggregate` | 여러 프로젝트 스펙 병합 | `OpenApiMerger`, `SpecRewrites`(참조·보안 이름 바꾸기), `ComponentNames`, `ProjectDirectories`(프로젝트별 디렉터리 이름) |
@@ -575,6 +624,26 @@ L0  dsl   internal
 | `tooling.internal.coverage` | 문서화 커버리지: 엔드포인트 목록과 문서화한 operation 읽기, 경로 템플릿 대조, 보고서 | `CoverageInputs`, `Endpoint`, `PathPatterns`, `CoverageReport` |
 | `tooling.internal.httpclient` | IntelliJ HTTP Client 파일: 스니펫에서 읽은 operation 마다 대표 요청 하나 | `RecordedRequest`, `HttpClientRequests`, `HttpClientFile`, `MaskedValues` |
 | `tooling.internal.sourcedocs` | 컴파일러 없이 도는 가벼운 KDoc·Javadoc 스캐너와 테스트가 읽는 JSON 색인 | `SourceDocsScanner`, `SourceLexer`, `KotlinDeclarations`, `JavaDeclarations`, `DocCommentParser`, `SourceDocsIndex` 와 보조 클래스 |
+
+`tooling.internal.openapi` 의 클래스:
+
+- `OpenApiResources`·`PrimaryResources`: 조각과 대표 조각
+- `SecurityRequirementsAligner`
+- `OpenApiSchemaNames`·`SchemaUsage`·`SchemaRenaming`·`SchemaMerging`: 같은 이름·다른 구조 스키마
+- `OpenApiGlobalHeaders`, `OpenApiBodySchemas`, `OpenApiRefinements`
+- `OpenApiSchemaHints`·`DescriptorHints`·`ParameterHints`·`BodyFieldHints`: 디스크립터 속성 합치기
+- `OpenApiRequestExtras`
+- `OpenApiFileBodies`: 파일 본문 설명, 바이너리 미디어 타입의 `charset` 빼기
+- `OpenApiOperationTidy`·`OpenApiOperationIds`·`OpenApiExamples`·`OpenApiDocumentTidy`·`HttpStatusPhrases`: operation·문서 다듬기
+- `SensitiveHeaderExamples`, `SharedSchemaMarks`, `PostmanCollectionTidy`
+- `OpenApiErrorResponses`: 선언 응답, 이어서 공통 응답 더하기
+- `OpenApiDeclaredResponses`·`DeclaredResponseSchemas`: `errorResponse` 로 선언한 응답과 그 스키마 이름
+- `OpenApiCommonResponses`: 공통 오류 응답
+- `OpenApiOperationTexts`: 요약·설명
+- `OpenApiFieldDefaults`: Kotlin 기본값
+- `OpenApiPolymorphism`·`VariantSchemas`·`SchemaSlot`: sealed·`@JsonSubTypes` 를 `oneOf` 로
+- `OpenApiSecuritySettings`·`OpenApiOAuthSecurity`: OAuth2·OpenID Connect
+- `ApiVersioningSettings`·`ApiVersions`·`OpenApiApiVersions`·`OpenApiVersionSplit`: API 버전
 
 계층(아래가 먼저, 순환 0):
 
@@ -634,9 +703,17 @@ L0  tooling (ToolingException)
 
 ### samples
 
-**역할.** `samples/spring-boot-3`(Boot 3.5, REST Docs 3, epages 0.19, springdoc 2.8)과 `samples/spring-boot-4`(Boot 4.1, REST Docs 4, epages 0.20, springdoc 3.2)는 같은 예제 앱입니다. 사용 예이면서, 라이브러리가 두 Boot 버전에서 똑같이 동작하는지 보이는 통합 검증입니다. HTTP, 쿠키, multipart, HAL, SSE, STOMP, WebSocket 핸들러, 응답 래퍼, yml 설정을 씁니다. JUnit 테스트 사이에 Kotest 스펙 하나(`kotest/UserSearchDocsSpec`, Kotest Spring 확장 사용)가 같은 `test` 태스크에서 돌고, 그 문서가 index·HTML·OpenAPI 에 함께 들어갑니다. 메모 API(`memo` 패키지, `MemoApiDocsTest`)는 설명 어노테이션도, 테스트에 적은 설명도 없이 KDoc 만으로 문서화하는 예제입니다. Kotest 확장은 프로젝트 설정(`io.kotest.provided.ProjectConfig`)에도 등록돼 있고, `kotest/ProjectExtensionSettingsSpec` 이 그 전역 확장이 Spring 컨텍스트의 yml 을 읽는지 확인합니다(문서는 만들지 않음). Boot 4 샘플에만 JUnit 문서화 테스트 9개를 Kotest `FunSpec` 으로 옮긴 스펙(`kotest/<같은 하위 패키지>/…Spec`)이 있습니다. `kotest/support/MirrorDocsConfig` 가 그 문서를 `build/generated-asciidoc-kotest` 에 쓰고 OpenAPI·AsyncAPI·WireMock 조각을 끄므로 index·HTML·OpenAPI·AsyncAPI·기준 스펙은 JUnit 문서만 담습니다.
+**역할.** `samples/spring-boot-3`(Boot 3.5, REST Docs 3, epages 0.19, springdoc 2.8)과 `samples/spring-boot-4`(Boot 4.1, REST Docs 4, epages 0.20, springdoc 3.2)는 같은 예제 앱입니다. 사용 예이면서, 라이브러리가 두 Boot 버전에서 똑같이 동작하는지 보이는 통합 검증입니다. HTTP, 쿠키, multipart, HAL, SSE, STOMP, WebSocket 핸들러, 응답 래퍼, yml 설정을 씁니다.
 
-**의존성.** 문서가 안내하는 최소 설정과 같습니다. 라이브러리(annotations·core·kotest·boot)와 REST Docs·epages 클라이언트는 적지 않고 Gradle 플러그인(`id("io.github.kardx-project")`, composite build)이 넣습니다. 샘플은 Kotest 6.2.7 러너와 Spring 확장만 적습니다. 플러그인이 넣는 배포 좌표(`io.github.kardx-project:<아티팩트>:<버전>`)는 샘플 컨벤션 플러그인(`build-logic` 의 `restdocs.kotlin-sample`)의 dependency substitution 이 같은 빌드의 프로젝트(`:core`·`:annotations`·`:boot`·`:kotest`·`:kotest5`)로 바꾸므로 mavenLocal 의 지난 jar 를 쓰지 않습니다. `./gradlew :samples:spring-boot-4:dependencies --configuration testRuntimeClasspath` 에서 `-> project :kotest` 처럼 보입니다.
+JUnit 테스트 사이에 Kotest 스펙 하나(`kotest/UserSearchDocsSpec`, Kotest Spring 확장 사용)가 같은 `test` 태스크에서 돌고, 그 문서가 index·HTML·OpenAPI 에 함께 들어갑니다. 메모 API(`memo` 패키지, `MemoApiDocsTest`)는 설명 어노테이션도, 테스트에 적은 설명도 없이 KDoc 만으로 문서화하는 예제입니다.
+
+Kotest 확장은 프로젝트 설정(`io.kotest.provided.ProjectConfig`)에도 등록돼 있고, `kotest/ProjectExtensionSettingsSpec` 이 그 전역 확장이 Spring 컨텍스트의 yml 을 읽는지 확인합니다(문서는 만들지 않음).
+
+Boot 4 샘플에만 JUnit 문서화 테스트 9개를 Kotest `FunSpec` 으로 옮긴 스펙(`kotest/<같은 하위 패키지>/…Spec`)이 있습니다. `kotest/support/MirrorDocsConfig` 가 그 문서를 `build/generated-asciidoc-kotest` 에 쓰고 OpenAPI·AsyncAPI·WireMock 조각을 끄므로 index·HTML·OpenAPI·AsyncAPI·기준 스펙은 JUnit 문서만 담습니다.
+
+**의존성.** 문서가 안내하는 최소 설정과 같습니다. 라이브러리(annotations·core·kotest·boot)와 REST Docs·epages 클라이언트는 적지 않고 Gradle 플러그인(`id("io.github.kardx-project")`, composite build)이 넣습니다. 샘플은 Kotest 6.2.7 러너와 Spring 확장만 적습니다.
+
+플러그인이 넣는 배포 좌표(`io.github.kardx-project:<아티팩트>:<버전>`)는 샘플 컨벤션 플러그인(`build-logic` 의 `restdocs.kotlin-sample`)의 dependency substitution 이 같은 빌드의 프로젝트(`:core`·`:annotations`·`:boot`·`:kotest`·`:kotest5`)로 바꾸므로 mavenLocal 의 지난 jar 를 쓰지 않습니다. `./gradlew :samples:spring-boot-4:dependencies --configuration testRuntimeClasspath` 에서 `-> project :kotest` 처럼 보입니다.
 
 **내용.** `src/main` 에 컨트롤러·DTO(패키지 `com.example.restdocs`), `src/test` 에 문서화 테스트와 기본 클래스 `support/RestDocsTestSupport`, `src/docs/asciidoc` 에 `index-template.adoc`·`_landing.adoc`, `src/test/resources/application-docs.yml` 이 있습니다.
 

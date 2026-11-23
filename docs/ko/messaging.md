@@ -139,7 +139,12 @@ fun chat(provider: RestDocumentationContextProvider) {
 | `fields<T>(path = "")` | 타입에서 추출해 등록하는 단축형. 방향에 맞는 규칙을 고른다: `send`·`connect` 는 요청 규칙(`requestFieldsOf`: 기본값 있는 프로퍼티 optional, 읽기 전용 제외), `subscribe` 는 응답 규칙(`responseFieldsOf`). 목록을 고치거나 합칠 때는 `fields(responseFieldsOf<T>() + ...)` |
 | `relaxed = true` | 문서화하지 않은 페이로드 필드를 허용한다 |
 
-프로토콜은 `MessageProtocol`(`io.github.kardx.dsl`)로 고릅니다: `STOMP`(기본), `WEBSOCKET`, `SSE`. 문서와 AsyncAPI 채널의 `x-protocol` 에는 `STOMP`·`WebSocket`·`SSE` 로 나가고, AsyncAPI 서버(`stomp`·`ws`·`http` …) 중 그 프로토콜로 연결할 수 있는 서버가 채널에 붙습니다. 목록에 없는 프로토콜은 문자열로 줍니다(`MessageDocumentation(provider, "MQTT")`). 그 채널에는 AsyncAPI 서버가 모두 붙습니다. 앞뒤 공백은 지우고, 알려진 프로토콜의 이름·별칭이면(대소문자 무시: `"websocket"`·`"ws"` → `WebSocket`, `"stomp"` → `STOMP`, `"sse"`·`"http"` → `SSE`) 그 프로토콜로 보고 표시 이름도 맞춥니다(문서 표시와 AsyncAPI 서버 연결 판정이 같은 값). 빈 문자열은 거부합니다.
+프로토콜은 `MessageProtocol`(`io.github.kardx.dsl`)로 고릅니다: `STOMP`(기본), `WEBSOCKET`, `SSE`. 문서와 AsyncAPI 채널의 `x-protocol` 에는 `STOMP`·`WebSocket`·`SSE` 로 나가고, AsyncAPI 서버(`stomp`·`ws`·`http` …) 중 그 프로토콜로 연결할 수 있는 서버가 채널에 붙습니다.
+
+목록에 없는 프로토콜은 문자열로 줍니다(`MessageDocumentation(provider, "MQTT")`). 그 채널에는 AsyncAPI 서버가 모두 붙습니다.
+
+- 앞뒤 공백은 지웁니다. 알려진 프로토콜의 이름·별칭이면(대소문자 무시: `"websocket"`·`"ws"` → `WebSocket`, `"stomp"` → `STOMP`, `"sse"`·`"http"` → `SSE`) 그 프로토콜로 보고 표시 이름도 맞춥니다(문서 표시와 AsyncAPI 서버 연결 판정이 같은 값).
+- 빈 문자열은 거부합니다.
 
 `headers`·`headerValues`·`fields` 는 여러 번 부르면 이어 붙고, 가변 인자와 `List`(`Map`) 두 형태를 받습니다. 방향을 직접 고르려면 `docs.document(MessageDirection.SEND, destination, payload) { ... }` 를 씁니다. `MessageDirection` 과 블록 타입 `MessageDocumentationBuilder` 는 HTTP 블록 타입과 같은 `io.github.kardx.dsl` 에, `MessageDocumentation`·`WebSocketHandlerTester` 는 `io.github.kardx.websocket` 에, 단축형 `fields<T>()` 는 `io.github.kardx.extractor` 에 있습니다.
 
@@ -224,11 +229,17 @@ class ChatMessageDocsTest : RestDocsTestSupport() {
 | 멤버 | 하는 일 |
 |---|---|
 | `StompTestClient(url, connectHeaders, timeout, webSocketClient)` | 바로 연결합니다. `connectHeaders` 는 CONNECT 프레임에 들어갑니다(`stomp.connectHeaders` 로도 읽음). `timeout` 기본값 5초, `webSocketClient` 기본값은 JSR-356 표준 클라이언트(Tomcat·Jetty 가 제공)입니다. 시간 안에 연결하지 못하거나 서버가 거절하면 `IllegalStateException` 으로 실패합니다 |
-| `sendAndReceive(destination, payload, subscribeTo)` | 구독하고 보낸 뒤 처음 받은 프레임을 돌려줍니다. 브로커가 구독을 등록하기 전에 보낸 메시지는 사라질 수 있고 Spring 의 simple broker 는 SUBSCRIBE 에 receipt 를 보내지 않으므로, 프레임이 올 때까지 같은 페이로드를 다시 보냅니다. 간격은 200ms 에서 시작해 두 배씩 늘어 1초까지입니다. 그래서 시간이 걸리는 핸들러(DB 저장 등)는 같은 메시지를 두 번 이상 받을 수 있고, 돌려받는 프레임은 그중 어느 전송의 결과일 수 있습니다. 한 번만 보내야 하면 `subscribe` → `send` → `StompSubscription.await` 를 직접 씁니다. 제한 시간 안에 오지 않으면 실패합니다. 다시 보내는 시간까지 포함해 호출 전체가 제한 시간을 넘지 않고, 마감 직전에는 다시 보내지 않습니다 |
+| `sendAndReceive(destination, payload, subscribeTo)` | 구독하고 보낸 뒤 처음 받은 프레임을 돌려줍니다. 프레임이 올 때까지 다시 보내므로 핸들러가 같은 메시지를 두 번 이상 받을 수 있습니다 (자세한 내용은 표 아래) |
 | `send(destination, payload, headers)` | 프레임 하나를 보냅니다. 문자열·`ByteArray` 는 그대로, 객체는 설정한 Jackson 매퍼로 JSON 이 됩니다. `content-type` 기본값은 `application/json` 입니다 |
 | `subscribe(destination)` | `StompSubscription` 을 돌려줍니다: `await(timeout)` 은 다음 프레임을 꺼내고 `unsubscribe()` 는 구독을 끝냅니다 |
 | `StompFrame` | `headers`(이름마다 첫 값)와 `body`(페이로드 문자열). `frame.body` 를 `docs.subscribe(...)` 에 넘깁니다 |
 | `close()` | 연결을 끊습니다. `use { }` 로 씁니다 |
+
+`sendAndReceive` 가 보내는 방식:
+
+- 브로커가 구독을 등록하기 전에 보낸 메시지는 사라질 수 있고 Spring 의 simple broker 는 SUBSCRIBE 에 receipt 를 보내지 않습니다. 그래서 프레임이 올 때까지 같은 페이로드를 다시 보냅니다. 간격은 200ms 에서 시작해 두 배씩 늘어 1초까지입니다.
+- 그래서 시간이 걸리는 핸들러(DB 저장 등)는 같은 메시지를 두 번 이상 받을 수 있고, 돌려받는 프레임은 그중 어느 전송의 결과일 수 있습니다. 한 번만 보내야 하면 `subscribe` → `send` → `StompSubscription.await` 를 직접 씁니다.
+- 제한 시간 안에 오지 않으면 실패합니다. 다시 보내는 시간까지 포함해 호출 전체가 제한 시간을 넘지 않고, 마감 직전에는 다시 보내지 않습니다.
 
 `StompTestClient` 는 Spring Framework 6(Boot 3)과 7(Boot 4)에서 모두 동작합니다. 서버가 CONNECT 를 거절하면(예: 토큰이 없을 때 예외를 던지는 채널 인터셉터) 연결되지 않는 클라이언트를 돌려주지 않고 생성자가 `IllegalStateException` 을 던지므로, 토큰이 틀리면 테스트가 그 자리에서 실패합니다.
 
@@ -277,7 +288,15 @@ OpenAPI 는 WebSocket·STOMP 메시지를 표현하지 못합니다. 그래서 �
 - `MessageDocumentation` 과 `events(...)` 는 스니펫과 함께 AsyncAPI 메타데이터를 남깁니다. 따로 할 일은 없습니다.
 - Gradle 플러그인의 `apiDocsAsyncApi` 태스크가 `asyncapi.yaml` 과 뷰어 `asyncapi.html` 을 만듭니다. 서버는 `asyncApi { server(...) }`, 파일 경로는 `asyncApi { fileName }` 으로 정합니다. 문서화한 메시지·SSE 가 하나도 없으면 만들지 않습니다.
 - 뷰어의 **문서** 탭은 AsyncAPI 공식 뷰어입니다. **Try it out** 탭에서는 STOMP 연결·구독·전송, WebSocket 연결·전송, SSE 구독을 직접 해 볼 수 있습니다. 서버 주소 기본값은 페이지를 연 앱이고, CDN 스크립트는 무결성(SRI)을 검증합니다.
-- 플러그인 없이 쓰려면 메인 클래스 `io.github.kardx.asyncapi.AsyncApiCli` 를 테스트 런타임 클래스패스로(예: Gradle `JavaExec` 태스크, `exec-maven-plugin`) `--snippets`(기본 `build/generated-snippets`), `--output`(기본 `build/api-spec/asyncapi.yaml`), `--viewer`(없으면 뷰어 없음), `--title`(기본 `API`), `--version`(기본 `1.0.0`), `--description`(선택, AsyncAPI `info.description`), `--server name=protocol://host[/path]`(여러 번, 예: `stomp=stomp://localhost:8080/ws`), `--security`(여러 번, [아래](#asyncapi-인증)) 인자로 실행합니다. 문서화한 것이 없으면 `AsyncAPI: no documented WebSocket, STOMP or SSE messages, nothing generated` 를 출력하고, 인자가 잘못되면 종료 코드 2 로 끝납니다.
+- 플러그인 없이 쓰려면 메인 클래스 `io.github.kardx.asyncapi.AsyncApiCli` 를 테스트 런타임 클래스패스로(예: Gradle `JavaExec` 태스크, `exec-maven-plugin`) 아래 인자로 실행합니다. 문서화한 것이 없으면 `AsyncAPI: no documented WebSocket, STOMP or SSE messages, nothing generated` 를 출력하고, 인자가 잘못되면 종료 코드 2 로 끝납니다.
+  - `--snippets` (기본 `build/generated-snippets`)
+  - `--output` (기본 `build/api-spec/asyncapi.yaml`)
+  - `--viewer` (없으면 뷰어 없음)
+  - `--title` (기본 `API`)
+  - `--version` (기본 `1.0.0`)
+  - `--description` (선택, AsyncAPI `info.description`)
+  - `--server name=protocol://host[/path]` (여러 번, 예: `stomp=stomp://localhost:8080/ws`)
+  - `--security` (여러 번, [아래](#asyncapi-인증))
 
 | 라이브러리 | AsyncAPI |
 |---|---|

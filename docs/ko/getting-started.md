@@ -80,7 +80,9 @@ Gradle 플러그인은 Gradle 전용입니다. 테스트가 만드는 것은 빌
 | WireMock 매핑 | 됨. stub jar 도 | yml `kardx.wire-mock-stubs: true` (매핑만) | 플러그인 없는 Gradle 과 같음 |
 | 앱의 `/docs/` 에서 문서 열기, 앱 시작 로그 | 됨 | 결과를 `static/docs` 에 직접 복사하고 `boot` 모듈을 직접 넣음. 시작 로그는 기본 파일 이름을 씀 | 플러그인 없는 Gradle 과 같음 (`maven-resources-plugin` 으로 복사) |
 
-**Gradle 버전과 Kotlin DSL.** 플러그인은 Gradle 7.6 이상이 필요하고, Gradle 은 JDK 17 이상에서 돌아야 합니다. 플러그인을 Java 17 용으로 컴파일했으므로 더 낮은 JDK 의 Gradle 은 플러그인을 읽지 못합니다 (`UnsupportedClassVersionError ... class file version 61.0`). IntelliJ 는 Settings → Build Tools → Gradle → Gradle JVM 을, 명령줄은 `JAVA_HOME` 이나 `org.gradle.java.home` 을 확인합니다. 이 문서의 Kotlin DSL 예시는 플러그인 설정을 `=` 로 넣는데(`language = "ko"`, `enabled = true`), Kotlin DSL 이 이런 지연 속성에 `=` 를 받는 것은 Gradle 8.2 부터입니다. Gradle 7.6~8.1 에서는 `.set(...)` 을 부르거나, 지원하는 모든 버전에서 `=` 가 되는 Groovy DSL 을 씁니다. 쓰는 Spring Boot 버전이 더 새 Gradle 을 요구할 수도 있습니다 (Spring Boot 4 는 Gradle 8.14 이상).
+**Gradle 버전과 Kotlin DSL.** 플러그인은 Gradle 7.6 이상이 필요하고, Gradle 은 JDK 17 이상에서 돌아야 합니다. 플러그인을 Java 17 용으로 컴파일했으므로 더 낮은 JDK 의 Gradle 은 플러그인을 읽지 못합니다 (`UnsupportedClassVersionError ... class file version 61.0`). IntelliJ 는 Settings → Build Tools → Gradle → Gradle JVM 을, 명령줄은 `JAVA_HOME` 이나 `org.gradle.java.home` 을 확인합니다.
+
+이 문서의 Kotlin DSL 예시는 플러그인 설정을 `=` 로 넣는데(`language = "ko"`, `enabled = true`), Kotlin DSL 이 이런 지연 속성에 `=` 를 받는 것은 Gradle 8.2 부터입니다. Gradle 7.6~8.1 에서는 `.set(...)` 을 부르거나, 지원하는 모든 버전에서 `=` 가 되는 Groovy DSL 을 씁니다. 쓰는 Spring Boot 버전이 더 새 Gradle 을 요구할 수도 있습니다 (Spring Boot 4 는 Gradle 8.14 이상).
 
 ```kotlin
 // Gradle 7.6~8.1, build.gradle.kts
