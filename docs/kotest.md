@@ -37,7 +37,7 @@ The JUnit extension (`AutoRestDocumentationExtension`) relies on test methods an
 
 The DSL (`andDocument { }`), field extraction (`responseFields<T>()`), settings (`RestDocsConfiguration`, yml), and the Gradle plugin are exactly the same as with JUnit. Only the extension differs; snippet cleanup, failure handling, settings rollback, and document writing use the same code as the JUnit extension.
 
-> **Kotest 6.x and 5.x are supported.** Each version has its own artifact (6.x `-kotest`, 5.x `-kotest5`) with the same package and public API. The repository verifies against 6.2.6 and 5.9.1 ([Dependencies by Kotest version](#dependencies-by-kotest-version), [Kotest 5.x](#kotest-5x)).
+> **Kotest 6.x and 5.x are supported.** Each version has its own artifact (6.x `-kotest`, 5.x `-kotest5`) with the same package and public API. The repository verifies against 6.2.7 and 5.9.1 ([Dependencies by Kotest version](#dependencies-by-kotest-version), [Kotest 5.x](#kotest-5x)).
 
 ## Dependencies
 
@@ -49,7 +49,7 @@ The Kotest extension has a different artifact for each Kotest version. Both arti
 
 | Your project's Kotest | Artifact to add | Kotest Spring extension (for Spring tests) | Verified versions |
 |---|---|---|---|
-| 6.x | `io.github.kardx-project:kardx-kotest` | `io.kotest:kotest-extensions-spring` (same version as Kotest) | 6.2.6 |
+| 6.x | `io.github.kardx-project:kardx-kotest` | `io.kotest:kotest-extensions-spring` (same version as Kotest) | 6.2.7 |
 | 5.x | `io.github.kardx-project:kardx-kotest5` | `io.kotest.extensions:kotest-extensions-spring:1.x` (different coordinates) | 5.9.1, Spring extension 1.3.0 |
 
 **Never put both artifacts on one classpath.** Classes with the same name would exist twice, and which one is used would be undefined. Both modules publish the same Gradle capability (`io.github.kardx-project:kardx-kotest-extension`), so if both come in through Gradle (including when another dependency pulls one in), dependency resolution fails with a capability conflict and asks you to pick one. The capability is carried in Gradle module metadata, so it has no effect in tools that read only the POM, such as Maven. If you add the artifact for the wrong line (`-kotest5` on Kotest 6.x, or the reverse), creating `RestDocsExtension` fails immediately:
@@ -62,9 +62,9 @@ Kotest 6.x (with the Gradle plugin):
 
 ```kotlin
 dependencies {
-    testImplementation("io.kotest:kotest-runner-junit5:6.2.6")   // the plugin adds kardx-kotest
+    testImplementation("io.kotest:kotest-runner-junit5:6.2.7")   // the plugin adds kardx-kotest
     // For Spring tests (@SpringBootTest). Constructor injection and reading kardx.* from yml
-    testImplementation("io.kotest:kotest-extensions-spring:6.2.6")
+    testImplementation("io.kotest:kotest-extensions-spring:6.2.7")
 }
 
 tasks.test { useJUnitPlatform() }

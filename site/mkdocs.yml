@@ -1,0 +1,113 @@
+# Documentation site. Source pages live in docs/ (English) and docs/ko/ (Korean);
+# scripts/build-site.py copies them into build/site-src/{en,ko} before mkdocs runs.
+site_name: kardx
+site_description: Spring REST Docs Kotlin DSL that produces OpenAPI, AsyncAPI and AsciiDoc from your tests
+site_url: https://kardx-project.github.io/kardx/
+repo_url: https://github.com/kardx-project/kardx
+repo_name: kardx-project/kardx
+edit_uri: ""
+copyright: Copyright 2026 devYSK · Apache License 2.0
+
+docs_dir: ../build/site-src
+site_dir: ../build/site
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  icon:
+    repo: fontawesome/brands/github
+  favicon: assets/favicon.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.tracking
+    - toc.follow
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: ko
+          name: 한국어
+          build: true
+          site_description: 테스트에서 OpenAPI·AsyncAPI·AsciiDoc 문서를 만드는 Spring REST Docs Kotlin DSL
+          nav_translations:
+            Guides: 가이드
+            Reference: 참고
+
+markdown_extensions:
+  - tables
+  - admonition
+  - attr_list
+  - md_in_html
+  - mdx_truly_sane_lists:
+      nested_indent: 2
+  - toc:
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.details
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/kardx-project/kardx
+
+nav:
+  - index.md
+  - getting-started.md
+  - Guides:
+      - http-api.md
+      - webtestclient.md
+      - kotest.md
+      - messaging.md
+      - configuration.md
+      - build.md
+      - openapi.md
+      - checks.md
+      - outputs.md
+      - maven.md
+      - asciidoc.md
+      - customizing-snippets.md
+      - ci.md
+      - migration.md
+  - Reference:
+      - troubleshooting.md
+      - architecture.md
+      - development.md
+
+validation:
+  links:
+    anchors: warn

@@ -37,7 +37,7 @@ JUnit 확장(`AutoRestDocumentationExtension`)은 테스트 메서드와 파라�
 
 DSL(`andDocument { }`), 필드 추출(`responseFields<T>()`), 설정(`RestDocsConfiguration`, yml), Gradle 플러그인은 JUnit 과 똑같습니다. 확장만 다르고, 스니펫 정리·실패 처리·설정 되돌리기·문서 쓰기는 JUnit 확장과 같은 코드를 씁니다.
 
-> **Kotest 6.x 와 5.x 를 지원합니다.** 버전마다 아티팩트가 다르고(6.x `-kotest`, 5.x `-kotest5`) 패키지·공개 API 는 같습니다. 저장소는 6.2.6 과 5.9.1 로 검증합니다([Kotest 버전별 의존성](#kotest-버전별-의존성), [Kotest 5.x](#kotest-5x)).
+> **Kotest 6.x 와 5.x 를 지원합니다.** 버전마다 아티팩트가 다르고(6.x `-kotest`, 5.x `-kotest5`) 패키지·공개 API 는 같습니다. 저장소는 6.2.7 과 5.9.1 로 검증합니다([Kotest 버전별 의존성](#kotest-버전별-의존성), [Kotest 5.x](#kotest-5x)).
 
 ## 의존성
 
@@ -49,7 +49,7 @@ Kotest 확장은 Kotest 버전마다 아티팩트가 다릅니다. 두 아티팩
 
 | 프로젝트의 Kotest | 넣을 아티팩트 | Kotest Spring 확장 (Spring 테스트일 때) | 검증한 버전 |
 |---|---|---|---|
-| 6.x | `io.github.kardx-project:kardx-kotest` | `io.kotest:kotest-extensions-spring` (Kotest 와 같은 버전) | 6.2.6 |
+| 6.x | `io.github.kardx-project:kardx-kotest` | `io.kotest:kotest-extensions-spring` (Kotest 와 같은 버전) | 6.2.7 |
 | 5.x | `io.github.kardx-project:kardx-kotest5` | `io.kotest.extensions:kotest-extensions-spring:1.x` (좌표가 다름) | 5.9.1, Spring 확장 1.3.0 |
 
 **두 아티팩트를 한 클래스패스에 함께 넣지 않습니다.** 같은 이름의 클래스가 두 벌이 되어 어느 쪽이 쓰일지 정해지지 않습니다. 두 모듈은 같은 Gradle capability(`io.github.kardx-project:kardx-kotest-extension`)를 내보내므로, Gradle 로 둘 다 들어오면(다른 의존성이 끌고 온 경우 포함) 의존성 해석이 capability 충돌로 실패하며 둘 중 하나를 고르라고 알려 줍니다. capability 는 Gradle 모듈 메타데이터로 전달되므로 Maven 처럼 POM 만 읽는 도구에서는 효과가 없습니다. 판이 맞지 않는 아티팩트를 넣으면(Kotest 6.x 에 `-kotest5`, 또는 반대) `RestDocsExtension` 을 만들 때 바로 실패합니다:
@@ -62,9 +62,9 @@ Kotest 6.x (Gradle 플러그인을 쓸 때):
 
 ```kotlin
 dependencies {
-    testImplementation("io.kotest:kotest-runner-junit5:6.2.6")   // 플러그인이 kardx-kotest 를 넣는다
+    testImplementation("io.kotest:kotest-runner-junit5:6.2.7")   // 플러그인이 kardx-kotest 를 넣는다
     // Spring 테스트(@SpringBootTest)를 쓸 때. 생성자 주입과 yml 의 kardx.* 읽기
-    testImplementation("io.kotest:kotest-extensions-spring:6.2.6")
+    testImplementation("io.kotest:kotest-extensions-spring:6.2.7")
 }
 
 tasks.test { useJUnitPlatform() }

@@ -3,6 +3,8 @@
 # kardx
 
 [![CI](https://github.com/kardx-project/kardx/actions/workflows/ci.yml/badge.svg)](https://github.com/kardx-project/kardx/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.kardx-project/kardx?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.kardx-project/kardx)
+[![Docs](https://img.shields.io/badge/docs-kardx--project.github.io-7c4dff)](https://kardx-project.github.io/kardx/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 ![JDK](https://img.shields.io/badge/JDK-17%2B-orange)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2%2B-7F52FF?logo=kotlin&logoColor=white)
@@ -89,13 +91,13 @@ Features that are off by default or that you use only when needed.
 | Tool | Supported | Version this repository builds and verifies with |
 |---|---|---|
 | JDK | 17 or later | 17 (library and plugin bytecode 17) |
-| Kotlin | 2.2 or later | Compiled with 2.3.21; metadata and stdlib 2.2.21 |
+| Kotlin | 2.2 or later | Compiled with 2.4.21; metadata and stdlib 2.2.21 |
 | Gradle | 7.6 or later (the plugin fails right away below that). The Kotlin DSL examples use `=` on plugin settings, which needs Gradle 8.2; on 7.6 to 8.1 use `.set(...)` or the Groovy DSL. Your Spring Boot version may need more (Spring Boot 4: 8.14 or later) | Wrapper 8.14.6. The plugin's core scenarios and spec export and upload (`apiDocsExport`, `apiDocsUpload`) also run on 7.6.4, 9.0.0 and 9.8.2 |
 | Maven | With the Maven plugin `io.github.kardx-project:kardx-maven-plugin` ([Maven and the command line](docs/maven.md)) | 3.9.11 (Maven Wrapper of `samples/maven-boot-4`) |
 | Asciidoctor Gradle plugin (`org.asciidoctor.jvm.convert`) | 4.0.x | 4.0.5 |
 | epages (`com.epages.restdocs-api-spec`) | Boot 3 → 0.19.x, Boot 4 → 0.20.x (the plugin warns on a mismatch) | 0.19.4, 0.20.2 |
-| Kotest | 6.x → `kardx-kotest`, 5.x → `-kotest5` (the plugin picks one based on the declared Kotest version) | 6.2.6, 5.9.1 |
-| JUnit | 5 and 6 | 5.13.4 |
+| Kotest | 6.x → `kardx-kotest`, 5.x → `-kotest5` (the plugin picks one based on the declared Kotest version) | 6.2.7, 5.9.1 |
+| JUnit | 5 and 6 | 5.14.4 |
 
 You write documentation tests in Kotlin. The DSL is built from infix functions, reified type arguments and lambdas with receivers, so it cannot be called usefully from Java. Your app code and DTOs can be Java: Java record and bean properties and Java annotations (`@Description`, Bean Validation, nullability, and so on) are read ([Extraction rules](docs/http-api.md#extraction-rules)).
 
@@ -105,15 +107,15 @@ The Gradle plugin works with the Kotlin and Groovy DSL. Maven has its own plugin
 
 ## Quick start
 
-The library is not yet published to Maven Central or the Gradle Plugin Portal. Clone the repository, install it with `./gradlew publishToMavenLocal`, and add `mavenLocal()` to your repositories and to `pluginManagement`.
+Artifacts are published to Maven Central under `io.github.kardx-project`. The Gradle plugin is published there too, so add `mavenCentral()` to the `pluginManagement` repositories as well.
 
 `settings.gradle.kts`
 
 ```kotlin
 pluginManagement {
     repositories {
-        mavenLocal() // until published to Maven Central and the Gradle Plugin Portal
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 ```
@@ -122,8 +124,8 @@ pluginManagement {
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.3.21"
-    kotlin("plugin.spring") version "2.3.21"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.asciidoctor.jvm.convert") version "4.0.5"
@@ -133,7 +135,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    mavenLocal() // until published to Maven Central
 }
 
 dependencies {

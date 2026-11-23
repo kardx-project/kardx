@@ -61,7 +61,7 @@ dependencies {
 
 직접 선언한 모듈은 건드리지 않으므로 버전을 바꾸려면 그 모듈만 적습니다. 자동 추가를 끄려면 `kardx { addDependencies = false }`, 시작 로그 모듈만 빼려면 `startupLog = false` 입니다.
 
-아직 Maven Central 과 Gradle Plugin Portal 에 배포하지 않았습니다. 저장소를 받아 `./gradlew publishToMavenLocal` 로 설치하고, 의존성 저장소와 `pluginManagement` 저장소에 `mavenLocal()` 을 추가합니다.
+Maven Central 에 `io.github.kardx-project` 로 배포되어 있습니다. Gradle 플러그인도 Maven Central 에 있으므로 `pluginManagement` 저장소에도 `mavenCentral()` 을 넣습니다.
 
 ### 지원하는 빌드 구성
 
@@ -96,8 +96,8 @@ kardx {
 // settings.gradle
 pluginManagement {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 ```
@@ -105,7 +105,7 @@ pluginManagement {
 ```groovy
 // build.gradle
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.3.21'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.21'
     id 'org.springframework.boot' version '4.1.2'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.asciidoctor.jvm.convert' version '4.0.5'
@@ -210,8 +210,8 @@ demo/
 ```kotlin
 pluginManagement {
     repositories {
-        mavenLocal() // Maven Central·Gradle Plugin Portal 배포 전까지
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 
@@ -223,8 +223,8 @@ rootProject.name = "demo"
 <!-- docs-pair: ignore-next-block -->
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.3.21"
-    kotlin("plugin.spring") version "2.3.21"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.asciidoctor.jvm.convert") version "4.0.5"          // REST Docs HTML
@@ -239,7 +239,6 @@ java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {

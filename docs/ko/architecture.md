@@ -131,7 +131,7 @@ flowchart LR
 
 ## 3. 사용자는 무엇을 넣나
 
-배포 전이라 `./gradlew publishToMavenLocal` 로 설치하고 `mavenLocal()` 을 저장소에 추가합니다. 전체 세팅은 [시작하기](getting-started.md#설치)에 있습니다. 아래는 Boot 4 기준이고, Boot 3 버전은 [Boot 3 에서 다른 점](getting-started.md#boot-3-에서-다른-점)을 봅니다.
+Maven Central 에 배포되어 있고 Gradle 플러그인도 그곳에 있으므로 `pluginManagement` 에도 `mavenCentral()` 을 넣습니다. 전체 세팅은 [시작하기](getting-started.md#설치)에 있습니다. 아래는 Boot 4 기준이고, Boot 3 버전은 [Boot 3 에서 다른 점](getting-started.md#boot-3-에서-다른-점)을 봅니다.
 
 **Gradle 플러그인을 쓸 때 (권장)**
 
@@ -636,7 +636,7 @@ L0  tooling (ToolingException)
 
 **역할.** `samples/spring-boot-3`(Boot 3.5, REST Docs 3, epages 0.19, springdoc 2.8)과 `samples/spring-boot-4`(Boot 4.1, REST Docs 4, epages 0.20, springdoc 3.2)는 같은 예제 앱입니다. 사용 예이면서, 라이브러리가 두 Boot 버전에서 똑같이 동작하는지 보이는 통합 검증입니다. HTTP, 쿠키, multipart, HAL, SSE, STOMP, WebSocket 핸들러, 응답 래퍼, yml 설정을 씁니다. JUnit 테스트 사이에 Kotest 스펙 하나(`kotest/UserSearchDocsSpec`, Kotest Spring 확장 사용)가 같은 `test` 태스크에서 돌고, 그 문서가 index·HTML·OpenAPI 에 함께 들어갑니다. 메모 API(`memo` 패키지, `MemoApiDocsTest`)는 설명 어노테이션도, 테스트에 적은 설명도 없이 KDoc 만으로 문서화하는 예제입니다. Kotest 확장은 프로젝트 설정(`io.kotest.provided.ProjectConfig`)에도 등록돼 있고, `kotest/ProjectExtensionSettingsSpec` 이 그 전역 확장이 Spring 컨텍스트의 yml 을 읽는지 확인합니다(문서는 만들지 않음). Boot 4 샘플에만 JUnit 문서화 테스트 9개를 Kotest `FunSpec` 으로 옮긴 스펙(`kotest/<같은 하위 패키지>/…Spec`)이 있습니다. `kotest/support/MirrorDocsConfig` 가 그 문서를 `build/generated-asciidoc-kotest` 에 쓰고 OpenAPI·AsyncAPI·WireMock 조각을 끄므로 index·HTML·OpenAPI·AsyncAPI·기준 스펙은 JUnit 문서만 담습니다.
 
-**의존성.** 문서가 안내하는 최소 설정과 같습니다. 라이브러리(annotations·core·kotest·boot)와 REST Docs·epages 클라이언트는 적지 않고 Gradle 플러그인(`id("io.github.kardx-project")`, composite build)이 넣습니다. 샘플은 Kotest 6.2.6 러너와 Spring 확장만 적습니다. 플러그인이 넣는 배포 좌표(`io.github.kardx-project:<아티팩트>:<버전>`)는 샘플 컨벤션 플러그인(`build-logic` 의 `restdocs.kotlin-sample`)의 dependency substitution 이 같은 빌드의 프로젝트(`:core`·`:annotations`·`:boot`·`:kotest`·`:kotest5`)로 바꾸므로 mavenLocal 의 지난 jar 를 쓰지 않습니다. `./gradlew :samples:spring-boot-4:dependencies --configuration testRuntimeClasspath` 에서 `-> project :kotest` 처럼 보입니다.
+**의존성.** 문서가 안내하는 최소 설정과 같습니다. 라이브러리(annotations·core·kotest·boot)와 REST Docs·epages 클라이언트는 적지 않고 Gradle 플러그인(`id("io.github.kardx-project")`, composite build)이 넣습니다. 샘플은 Kotest 6.2.7 러너와 Spring 확장만 적습니다. 플러그인이 넣는 배포 좌표(`io.github.kardx-project:<아티팩트>:<버전>`)는 샘플 컨벤션 플러그인(`build-logic` 의 `restdocs.kotlin-sample`)의 dependency substitution 이 같은 빌드의 프로젝트(`:core`·`:annotations`·`:boot`·`:kotest`·`:kotest5`)로 바꾸므로 mavenLocal 의 지난 jar 를 쓰지 않습니다. `./gradlew :samples:spring-boot-4:dependencies --configuration testRuntimeClasspath` 에서 `-> project :kotest` 처럼 보입니다.
 
 **내용.** `src/main` 에 컨트롤러·DTO(패키지 `com.example.restdocs`), `src/test` 에 문서화 테스트와 기본 클래스 `support/RestDocsTestSupport`, `src/docs/asciidoc` 에 `index-template.adoc`·`_landing.adoc`, `src/test/resources/application-docs.yml` 이 있습니다.
 

@@ -37,7 +37,7 @@ plugins {
 
 Without any settings, the index includes every test class that produced a document. If you move your existing `index.adoc` to the template (`src/docs/asciidoc/index-template.adoc`), the entries go at its marker line (section 4). If you want to tie together only the new documents while mixing with the old ones, narrow the scope with `kardx { index { packageName = "com.example.demo"; baseClass = "com.example.demo.ApiDocsTest" } }`.
 
-The library isn't published yet, so you need `mavenLocal()`. The full setup and the Boot 3 differences are in [Getting started](getting-started.md#installation). Documents are built with `./gradlew apiDocs` (change scripts that called the `asciidoctor` task directly).
+The library and the Gradle plugin are on Maven Central, so `pluginManagement` needs `mavenCentral()` too. The full setup and the Boot 3 differences are in [Getting started](getting-started.md#installation). Documents are built with `./gradlew apiDocs` (change scripts that called the `asciidoctor` task directly).
 
 ## 2. Test base class
 

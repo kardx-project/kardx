@@ -37,7 +37,7 @@ plugins {
 
 index 는 설정 없이 문서를 만든 모든 테스트 클래스를 넣습니다. 기존 `index.adoc` 을 템플릿(`src/docs/asciidoc/index-template.adoc`)으로 옮기면 그 마커 줄 자리에 들어갑니다(4절). 옛 문서와 섞어 쓰는 동안 새 문서만 묶고 싶으면 `kardx { index { packageName = "com.example.demo"; baseClass = "com.example.demo.ApiDocsTest" } }` 로 범위를 좁힙니다.
 
-배포 전이라 `mavenLocal()` 이 필요합니다. 전체 설정과 Boot 3 차이는 [시작하기](getting-started.md#설치)에 있습니다. 문서는 `./gradlew apiDocs` 로 만듭니다(`asciidoctor` 태스크를 직접 부르던 스크립트는 바꿉니다).
+라이브러리와 Gradle 플러그인이 Maven Central 에 있으므로 `pluginManagement` 에도 `mavenCentral()` 을 넣습니다. 전체 설정과 Boot 3 차이는 [시작하기](getting-started.md#설치)에 있습니다. 문서는 `./gradlew apiDocs` 로 만듭니다(`asciidoctor` 태스크를 직접 부르던 스크립트는 바꿉니다).
 
 ## 2. 테스트 기본 클래스
 

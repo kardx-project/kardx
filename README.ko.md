@@ -3,6 +3,8 @@
 # kardx
 
 [![CI](https://github.com/kardx-project/kardx/actions/workflows/ci.yml/badge.svg)](https://github.com/kardx-project/kardx/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.kardx-project/kardx?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.kardx-project/kardx)
+[![Docs](https://img.shields.io/badge/%EB%AC%B8%EC%84%9C-kardx--project.github.io-7c4dff)](https://kardx-project.github.io/kardx/ko/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 ![JDK](https://img.shields.io/badge/JDK-17%2B-orange)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2%2B-7F52FF?logo=kotlin&logoColor=white)
@@ -89,13 +91,13 @@ mockMvc
 | 도구 | 지원 | 이 저장소가 빌드·검증하는 버전 |
 |---|---|---|
 | JDK | 17 이상 | 17 (라이브러리·플러그인 바이트코드 17) |
-| Kotlin | 2.2 이상 | 2.3.21 로 컴파일, 메타데이터·stdlib 는 2.2.21 |
+| Kotlin | 2.2 이상 | 2.4.21 로 컴파일, 메타데이터·stdlib 는 2.2.21 |
 | Gradle | 7.6 이상 (미만이면 플러그인이 바로 실패). Kotlin DSL 예시는 플러그인 설정에 `=` 를 쓰는데 이는 Gradle 8.2 부터 됨. 7.6~8.1 에서는 `.set(...)` 이나 Groovy DSL. 쓰는 Spring Boot 버전이 더 요구할 수 있음 (Spring Boot 4: 8.14 이상) | 래퍼 8.14.6. 플러그인 핵심 시나리오와 스펙 내보내기·업로드(`apiDocsExport`, `apiDocsUpload`)를 7.6.4·9.0.0·9.8.2 에서도 돌림 |
 | Maven | Maven 플러그인 `io.github.kardx-project:kardx-maven-plugin` 으로 ([Maven 과 명령줄](docs/ko/maven.md)) | 3.9.11 (`samples/maven-boot-4` 의 Maven Wrapper) |
 | Asciidoctor Gradle 플러그인 (`org.asciidoctor.jvm.convert`) | 4.0.x | 4.0.5 |
 | epages (`com.epages.restdocs-api-spec`) | Boot 3 → 0.19.x, Boot 4 → 0.20.x (어긋나면 플러그인이 경고) | 0.19.4, 0.20.2 |
-| Kotest | 6.x → `kardx-kotest`, 5.x → `-kotest5` (플러그인이 선언한 Kotest 버전으로 고른다) | 6.2.6, 5.9.1 |
-| JUnit | 5·6 | 5.13.4 |
+| Kotest | 6.x → `kardx-kotest`, 5.x → `-kotest5` (플러그인이 선언한 Kotest 버전으로 고른다) | 6.2.7, 5.9.1 |
+| JUnit | 5·6 | 5.14.4 |
 
 문서화 테스트는 Kotlin 으로 씁니다. DSL 이 중위 함수, reified 타입 인자, 수신 객체 지정 람다로 되어 있어 Java 에서는 쓸 만하게 부를 수 없습니다. 앱 코드와 DTO 는 Java 여도 됩니다: Java record·bean 의 프로퍼티와 Java 어노테이션(`@Description`, Bean Validation, nullability 등)을 읽습니다([추출 규칙](docs/ko/http-api.md#추출-규칙)).
 
@@ -105,15 +107,15 @@ Gradle 플러그인은 Kotlin DSL 과 Groovy DSL 모두에서 씁니다. Maven �
 
 ## 빠른 시작
 
-아직 Maven Central 과 Gradle Plugin Portal 에 배포하지 않았습니다. 저장소를 받아 `./gradlew publishToMavenLocal` 로 설치하고, 저장소 목록과 `pluginManagement` 에 `mavenLocal()` 을 추가합니다.
+Maven Central 에 `io.github.kardx-project` 로 배포되어 있습니다. Gradle 플러그인도 Maven Central 에 있으므로 `pluginManagement` 저장소에도 `mavenCentral()` 을 넣습니다.
 
 `settings.gradle.kts`
 
 ```kotlin
 pluginManagement {
     repositories {
-        mavenLocal() // Maven Central·Gradle Plugin Portal 배포 전까지
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 ```
@@ -123,8 +125,8 @@ pluginManagement {
 <!-- docs-pair: ignore-next-block -->
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.3.21"
-    kotlin("plugin.spring") version "2.3.21"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.asciidoctor.jvm.convert") version "4.0.5"
@@ -134,7 +136,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    mavenLocal() // Maven Central 배포 전까지
 }
 
 dependencies {

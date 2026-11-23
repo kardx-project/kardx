@@ -61,7 +61,7 @@ dependencies {
 
 Modules you declare yourself are left alone, so to change a version, declare just that module. To turn off automatic dependencies, use `kardx { addDependencies = false }`; to leave out only the startup log module, use `startupLog = false`.
 
-The library is not yet published to Maven Central or the Gradle Plugin Portal. Clone the repository, install it with `./gradlew publishToMavenLocal`, and add `mavenLocal()` to your dependency repositories and to the `pluginManagement` repositories.
+Artifacts are published to Maven Central under `io.github.kardx-project`. The Gradle plugin is published there too, so add `mavenCentral()` to the `pluginManagement` repositories as well.
 
 ### Supported build setups
 
@@ -96,8 +96,8 @@ kardx {
 // settings.gradle
 pluginManagement {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 ```
@@ -105,7 +105,7 @@ pluginManagement {
 ```groovy
 // build.gradle
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.3.21'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.21'
     id 'org.springframework.boot' version '4.1.2'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.asciidoctor.jvm.convert' version '4.0.5'
@@ -210,8 +210,8 @@ demo/
 ```kotlin
 pluginManagement {
     repositories {
-        mavenLocal() // until published to Maven Central and the Gradle Plugin Portal
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 
@@ -222,8 +222,8 @@ rootProject.name = "demo"
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.3.21"
-    kotlin("plugin.spring") version "2.3.21"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.asciidoctor.jvm.convert") version "4.0.5"          // REST Docs HTML
@@ -238,7 +238,6 @@ java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
