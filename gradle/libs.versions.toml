@@ -31,7 +31,7 @@ binary-compatibility-validator = "0.18.2"
 jakarta-servlet = "6.0.0"
 json-path = "2.9.0"
 # compileOnly: MockMvcTester(MvcTestResult) 진입점이 AssertJ 의 AssertProvider 를 상속한다
-assertj = "3.27.6"
+assertj = "3.27.7"
 snakeyaml = "2.4"
 # tooling(빌드 도구와 무관한 후처리)의 JSON 읽기·쓰기. Gradle 플러그인은 Gradle 이 내장한 Groovy 를 쓴다
 groovy = "4.0.33"
