@@ -12,6 +12,8 @@
 
 *Kotlin Auto Rest Docs eXtension* — a library that makes [Spring REST Docs](https://docs.spring.io/spring-restdocs/reference/) easy to use from Kotlin.
 
+**Documentation website: [kardx-project.github.io/kardx](https://kardx-project.github.io/kardx/)** ([한국어](https://kardx-project.github.io/kardx/ko/))
+
 Put `@Description` on your DTOs and the field documentation comes from the types; when the tests finish, the AsciiDoc documents are assembled for you. The same tests also produce OpenAPI (Swagger UI) and AsyncAPI (WebSocket, STOMP, SSE) specs.
 
 ```kotlin
@@ -177,6 +179,8 @@ Which command to use for CI, the baseline check, exporting specs or `clean` is i
 Running `./gradlew apiDocs` creates the HTML (`index.html` links every test class that produced a document) and `openapi3.yaml` (plus `asyncapi.html` if you documented messages) in `build/api-docs/` and prints their locations. `./gradlew bootRun` and IntelliJ runs generate the documents automatically first, and when the app starts they log the document addresses. The full walkthrough, including the directory layout, yml and index template, is in [Getting started](docs/getting-started.md). Documents packaged into the executable jar are also served by the production app, so check [Production exposure](docs/build.md#production-exposure).
 
 ## Documentation
+
+The guides below are also published as a website with search and an English/Korean switcher: **[kardx-project.github.io/kardx](https://kardx-project.github.io/kardx/)**.
 
 | What you want to do | Where to look |
 |---|---|

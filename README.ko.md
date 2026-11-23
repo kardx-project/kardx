@@ -12,6 +12,8 @@
 
 *Kotlin Auto Rest Docs eXtension* — [Spring REST Docs](https://docs.spring.io/spring-restdocs/reference/) 를 Kotlin 으로 쓰기 쉽게 만든 라이브러리입니다.
 
+**문서 사이트: [kardx-project.github.io/kardx/ko](https://kardx-project.github.io/kardx/ko/)** ([English](https://kardx-project.github.io/kardx/))
+
 DTO 에 `@Description` 을 붙이면 필드 문서를 타입에서 만들고, 테스트가 끝나면 AsciiDoc 문서를 조립합니다. 같은 테스트로 OpenAPI(Swagger UI)와 AsyncAPI(WebSocket·STOMP·SSE) 스펙도 만듭니다.
 
 ```kotlin
@@ -182,6 +184,8 @@ CI, 기준 비교, 스펙 내보내기, `clean` 에 어떤 명령을 쓰는지�
 `./gradlew apiDocs` 를 실행하면 `build/api-docs/` 에 HTML(`index.html` 이 문서를 만든 모든 테스트 클래스를 잇는다), `openapi3.yaml` (메시지를 문서화했다면 `asyncapi.html` 도) 이 생기고 위치가 출력됩니다. `./gradlew bootRun` 이나 IntelliJ 실행은 그 전에 문서를 자동으로 만들고, 앱이 뜨면 문서 주소를 로그로 보여 줍니다. 디렉터리 구조, yml, index 템플릿까지 포함한 전체 과정은 [시작하기](docs/ko/getting-started.md)에 있습니다. 실행 jar 에 들어간 문서는 운영 앱에서도 열리므로 [운영 노출](docs/ko/build.md#운영-노출)을 확인하세요.
 
 ## 문서
+
+아래 문서는 검색과 영어·한국어 전환이 되는 웹사이트로도 볼 수 있습니다: **[kardx-project.github.io/kardx/ko](https://kardx-project.github.io/kardx/ko/)**
 
 | 하려는 것 | 볼 문서 |
 |---|---|
