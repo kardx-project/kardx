@@ -36,7 +36,7 @@ snakeyaml = "2.4"
 # tooling(빌드 도구와 무관한 후처리)의 JSON 읽기·쓰기. Gradle 플러그인은 Gradle 이 내장한 Groovy 를 쓴다
 groovy = "4.0.33"
 # Maven 플러그인(maven-plugin): Maven API 는 provided, 목표 어노테이션은 컴파일 전용
-maven = "3.9.11"
+maven = "3.9.16"
 maven-plugin-tools = "3.16.0"
 swagger-annotations = "2.2.47"
 # 테스트 전용: Spring Data Page·Pageable 추출 확인 (core 는 컴파일 의존하지 않는다)
