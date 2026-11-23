@@ -1,7 +1,8 @@
 version: 2
 updates:
   - package-ecosystem: gradle
-    directories: ["/", "/gradle-plugin"]
+    # /gradle-plugin 은 같은 gradle/libs.versions.toml 을 읽으므로 / 만 본다 (중복 PR 방지)
+    directories: ["/"]
     schedule: { interval: weekly }
     open-pull-requests-limit: 10
     groups:
@@ -10,17 +11,28 @@ updates:
       test: { patterns: ["io.kotest*", "org.junit*", "com.jayway.jsonpath*"] }
       lint: { patterns: ["*ktlint*", "io.gitlab.arturbosch.detekt*"] }
     ignore:
-      # 지원 하한으로 일부러 고정한 버전 (Boot 3.5 / REST Docs 3.0 / Spring 6.2 / Jackson 2 / jakarta.validation 3.0 / JUnit 5)
-      - dependency-name: "org.springframework.restdocs:*"
+      # 메이저 업데이트는 손으로 한다. 한 모듈이 Boot 3 줄·Boot 4 줄 두 버전을 같이 쓰는 경우가 많아
+      # Dependabot 이 어느 줄인지 구분하지 못한다 (예: spring-framework 6.2 와 7.0, epages 0.19 와 0.20)
+      - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-      - dependency-name: "org.springframework:*"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "org.springframework.boot*"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "com.fasterxml.jackson*"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "org.junit*"
-        update-types: ["version-update:semver-major"]
+      # 지원 하한으로 일부러 고정한 버전. 마이너도 올리지 않는다
+      - dependency-name: "jakarta.validation:jakarta.validation-api" # Boot 3.5 = 3.0
+        update-types: ["version-update:semver-minor"]
+      - dependency-name: "jakarta.servlet:jakarta.servlet-api" # Boot 3.5 = Servlet 6.0
+        update-types: ["version-update:semver-minor"]
+      - dependency-name: "org.apache.maven:*" # Maven 플러그인은 Maven 3.9 API 로 컴파일한다
+        update-types: ["version-update:semver-minor"]
+      - dependency-name: "com.epages:*" # 0.19.x = Boot 3 줄, 0.20.x = Boot 4 줄 (0.x 마이너는 호환이 깨진다)
+        update-types: ["version-update:semver-minor"]
+      - dependency-name: "tools.jackson*" # compileOnly. epages 0.20.x 가 실제로 가져오는 Jackson 3 에 맞춘다
+        update-types: ["version-update:semver-minor"]
+      - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization*" # compileOnly. 사용자가 런타임을 고른다
+        update-types: ["version-update:semver-minor"]
+      # kotest5 모듈은 Kotest 5.x 를 쓴다. 6.x 와 artifact 이름이 같아 Dependabot 이 5.9.1 → 6.x 로 올리려 한다
+      - dependency-name: "io.kotest:kotest-framework-api"
+        versions: [">= 6"]
+      - dependency-name: "io.kotest:kotest-framework-datatest"
+        versions: [">= 6"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule: { interval: weekly }

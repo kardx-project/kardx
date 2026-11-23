@@ -22,7 +22,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <kotlin.version>2.3.21</kotlin.version>
+        <kotlin.version>2.4.21</kotlin.version>
         <kardx.version>0.1</kardx.version>
         <!-- epages: Boot 4 = 0.20.x, Boot 3 = 0.19.x -->
         <epages.version>0.20.2</epages.version>
