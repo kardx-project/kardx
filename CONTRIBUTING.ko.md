@@ -7,7 +7,7 @@ kardx 에 관심을 가져 주셔서 감사합니다. 버그 제보, 기능 제�
 ## 이슈
 
 - 버그와 기능 제안은 GitHub 이슈 양식으로 남겨 주세요. 버그는 재현 코드와 Spring Boot·REST Docs·Kotlin·JDK·Gradle 버전을 함께 적어 주시면 빠르게 확인할 수 있습니다.
-- 보안 취약점은 공개 이슈로 올리지 말고 [SECURITY.md](SECURITY.md) 의 방법으로 제보해 주세요.
+- 보안 취약점은 공개 이슈로 올리지 말고 [SECURITY.ko.md](SECURITY.ko.md) 의 방법으로 제보해 주세요.
 - 큰 변경은 먼저 이슈에서 방향을 맞춘 뒤 작업하면 서로의 시간을 아낄 수 있습니다.
 
 ## 개발 환경
@@ -46,7 +46,7 @@ PR 을 올리면 CI 가 JDK 17·21 에서 같은 검증을 실행합니다. Boot
 - `.editorconfig` 와 ktlint·detekt 규칙을 따릅니다. `./gradlew build` 가 통과하면 됩니다.
 - core 테스트에서 `RestDocsConfiguration` 은 Kotest 프로젝트 설정(`io.kotest.provided.ProjectConfig`)이 매 테스트 뒤 되돌립니다. 테스트 하나에서만 쓸 설정은 `withSettings` 를 씁니다.
 - 공개 API 는 Kotlin `explicitApi()` 로 관리합니다. 공개 API 를 추가·변경하면 KDoc 과 문서(`docs/`)를 함께 갱신해 주세요.
-- 사용자에게 보이는 변경은 [CHANGELOG.md](CHANGELOG.md) 에 적어 주세요.
+- 사용자에게 보이는 변경은 [CHANGELOG.ko.md](CHANGELOG.ko.md) 와 영어판 `CHANGELOG.md` 에 함께 적어 주세요.
 - 문서는 영어(`README.md`, `docs/`)와 한국어(`README.ko.md`, `docs/ko/`) 두 벌입니다. 한쪽을 고치면 다른 쪽도 같은 PR 에서 함께 고쳐 주세요.
 - `docs/*.md`·`docs/ko/*.md` 의 절을 바꾸면 `python3 scripts/update-docs-toc.py` 로 두 언어의 목차를 다시 만듭니다.
 - 두 언어 문서의 짝(파일 목록, 제목 구조, 코드 블록, 표, 링크 대상)은 `python3 scripts/check-docs-pairs.py` 로 확인합니다. 루트 `checkDocsPairs` 태스크가 같은 검사를 `check` 에서 돌리므로 `./gradlew build` 도 짝이 어긋나면 실패합니다.

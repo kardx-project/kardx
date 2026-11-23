@@ -78,7 +78,7 @@ prefer the scripts above, which work on build outputs.
   `RestDocsConfiguration` is reset after each test; use `withSettings` for per-test settings.
 - Performance matters: a feature must not noticeably slow down tests or doc generation (lazy work, Gradle caching).
   `asciidoctor` must be `UP-TO-DATE` on a second unchanged run.
-- User-visible changes go in `CHANGELOG.md`.
+- User-visible changes go in `CHANGELOG.md` and `CHANGELOG.ko.md` (same entries, English and Korean).
 - Commits: `<type>: <description>` with type `feat|fix|refactor|docs|test|chore|perf|ci`.
 
 ## Two supported lines

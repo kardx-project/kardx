@@ -240,4 +240,4 @@ cd samples/maven-boot-4 && ./mvnw verify
 
 ## 개발과 라이선스
 
-저장소 구조와 검증 방법은 [개발](docs/ko/development.md), 변경 내역은 [CHANGELOG](CHANGELOG.md) 에 있습니다. 이슈 제보와 기여 방법은 [기여 안내](CONTRIBUTING.ko.md)([English](CONTRIBUTING.md))에 있습니다. 라이선스는 Apache License 2.0 입니다.
+저장소 구조와 검증 방법은 [개발](docs/ko/development.md), 변경 내역은 [CHANGELOG](CHANGELOG.ko.md) 에 있습니다. 이슈 제보와 기여 방법은 [기여 안내](CONTRIBUTING.ko.md)([English](CONTRIBUTING.md))에 있습니다. 라이선스는 Apache License 2.0 입니다.

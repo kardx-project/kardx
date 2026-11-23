@@ -235,4 +235,4 @@ cd samples/maven-boot-4 && ./mvnw verify
 
 ## Development and license
 
-The repository layout and how to verify changes are in [Development](docs/development.md), and the change history is in [CHANGELOG](CHANGELOG.md) (in Korean). How to report issues and contribute is in [CONTRIBUTING](CONTRIBUTING.md) ([한국어](CONTRIBUTING.ko.md)). The license is Apache License 2.0.
+The repository layout and how to verify changes are in [Development](docs/development.md), and the change history is in [CHANGELOG](CHANGELOG.md). How to report issues and contribute is in [CONTRIBUTING](CONTRIBUTING.md) ([한국어](CONTRIBUTING.ko.md)). The license is Apache License 2.0.

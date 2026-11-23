@@ -47,4 +47,4 @@ kardx 사용 설명서입니다. 처음이라면 [시작하기](getting-started.
 | 이 저장소 고치기 | [개발](development.md) | 저장소 구조, 고친 뒤 확인 순서, 빌드, 검증 스크립트 |
 | 모듈 구성 보기 | [모듈 구성](architecture.md) | 모듈별 역할과 내용, 넣을 아티팩트, 문서가 만들어지는 흐름 |
 
-변경 내역은 [CHANGELOG](../../CHANGELOG.md) 에 있습니다.
+변경 내역은 [CHANGELOG](../../CHANGELOG.ko.md) 에 있습니다.

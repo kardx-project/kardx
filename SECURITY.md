@@ -1,25 +1,27 @@
-# 보안 정책
+**English** | [한국어](SECURITY.ko.md)
 
-## 지원 버전
+# Security policy
 
-보안 수정은 **최신 릴리스**에만 제공합니다. 이전 버전을 쓰고 있다면 최신 릴리스로 올린 뒤 문제가 남아 있는지 확인해 주세요.
+## Supported versions
 
-| 버전 | 지원 |
+Security fixes are provided only for the **latest release**. If you are on an older version, upgrade to the latest release and check whether the problem is still there.
+
+| Version | Supported |
 |------|------|
-| 최신 릴리스 | 지원 |
-| 그 이전 | 미지원 |
+| Latest release | Yes |
+| Older | No |
 
-## 취약점 제보
+## Reporting a vulnerability
 
-보안 취약점은 **공개 이슈로 올리지 마세요.** GitHub 의 비공개 취약점 제보(private vulnerability reporting)를 사용해 주세요.
+**Don't report security vulnerabilities in public issues.** Use GitHub's private vulnerability reporting.
 
-1. 저장소의 **Security** 탭으로 이동합니다.
-2. **Report a vulnerability** 를 눌러 제보 양식을 작성합니다.
+1. Go to the repository's **Security** tab.
+2. Click **Report a vulnerability** and fill in the form.
 
-제보에는 다음 내용을 담아 주시면 확인이 빠릅니다.
+Reports are checked faster when they include:
 
-- 영향받는 버전과 모듈 (core, boot, annotations, Gradle 플러그인 등)
-- 재현 방법 또는 개념 증명 코드
-- 예상되는 영향 (예: 생성된 문서에 민감한 헤더·쿠키 값이 마스킹되지 않고 노출됨)
+- The affected version and module (core, boot, annotations, the Gradle plugin and so on)
+- Steps to reproduce or proof-of-concept code
+- The expected impact (for example, sensitive header or cookie values exposed unmasked in generated documents)
 
-제보는 비공개로 검토하며, 수정 릴리스가 나온 뒤 GitHub Security Advisory 로 공개합니다.
+Reports are reviewed privately and published as a GitHub Security Advisory after a fix release is out.

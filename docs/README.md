@@ -47,4 +47,4 @@ You can change `/docs` and the file locations with the [Gradle plugin](build.md#
 | Work on this repository | [Development](development.md) | Repository layout, the order of checks after a change, build, verification scripts |
 | See the module layout | [Modules](architecture.md) | Role and contents of each module, which artifacts to add, how documents are produced |
 
-The change history is in [CHANGELOG](../CHANGELOG.md) (in Korean).
+The change history is in [CHANGELOG](../CHANGELOG.md).

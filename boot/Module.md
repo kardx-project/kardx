@@ -1,7 +1,7 @@
 # Module kardx-boot
 
-Spring Boot 앱이 뜰 때 API 문서 주소(REST Docs, Swagger UI, OpenAPI 뷰어·스펙, AsyncAPI)를 INFO 로그로 남긴다.
-의존성만 넣으면 `META-INF/spring.factories` 로 등록된다.
+Logs the API documentation addresses (REST Docs, Swagger UI, OpenAPI viewer and spec, AsyncAPI) at INFO when a Spring Boot app starts.
+Adding the dependency is enough; it is registered through `META-INF/spring.factories`.
 
-- `io.github.kardx.boot.ApiDocsStartupLogger`: 시작 로그. `kardx.startup-log.*` 로 항목·문구를 바꾸고,
-  `kardx.startup-log.enabled=false` 로 끈다
+- `io.github.kardx.boot.ApiDocsStartupLogger`: the startup log. Change its entries and text with `kardx.startup-log.*`, and
+  turn it off with `kardx.startup-log.enabled=false`

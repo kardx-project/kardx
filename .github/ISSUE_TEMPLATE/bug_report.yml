@@ -1,76 +1,77 @@
-name: 버그 제보
-description: 예상과 다르게 동작하는 문제를 알려 주세요.
+name: Bug report (버그 제보)
+description: Report something that doesn't work as expected. (예상과 다르게 동작하는 문제를 알려 주세요.)
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
+        Thanks for the report. For security vulnerabilities, don't use this form; report them privately as described in the repository's `SECURITY.md`.
         제보 감사합니다. 보안 취약점은 이 양식 대신 저장소의 `SECURITY.md` 에 안내된 방법으로 비공개 제보해 주세요.
   - type: input
     id: library-version
     attributes:
-      label: 라이브러리 버전
+      label: Library version (라이브러리 버전)
       placeholder: "0.1"
-      description: kardx (및 Gradle 플러그인 io.github.kardx-project) 버전
+      description: Version of kardx (and the Gradle plugin io.github.kardx-project) (kardx 및 Gradle 플러그인 버전)
     validations:
       required: true
   - type: input
     id: spring-boot-version
     attributes:
-      label: Spring Boot 버전
+      label: Spring Boot version (Spring Boot 버전)
       placeholder: "3.5.x / 4.x"
     validations:
       required: true
   - type: input
     id: restdocs-version
     attributes:
-      label: Spring REST Docs 버전
+      label: Spring REST Docs version (Spring REST Docs 버전)
       placeholder: "3.0.x / 4.0.x"
     validations:
       required: true
   - type: input
     id: kotlin-version
     attributes:
-      label: Kotlin 버전
+      label: Kotlin version (Kotlin 버전)
       placeholder: "2.x"
     validations:
       required: true
   - type: input
     id: jdk-version
     attributes:
-      label: JDK 버전
+      label: JDK version (JDK 버전)
       placeholder: "17 / 21"
     validations:
       required: true
   - type: input
     id: gradle-version
     attributes:
-      label: Gradle 버전
+      label: Gradle version (Gradle 버전)
       placeholder: "8.14"
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
-      label: 재현 코드
-      description: 문제를 재현할 수 있는 최소한의 테스트·컨트롤러·DTO 코드. 가능하면 재현 저장소 링크도 붙여 주세요.
+      label: Code to reproduce (재현 코드)
+      description: The smallest test, controller and DTO code that reproduces the problem. A link to a reproduction repository helps too. (문제를 재현할 수 있는 최소한의 코드. 가능하면 재현 저장소 링크도 붙여 주세요.)
       render: kotlin
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: 기대한 결과
+      label: Expected result (기대한 결과)
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: 실제 결과
-      description: 생성된 스니펫·문서 내용, 오류 메시지, 스택트레이스 등
+      label: Actual result (실제 결과)
+      description: Generated snippets or document content, error messages, stack traces, etc. (생성된 스니펫·문서 내용, 오류 메시지, 스택트레이스 등)
     validations:
       required: true
   - type: textarea
     id: additional
     attributes:
-      label: 추가 정보
+      label: Additional information (추가 정보)

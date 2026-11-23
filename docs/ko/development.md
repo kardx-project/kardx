@@ -104,7 +104,7 @@ Kotest 확장 테스트(`./gradlew :kotest:test :kotest5:test`)는 고정 스펙
 
 IntelliJ 는 한 디렉터리를 모듈 하나에만 붙이므로 `kotest-common` 의 파일은 한쪽(보통 `kotest`) 모듈 기준으로 분석됩니다. 다른 쪽 모듈 파일에서 공유 코드의 `internal` 선언이 빨갛게 보일 수 있지만 Gradle 빌드는 두 모듈 모두 정상입니다. 공유 코드를 고치면 `./gradlew :kotest:check :kotest5:check` 로 두 버전을 함께 확인합니다.
 
-공개 API 는 Kotlin `explicitApi()` 로 관리하고 `<모듈>/api/*.api` 로 고정됩니다. API 를 바꾸면 `./gradlew apiDump` 로 갱신해 함께 반영합니다(`check` 가 `apiCheck` 로 검사). `tooling` 은 Java 라서 javap 기반의 `apiDump`/`apiCheck` 가 따로 있습니다(`./gradlew -p tooling apiDump`, 파일 `tooling/api/kardx-tooling.api`. 공개는 `io.github.kardx.tooling` 패키지와 `cli.ApiDocsCli` 뿐). Maven 플러그인의 계약은 목표와 파라미터이고 [Maven 과 명령줄](maven.md)에 적혀 있습니다. 변경 내역은 [CHANGELOG.md](../../CHANGELOG.md) 에 있습니다.
+공개 API 는 Kotlin `explicitApi()` 로 관리하고 `<모듈>/api/*.api` 로 고정됩니다. API 를 바꾸면 `./gradlew apiDump` 로 갱신해 함께 반영합니다(`check` 가 `apiCheck` 로 검사). `tooling` 은 Java 라서 javap 기반의 `apiDump`/`apiCheck` 가 따로 있습니다(`./gradlew -p tooling apiDump`, 파일 `tooling/api/kardx-tooling.api`. 공개는 `io.github.kardx.tooling` 패키지와 `cli.ApiDocsCli` 뿐). Maven 플러그인의 계약은 목표와 파라미터이고 [Maven 과 명령줄](maven.md)에 적혀 있습니다. 변경 내역은 [CHANGELOG.ko.md](../../CHANGELOG.ko.md) 에 있습니다.
 
 공개 API 에는 data class 를 두지 않습니다. `copy`·`componentN` 이 ABI 에 들어가 프로퍼티를 하나만 추가해도 바이너리 호환이 깨지기 때문입니다. 값 객체(`AsyncApiInfo`, `ResponseWrapper`, `DocumentGenerator.Config` 등)는 일반 class 에 `equals`/`hashCode`/`toString` 을 직접 구현하고(`PublicValueClassesTest` 에 계약 테스트 추가), 이름 있는 인자로 부르는 public 생성자를 둡니다. 이런 클래스에 프로퍼티를 추가할 때는 새 프로퍼티를 기본값과 함께 주 생성자 끝에 붙이고, 바꾸기 전의 생성자 시그니처를 그대로 받는 secondary constructor 를 남겨 새 생성자로 위임합니다(기본값이 있는 생성자는 `$default` 합성 메서드까지 시그니처가 바뀌므로 기존 바이너리가 찾을 수 있게). `apiDump` 결과에서 기존 `<init>` 줄이 지워지지 않고 추가만 되었는지 확인합니다.
 

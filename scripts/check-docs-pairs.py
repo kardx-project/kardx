@@ -10,7 +10,7 @@ docs/*.md <-> docs/ko/*.md. For every pair it compares
     side every run of text containing Hangul becomes a wildcard, so translated comments, string literals and
     labels match; everything else must be identical line by line,
   - tables: same count, and per table the same number of rows and columns,
-  - relative link targets: the same set of files (anchors and the ko/ path difference ignored).
+  - relative link targets: the same set of files (anchors, the ko/ path difference and root X.ko.md vs X.md ignored).
 
 A difference that is intended is marked in either doc with an HTML comment directly above the code block or
 table (only blank lines may come between):
@@ -165,6 +165,9 @@ def english_path(rel):
             return en_name
     if rel.startswith('docs/ko/'):
         return 'docs/' + rel[len('docs/ko/'):]
+    if '/' not in rel and rel.endswith('.ko.md'):
+        # Korean twins of other root files (CHANGELOG.ko.md, SECURITY.ko.md)
+        return rel[:-len('.ko.md')] + '.md'
     return rel
 
 

@@ -46,7 +46,7 @@ When you open a pull request, CI runs the same checks on JDK 17 and 21. The comm
 - Follow `.editorconfig` and the ktlint and detekt rules. If `./gradlew build` passes, you're fine.
 - In core tests, the Kotest project config (`io.kotest.provided.ProjectConfig`) resets `RestDocsConfiguration` after every test. For settings used by a single test, use `withSettings`.
 - The public API is managed with Kotlin `explicitApi()`. When you add or change public API, update the KDoc and the documentation (`docs/`) as well.
-- Record user-visible changes in [CHANGELOG.md](CHANGELOG.md).
+- Record user-visible changes in [CHANGELOG.md](CHANGELOG.md) and its Korean version `CHANGELOG.ko.md`.
 - The documentation exists in English (`README.md`, `docs/`) and Korean (`README.ko.md`, `docs/ko/`). When you change one side, change the other in the same pull request.
 - When you change sections of `docs/*.md` or `docs/ko/*.md`, regenerate the tables of contents of both languages with `python3 scripts/update-docs-toc.py`.
 - Check the pairing of the two languages (file sets, heading structure, code blocks, tables, link targets) with `python3 scripts/check-docs-pairs.py`. The root `checkDocsPairs` task runs the same check in `check`, so `./gradlew build` also fails when the pairs drift.
